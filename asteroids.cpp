@@ -109,7 +109,10 @@ public:
 	}
 };
 // add png files name and create array based on # of pngs
-Image img("./images/bigfoot.png");
+//Image img("./images/bigfoot.png");
+Image img[2] = {
+"./Image/bigfoot.png",	
+"./Image/luis_3350.png"};
 
 class Global {
 public:
@@ -428,8 +431,8 @@ void init_opengl(void)
 	
 	glGenTextures(1, &gl.bigfootTexture);
 	// Generate texture for each texture id
-	int w = img.width;
-	int h = img.height;
+	int w = img[0].width;
+	int h = img[0].height;
 
 	// Bind texture for each texture id
 	glBindTexture(GL_TEXTURE_2D, gl.bigfootTexture);
@@ -437,7 +440,21 @@ void init_opengl(void)
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
         glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-                GL_RGB, GL_UNSIGNED_BYTE, img.data);
+                GL_RGB, GL_UNSIGNED_BYTE, img[0].data);
+				
+	glGenTextures(1, &gl.luisTexture);
+	// Generate texture for each texture id
+	int w = img[1].width;
+	int h = img[1].height;
+
+	// Bind texture for each texture id
+	glBindTexture(GL_TEXTURE_2D, gl.luisTexture);
+        //
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+                GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
+			
 
 }
 
