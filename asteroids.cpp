@@ -444,8 +444,8 @@ void init_opengl(void)
 				
 	glGenTextures(1, &gl.luisTexture);
 	// Generate texture for each texture id
-	int w = img[1].width;
-	int h = img[1].height;
+	w = img[1].width;
+	h = img[1].height;
 
 	// Bind texture for each texture id
 	glBindTexture(GL_TEXTURE_2D, gl.luisTexture);
