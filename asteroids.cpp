@@ -111,8 +111,8 @@ public:
 // add png files name and create array based on # of pngs
 //Image img("./images/bigfoot.png");
 Image img[2] = {
-"./Image/bigfoot.png",	
-"./Image/luis_3350.png"};
+"./images/bigfoot.png",	
+"./images/luis_3350.png"};
 
 class Global {
 public:
@@ -570,6 +570,7 @@ void check_mouse(XEvent *e)
 
 
 void andrewH(int x, int y, GLuint textid);
+void creditsLuis(int x, int y, GLuint textid);
 // add prototypes of all external functions
 
 int check_keys(XEvent *e)
