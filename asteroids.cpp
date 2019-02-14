@@ -108,6 +108,7 @@ public:
 			unlink(ppmname);
 	}
 };
+// add png files name and create array based on # of pngs
 Image img("./images/bigfoot.png");
 
 class Global {
@@ -115,6 +116,7 @@ public:
 	int xres, yres;
 	char keys[65536];
 	GLuint bigfootTexture;
+	// declare GLuint textid for each png
 	Global() {
 		xres = 1250;
 		yres = 900;
@@ -422,10 +424,13 @@ void init_opengl(void)
 	//Do this to allow fonts
 	glEnable(GL_TEXTURE_2D);
 	initialize_fonts();
+	
 	glGenTextures(1, &gl.bigfootTexture);
-
+	// Generate texture for each texture id
 	int w = img.width;
 	int h = img.height;
+
+	// Bind texture for each texture id
 	glBindTexture(GL_TEXTURE_2D, gl.bigfootTexture);
         //
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
@@ -547,6 +552,7 @@ void check_mouse(XEvent *e)
 
 
 void andrewH(int x, int y, GLuint textid);
+// add prototypes of all external functions
 
 int check_keys(XEvent *e)
 {
@@ -955,6 +961,7 @@ void render()
 	}
 	if (g.show_credits) {
 	    andrewH(gl.xres/2,gl.yres/2, gl.bigfootTexture);
+	    // function calls for everyone with parameters
 	}
 }
 
