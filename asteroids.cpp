@@ -116,6 +116,7 @@ public:
 	int xres, yres;
 	char keys[65536];
 	GLuint bigfootTexture;
+	GLuint luisTexture;
 	// declare GLuint textid for each png
 	Global() {
 		xres = 1250;
@@ -961,6 +962,7 @@ void render()
 	}
 	if (g.show_credits) {
 	    andrewH(gl.xres/2,gl.yres/2, gl.bigfootTexture);
+		creditsLuis(gl.xres/2,gl.yres/2, gl.luisTexture);
 	    // function calls for everyone with parameters
 	}
 }
