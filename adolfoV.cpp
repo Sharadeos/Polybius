@@ -30,7 +30,7 @@ class Image {
             char ppname[80];
             if (strncmp(name+(slen-4), 
             */
-void AdolfoValenciaPicture(int x, int y, GLuint AdolfoTexture) {
+void AdolfoValenciaPicture(int x, int y, GLuint textid) {
     Rect r;
     unsigned int c = 0x00ffff44;
     r.bot = y;
@@ -49,11 +49,11 @@ void AdolfoValenciaPicture(int x, int y, GLuint AdolfoTexture) {
    // fa += x;
    // angle += sin(angle) * 0.2f;
     glPushMatrix();
-    glTranslatef(x+100, y, 0);
+    glTranslatef(x+250, y, 0);
     glEnable(GL_ALPHA_TEST);
     glColor3ub(255,255,255);
    // glRotatef(x, 0, 0, 1.0);
-    glBindTexture(GL_TEXTURE_2D, AdolfoTexture);
+    glBindTexture(GL_TEXTURE_2D, textid);
     glBegin(GL_QUADS);
         glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
         glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);

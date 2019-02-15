@@ -458,14 +458,15 @@ void init_opengl(void)
 		    GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
 	
 	glGenTextures(1, &gl.AdolfoTexture);                                              
-        w=img[2].width;                                                                   
+        
+	w=img[2].width;                                                                   
         h=img[2].height;                                                                  
                                                                                           
         glBindTexture (GL_TEXTURE_2D, gl.AdolfoTexture);                                  
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);              
-            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);              
-            glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,                                    
-                   GL_RGB, GL_UNSIGNED_BYTE, img[2].data);	
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);              
+        glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);              
+        glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,                                    
+                 	GL_RGB, GL_UNSIGNED_BYTE, img[2].data);	
 }
 
 void normalize2d(Vec v)
