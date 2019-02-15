@@ -110,9 +110,10 @@ public:
 };
 // add png files name and create array based on # of pngs
 //Image img("./images/bigfoot.png");
-Image img[2] = {
+Image img[3] = {
 "./images/bigfoot.png",	
-"./images/luis_3350.png"};
+"./images/luis_3350.png",
+"./images/IMG_Adolfo_Valencia.png"};
 
 class Global {
 public:
@@ -120,6 +121,7 @@ public:
 	char keys[65536];
 	GLuint bigfootTexture;
 	GLuint luisTexture;
+	GLuint AdolfoTexture;
 	// declare GLuint textid for each png
 	Global() {
 		xres = 1250;
@@ -453,9 +455,17 @@ void init_opengl(void)
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
         glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-                GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
-			
-
+		    GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
+	
+	glGenTextures(1, &gl.AdolfoTexture);                                              
+        w=img[2].width;                                                                   
+        h=img[2].height;                                                                  
+                                                                                          
+        glBindTexture (GL_TEXTURE_2D, gl.AdolfoTexture);                                  
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);              
+            glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);              
+            glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,                                    
+                   GL_RGB, GL_UNSIGNED_BYTE, img[2].data);	
 }
 
 void normalize2d(Vec v)
@@ -568,7 +578,7 @@ void check_mouse(XEvent *e)
 	}
 }
 
-
+void AdolfoValenciaPicture(int x, int y, GLuint textid);
 void andrewH(int x, int y, GLuint textid);
 void creditsLuis(int x, int y, GLuint textid);
 // add prototypes of all external functions
@@ -979,8 +989,9 @@ void render()
 		}
 	}
 	if (g.show_credits) {
-	    andrewH(.75*gl.xres,.75*gl.yres, gl.bigfootTexture);
+	    	andrewH(.75*gl.xres,.75*gl.yres, gl.bigfootTexture);
 		creditsLuis(gl.xres/2,gl.yres/2, gl.luisTexture);
+		AdolfoValenciaPicture(gl.xres*.25, gl.yres*.25, gl.AdolfoTexture);
 	    // function calls for everyone with parameters
 	}
 }
