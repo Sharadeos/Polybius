@@ -31,7 +31,7 @@ void creditsLuis(int x, int y, GLuint luisTexture)
 	float wid = 120.0f;
 	
 	glPushMatrix();
-	glTranslatef(x/2.0, y/2.0, 0);
+	glTranslatef(x + 250, y - 50, 0);
 	glEnable(GL_ALPHA_TEST);
 	glColor3ub(255,255,255);
 	glBindTexture(GL_TEXTURE_2D, luisTexture);

@@ -979,7 +979,7 @@ void render()
 		}
 	}
 	if (g.show_credits) {
-	    andrewH(gl.xres/2,gl.yres/2, gl.bigfootTexture);
+	    andrewH(.75*gl.xres,.75*gl.yres, gl.bigfootTexture);
 		creditsLuis(gl.xres/2,gl.yres/2, gl.luisTexture);
 	    // function calls for everyone with parameters
 	}
