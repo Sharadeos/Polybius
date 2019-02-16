@@ -1002,8 +1002,8 @@ void render()
 		}
 	}
 	if (g.show_credits) {
-	    	andrewH(.75*gl.xres,.75*gl.yres, gl.bigfootTexture);
-		creditsLuis(gl.xres/2,gl.yres/2, gl.luisTexture);
+	    andrewH(.75*gl.xres,.75*gl.yres, gl.bigfootTexture);
+		creditsLuis(.5*gl.xres,.5*gl.yres, gl.luisTexture);
 		AdolfoValenciaPicture(gl.xres*.25, gl.yres*.25, gl.AdolfoTexture);
         showChrisRamirez(gl.xres*.65, gl.yres*.65, gl.chrisTexture);
 	    // function calls for everyone with parameters
