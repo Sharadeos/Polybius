@@ -126,7 +126,7 @@ public:
 	GLuint luisTexture;
 	GLuint AdolfoTexture;
 	GLuint chrisTexture;
-    GLuint josephTexture;
+        GLuint josephTexture;
     // declare GLuint textid for each png
 	Global() {
 		xres = 1250;
@@ -196,7 +196,7 @@ public:
 	bool show_credits;
 public:
 	Game() {
-		bool show_credits = false;
+		show_credits = false;
 		ahead = NULL;
 		barr = new Bullet[MAX_BULLETS];
 		nasteroids = 0;
@@ -485,7 +485,7 @@ void init_opengl(void)
     glGenTextures(1, &gl.josephTexture);
     w = img[4].width;
     h = img[4].width;
-    glBindTexture(GL_TEXTURE_2D, gl.chrisTexture);
+    glBindTexture(GL_TEXTURE_2D, gl.josephTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
@@ -1017,9 +1017,9 @@ void render()
 	}
 	if (g.show_credits) {
 	    andrewH(.75*gl.xres,.75*gl.yres, gl.bigfootTexture);
-		creditsLuis(.5*gl.xres,.5*gl.yres, gl.luisTexture);
-		AdolfoValenciaPicture(gl.xres*.25, gl.yres*.25, gl.AdolfoTexture);
-        showChrisRamirez(gl.xres*.65, gl.yres*.65, gl.chrisTexture);
+  	    creditsLuis(.5*gl.xres,.5*gl.yres, gl.luisTexture);
+	    AdolfoValenciaPicture(gl.xres*.25, gl.yres*.25, gl.AdolfoTexture);
+            showChrisRamirez(gl.xres*.65, gl.yres*.65, gl.chrisTexture);
 	    josephG(gl.xres*.4,gl.yres*.4,gl.josephTexture);
         // function calls for everyone with parameters
 	}

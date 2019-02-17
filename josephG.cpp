@@ -33,7 +33,7 @@ void josephG(int x, int y, GLuint textid)
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.0f);
     glColor4ub(255,255,255,255);
-    int wid = 50; 
+    float wid = 120.0f; 
     glBegin(GL_QUADS);
     glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
     glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
