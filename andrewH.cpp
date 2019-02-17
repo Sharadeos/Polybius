@@ -17,7 +17,7 @@ void andrewH(int x, int y, GLuint textid)
     ggprint8b(&r, 16, c, "Andrew Hubbard");
 
     glPushMatrix();
-    glTranslatef(x + 200, y, 0);
+    glTranslatef(x + 250, y, 0);
     glBindTexture(GL_TEXTURE_2D, textid);
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.0f);
