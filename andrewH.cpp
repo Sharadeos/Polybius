@@ -1,7 +1,7 @@
 //
 //program: andrewH.cpp
 //author: Andrew (Joey) Hubbard
-//Last Modified: 2-14-2019  10:23am
+//Last Modified: 2-16-2019  6:36pm
 //
 #include <GL/glx.h>
 #include "fonts.h"
@@ -24,10 +24,10 @@ void andrewH(int x, int y, GLuint textid)
     glColor4ub(255,255,255,255);
     float wid = 120.0f; 
     glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
-    glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
-    glTexCoord2f(1.0f, 0.0f); glVertex2i( wid, wid);
-    glTexCoord2f(1.0f, 1.0f); glVertex2i( wid,-wid);
+        glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
+        glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+        glTexCoord2f(1.0f, 0.0f); glVertex2i( wid, wid);
+        glTexCoord2f(1.0f, 1.0f); glVertex2i( wid,-wid);
     glEnd();
     glPopMatrix();
 }
