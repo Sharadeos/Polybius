@@ -1016,11 +1016,11 @@ void render()
 		}
 	}
 	if (g.show_credits) {
-	    andrewH(.75*gl.xres,.75*gl.yres, gl.bigfootTexture);
-  	    creditsLuis(.5*gl.xres,.5*gl.yres, gl.luisTexture);
-	    AdolfoValenciaPicture(gl.xres*.25, gl.yres*.25, gl.AdolfoTexture);
-            showChrisRamirez(gl.xres*.65, gl.yres*.65, gl.chrisTexture);
-	    josephG(gl.xres*.4,gl.yres*.4,gl.josephTexture);
+	    andrewH(.5*gl.xres,.9*gl.yres, gl.bigfootTexture);
+  	    creditsLuis(.5*gl.xres,.7*gl.yres, gl.luisTexture);
+	    AdolfoValenciaPicture(.5*gl.xres, .5*gl.yres, gl.AdolfoTexture);
+            showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
+	    josephG(.5*gl.xres,.1*gl.yres,gl.josephTexture);
         // function calls for everyone with parameters
 	}
 }
