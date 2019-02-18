@@ -6,8 +6,12 @@
 #include <GL/glx.h>
 #include "fonts.h"
 #include <math.h>
-void andrewH(int x, int y, GLuint textid, float rad) 
+static float spin = 20;
+void andrewH(int x, int y, GLuint textid, int move) 
 {
+    if(!move)
+	spin = 20;
+
     Rect r;
     unsigned int c = 0x00ffff44;
     r.bot = y;
@@ -20,11 +24,12 @@ void andrewH(int x, int y, GLuint textid, float rad)
     q.left = x/2;
     q.center = 0;
     ggprint16(&q, 16, c, "CREATED BY");
-
+    
     float wid = 110.0f; 
+    float rad = move * -.05;
     glPushMatrix();
     glTranslatef(x + 250, y, 0);
-    glRotatef(60*sin(rad),0,0,1);
+    glRotatef(spin*sin(rad),0,0,1);
     glBindTexture(GL_TEXTURE_2D, textid);
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.0f);
@@ -36,4 +41,6 @@ void andrewH(int x, int y, GLuint textid, float rad)
         glTexCoord2f(1.0f, 1.0f); glVertex2i( wid,-wid);
     glEnd();
     glPopMatrix();
+    if (sin(rad) > .98 || sin(rad) < -.98)
+    	spin *= 1.01;
 }
