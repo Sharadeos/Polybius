@@ -2,7 +2,6 @@
 //Author:  Christopher Ramirez
 //Date:    2019
 #include <GL/glx.h>
-#include "log.h"
 #include "fonts.h"
 void showChrisRamirez(int x, int y, GLuint textid)
 {
@@ -26,5 +25,4 @@ void showChrisRamirez(int x, int y, GLuint textid)
 	       glTexCoord2f(1.0f, 1.0f); glVertex2i( wid,-wid);
 	glEnd();
 	glPopMatrix();
-}
- 
+} 
