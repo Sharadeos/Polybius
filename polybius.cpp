@@ -918,7 +918,6 @@ void render()
 	glClear(GL_COLOR_BUFFER_BIT);
 	if (!g.show_credits) {
 		Rect r;
-		glClear(GL_COLOR_BUFFER_BIT);
 		//
 		r.bot = gl.yres - 20;
 		r.left = 10;
