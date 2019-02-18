@@ -606,7 +606,7 @@ void check_mouse(XEvent *e)
 }
 
 void AdolfoValenciaPicture(int x, int y, GLuint textid);
-void andrewH(int x, int y, GLuint textid, float i);
+void andrewH(int x, int y, GLuint textid, float rad);
 void creditsLuis(int x, int y, GLuint textid);
 void showChrisRamirez(int x, int y, GLuint textid);
 void josephG(int x, int y, GLuint textid);
