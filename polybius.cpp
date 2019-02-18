@@ -194,6 +194,7 @@ public:
 	struct timespec mouseThrustTimer;
 	bool mouseThrustOn;
 	bool show_credits;
+	float mtext;
 public:
 	Game() {
 		show_credits = false;
@@ -202,6 +203,7 @@ public:
 		nasteroids = 0;
 		nbullets = 0;
 		mouseThrustOn = false;
+		mtext = 0;
 		//build 10 asteroids...
 		for (int j=0; j<10; j++) {
 			Asteroid *a = new Asteroid;
@@ -604,7 +606,7 @@ void check_mouse(XEvent *e)
 }
 
 void AdolfoValenciaPicture(int x, int y, GLuint textid);
-void andrewH(int x, int y, GLuint textid);
+void andrewH(int x, int y, GLuint textid, float i);
 void creditsLuis(int x, int y, GLuint textid);
 void showChrisRamirez(int x, int y, GLuint textid);
 void josephG(int x, int y, GLuint textid);
@@ -913,6 +915,7 @@ void physics()
 
 void render()
 { 
+	glClear(GL_COLOR_BUFFER_BIT);
 	if (!g.show_credits) {
 		Rect r;
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -1015,8 +1018,10 @@ void render()
 			glEnd();
 		}
 	}
+
 	if (g.show_credits) {
-	    andrewH(.5*gl.xres, .9*gl.yres, gl.bigfootTexture);
+	    g.mtext -= .02;
+	    andrewH(.5*gl.xres, .9*gl.yres, gl.bigfootTexture,g.mtext);
   	    creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
 	    AdolfoValenciaPicture(.5*gl.xres, .5*gl.yres, gl.AdolfoTexture);
             showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
