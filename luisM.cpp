@@ -29,3 +29,10 @@ void creditsLuis(int x, int y, GLuint luisTexture)
 	glPopMatrix();
 
 }
+
+
+void difficulty()
+{
+	
+	
+}

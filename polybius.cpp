@@ -20,6 +20,7 @@
 #include <GL/glx.h>
 #include "log.h"
 #include "fonts.h"
+#include <stdio.h>
 
 //defined types
 typedef float Flt;
@@ -198,13 +199,16 @@ public:
 public:
 	Game() {
 		show_credits = false;
-		ahead = NULL;
 		barr = new Bullet[MAX_BULLETS];
+		
+		ahead = NULL;
+		
 		nasteroids = 0;
 		nbullets = 0;
 		mouseThrustOn = false;
 		mtext = 0;
 		//build 10 asteroids...
+		
 		for (int j=0; j<10; j++) {
 			Asteroid *a = new Asteroid;
 			a->nverts = 8;
@@ -235,6 +239,7 @@ public:
 			ahead = a;
 			++nasteroids;
 		}
+		
 		clock_gettime(CLOCK_REALTIME, &bulletTimer);
 	}
 	~Game() {
@@ -1023,7 +1028,7 @@ void render()
 	    andrewH(.5*gl.xres, .9*gl.yres, gl.bigfootTexture,g.mtext);
   	    creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
 	    AdolfoValenciaPicture(.5*gl.xres, .5*gl.yres, gl.AdolfoTexture);
-            showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
+        showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
 	    josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
 	    g.mtext++;
         // function calls for everyone with parameters
