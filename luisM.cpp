@@ -4,6 +4,7 @@
 #include <GL/glx.h>
 #include "fonts.h"
 
+
 void creditsLuis(int x, int y, GLuint luisTexture)
 {
 	Rect r;
@@ -31,8 +32,8 @@ void creditsLuis(int x, int y, GLuint luisTexture)
 }
 
 
-void difficulty()
+int difficulty()
 {
 	
-	
+	return 0;
 }

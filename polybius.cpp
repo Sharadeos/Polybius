@@ -56,6 +56,23 @@ extern double timeSpan;
 extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
+//function prototypes
+void init_opengl(void);
+void check_mouse(XEvent *e);
+int check_keys(XEvent *e);
+void physics();
+void render();
+void AdolfoValenciaPicture(int x, int y, GLuint textid);
+void andrewH(int x, int y, GLuint textid, int move);
+void creditsLuis(int x, int y, GLuint textid);
+void showChrisRamirez(int x, int y, GLuint textid);
+void josephG(int x, int y, GLuint textid);
+
+
+void difficulty();
+void createAsteroid();
+
+
 class Image {
 public:
         int width, height;
@@ -196,48 +213,23 @@ public:
 	bool mouseThrustOn;
 	bool show_credits;
 	int mtext;
+	int asteroidCount;
+	
 public:
 	Game() {
 		show_credits = false;
 		barr = new Bullet[MAX_BULLETS];
-		
-		ahead = NULL;
-		
-		nasteroids = 0;
 		nbullets = 0;
 		mouseThrustOn = false;
 		mtext = 0;
-		//build 10 asteroids...
+		asteroidCount = 1;
+		ahead = NULL;
+		nasteroids = 0;	
+		//build x asteroids...
 		
-		for (int j=0; j<10; j++) {
-			Asteroid *a = new Asteroid;
-			a->nverts = 8;
-			a->radius = rnd()*80.0 + 40.0;
-			Flt r2 = a->radius / 2.0;
-			Flt angle = 0.0f;
-			Flt inc = (PI * 2.0) / (Flt)a->nverts;
-			for (int i=0; i<a->nverts; i++) {
-				a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
-				a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
-				angle += inc;
-			}
-			a->pos[0] = (Flt)(rand() % gl.xres);
-			a->pos[1] = (Flt)(rand() % gl.yres);
-			a->pos[2] = 0.0f;
-			a->angle = 0.0;
-			a->rotate = rnd() * 4.0 - 2.0;
-			a->color[0] = 0.8;
-			a->color[1] = 0.8;
-			a->color[2] = 0.7;
-			a->vel[0] = (Flt)(rnd()*2.0-1.0);
-			a->vel[1] = (Flt)(rnd()*2.0-1.0);
-			//std::cout << "asteroid" << std::endl;
-			//add to front of linked list
-			a->next = ahead;
-			if (ahead != NULL)
-				ahead->prev = a;
-			ahead = a;
-			++nasteroids;
+		for (int j=0; j<asteroidCount; j++) {
+			
+			createAsteroid();
 		}
 		
 		clock_gettime(CLOCK_REALTIME, &bulletTimer);
@@ -246,6 +238,39 @@ public:
 		delete [] barr;
 	}
 } g;
+
+void createAsteroid()
+{
+	Asteroid *a = new Asteroid;
+	a->nverts = 8;
+	a->radius = rnd()*80.0 + 40.0;
+	Flt r2 = a->radius / 2.0;
+	Flt angle = 0.0f;
+	Flt inc = (PI * 2.0) / (Flt)a->nverts;
+	for (int i=0; i<a->nverts; i++) {
+		a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
+		a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
+		angle += inc;
+	}
+	a->pos[0] = (Flt)(rand() % gl.xres);
+	a->pos[1] = (Flt)(rand() % gl.yres);
+	a->pos[2] = 0.0f;
+	a->angle = 0.0;
+	a->rotate = rnd() * 4.0 - 2.0;
+	a->color[0] = 0.8;
+	a->color[1] = 0.8;
+	a->color[2] = 0.7;
+	a->vel[0] = (Flt)(rnd()*2.0-1.0);
+	a->vel[1] = (Flt)(rnd()*2.0-1.0);
+	//std::cout << "asteroid" << std::endl;
+	//add to front of linked list
+	a->next = g.ahead;
+	if (g.ahead != NULL)
+		g.ahead->prev = a;
+	g.ahead = a;
+	++g.nasteroids;	
+	
+}
 
 //X Windows variables
 class X11_wrapper {
@@ -378,12 +403,8 @@ public:
 	}
 } x11(0, 0);
 
-//function prototypes
-void init_opengl(void);
-void check_mouse(XEvent *e);
-int check_keys(XEvent *e);
-void physics();
-void render();
+
+
 
 //==========================================================================
 // M A I N
@@ -411,6 +432,8 @@ int main()
 			physicsCountdown += timeSpan;
 			while (physicsCountdown >= physicsRate) {
 				physics();
+				difficulty();
+				
 				physicsCountdown -= physicsRate;
 			}
 		}
@@ -560,6 +583,7 @@ void check_mouse(XEvent *e)
 		}
 		if (e->xbutton.button==3) {
 			//Right button is down
+			createAsteroid();
 		}
 	}
 	//keys[XK_Up] = 0;
@@ -610,11 +634,6 @@ void check_mouse(XEvent *e)
 	}
 }
 
-void AdolfoValenciaPicture(int x, int y, GLuint textid);
-void andrewH(int x, int y, GLuint textid, int move);
-void creditsLuis(int x, int y, GLuint textid);
-void showChrisRamirez(int x, int y, GLuint textid);
-void josephG(int x, int y, GLuint textid);
 // add prototypes of all external functions
 
 int check_keys(XEvent *e)
