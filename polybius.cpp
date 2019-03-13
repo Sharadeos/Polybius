@@ -126,7 +126,7 @@ public:
 	GLuint luisTexture;
 	GLuint AdolfoTexture;
 	GLuint chrisTexture;
-    GLuint josephTexture;
+        GLuint josephTexture;
     // declare GLuint textid for each png
 	Global() {
 		xres = 1250;
@@ -194,14 +194,16 @@ public:
 	struct timespec mouseThrustTimer;
 	bool mouseThrustOn;
 	bool show_credits;
+	float mtext;
 public:
 	Game() {
-		bool show_credits = false;
+		show_credits = false;
 		ahead = NULL;
 		barr = new Bullet[MAX_BULLETS];
 		nasteroids = 0;
 		nbullets = 0;
 		mouseThrustOn = false;
+		mtext = 0;
 		//build 10 asteroids...
 		for (int j=0; j<10; j++) {
 			Asteroid *a = new Asteroid;
@@ -485,7 +487,7 @@ void init_opengl(void)
     glGenTextures(1, &gl.josephTexture);
     w = img[4].width;
     h = img[4].width;
-    glBindTexture(GL_TEXTURE_2D, gl.chrisTexture);
+    glBindTexture(GL_TEXTURE_2D, gl.josephTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
@@ -604,10 +606,11 @@ void check_mouse(XEvent *e)
 }
 
 void AdolfoValenciaPicture(int x, int y, GLuint textid);
-void andrewH(int x, int y, GLuint textid);
+void andrewH(int x, int y, GLuint textid, float i);
 void creditsLuis(int x, int y, GLuint textid);
 void showChrisRamirez(int x, int y, GLuint textid);
 void josephG(int x, int y, GLuint textid);
+void pathFinding(float* a, float* b, int x, int y);
 // add prototypes of all external functions
 
 int check_keys(XEvent *e)
@@ -761,12 +764,15 @@ void physics()
 	}
 	//
 	//Update asteroid positions
-	Asteroid *a = g.ahead;
+	//pathFinding(&a->pos[0], &a->pos[2]
+    Asteroid *a = g.ahead;
 	while (a) {
-		a->pos[0] += a->vel[0];
-		a->pos[1] += a->vel[1];
+        a->pos[0] += a->vel[0];
+        a->pos[0] += a->vel[1];
+        
+        pathFinding(&a->pos[0],&a->pos[1],g.ship.pos[0], g.ship.pos[1]);
 		//Check for collision with window edges
-		if (a->pos[0] < -100.0) {
+        if (a->pos[0] < -100.0) {
 			a->pos[0] += (float)gl.xres+200;
 		}
 		else if (a->pos[0] > (float)gl.xres+100) {
@@ -913,9 +919,9 @@ void physics()
 
 void render()
 { 
+	glClear(GL_COLOR_BUFFER_BIT);
 	if (!g.show_credits) {
 		Rect r;
-		glClear(GL_COLOR_BUFFER_BIT);
 		//
 		r.bot = gl.yres - 20;
 		r.left = 10;
@@ -1015,15 +1021,14 @@ void render()
 			glEnd();
 		}
 	}
+
 	if (g.show_credits) {
-	    andrewH(.75*gl.xres,.75*gl.yres, gl.bigfootTexture);
-		creditsLuis(.5*gl.xres,.5*gl.yres, gl.luisTexture);
-		AdolfoValenciaPicture(gl.xres*.25, gl.yres*.25, gl.AdolfoTexture);
-        showChrisRamirez(gl.xres*.65, gl.yres*.65, gl.chrisTexture);
-	    josephG(gl.xres*.4,gl.yres*.4,gl.josephTexture);
+	    g.mtext -= .02;
+	    andrewH(.5*gl.xres, .9*gl.yres, gl.bigfootTexture,g.mtext);
+  	    creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
+	    AdolfoValenciaPicture(.5*gl.xres, .5*gl.yres, gl.AdolfoTexture);
+        showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
+	    josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
         // function calls for everyone with parameters
 	}
 }
-
-
-

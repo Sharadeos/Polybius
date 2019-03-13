@@ -2,19 +2,7 @@
 //program: josephG.cpp
 //author: Joseph Gaede
 //
-#include <iostream>
-#include <cstdlib>
-#include <cstring>
-#include <unistd.h>
-#include <ctime>
-#include <cmath>
-#include <X11/Xlib.h>
-//#include <X11/Xutil.h>
-//#include <GL/gl.h>
-//#include <GL/glu.h>
-#include <X11/keysym.h>
 #include <GL/glx.h>
-#include "log.h"
 #include "fonts.h"
    
 
@@ -33,7 +21,7 @@ void josephG(int x, int y, GLuint textid)
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.0f);
     glColor4ub(255,255,255,255);
-    int wid = 50; 
+    float wid = 120.0f; 
     glBegin(GL_QUADS);
     glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
     glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
@@ -41,4 +29,21 @@ void josephG(int x, int y, GLuint textid)
     glTexCoord2f(1.0f, 1.0f); glVertex2i( wid,-wid);
     glEnd();
     glPopMatrix();
+}
+void pathFinding(float* a,float* b,int x,int y) 
+{
+    int c = *a - x;
+    int z = *b - y;
+    if (c > 30 || z > 30) 
+    {
+        if (*a < x)
+            *a += (float)1;
+        if (*a > x)
+            *a -= (float)1;
+        if (*b < y)
+            *b += (float)1;
+        if (*b > y)
+            *b -= (float)1;
+    }
+
 }
