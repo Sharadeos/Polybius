@@ -65,6 +65,10 @@ extern double timeSpan;
 extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
+
+void difficulty();
+void createAsteroid();
+
 class Image {
 public:
         int width, height;
@@ -228,6 +232,7 @@ public:
 	bool mouseThrustOn;
 	bool show_credits;
 	float mtext;
+	int asteroidCount;
 public:
 	Game() {
 		show_credits = false;
@@ -239,7 +244,6 @@ public:
 		mtext = 0;
 		asteroidCount = 1;
 		ahead = NULL;
-		nasteroids = 0;	
 		//build x asteroids...
 		
 		for (int j=0; j<asteroidCount; j++) {
@@ -740,8 +744,7 @@ void showChrisRamirez(int x, int y, GLuint textid);
 void josephG(int x, int y, GLuint textid);
 void pathFinding(float* a, float* b, int x, int y);
 
-void difficulty();
-void createAsteroid();
+
 // add prototypes of all external functions
 
 int check_keys(XEvent *e)
