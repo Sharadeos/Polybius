@@ -20,7 +20,16 @@
 #include <GL/glx.h>
 #include "log.h"
 #include "fonts.h"
+
 #include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#ifdef USE_OPENAL_SOUND
+#include </usr/include/AL/alut.h>
+#endif 
 
 //defined types
 typedef float Flt;
@@ -56,23 +65,6 @@ extern double timeSpan;
 extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
-//function prototypes
-void init_opengl(void);
-void check_mouse(XEvent *e);
-int check_keys(XEvent *e);
-void physics();
-void render();
-void AdolfoValenciaPicture(int x, int y, GLuint textid);
-void andrewH(int x, int y, GLuint textid, int move);
-void creditsLuis(int x, int y, GLuint textid);
-void showChrisRamirez(int x, int y, GLuint textid);
-void josephG(int x, int y, GLuint textid);
-
-
-void difficulty();
-void createAsteroid();
-
-
 class Image {
 public:
         int width, height;
@@ -172,6 +164,29 @@ public:
 	}
 };
 
+class Enemies {
+public:
+    Vec dir;
+    Vec pos;
+    Vec vel;
+    float angle;
+    float color[3];
+    Flt radius;
+    float rotate;
+    struct Enemy *prev;
+    struct Enemy *next;
+public:
+    Enemies() {
+        pos[0] = (Flt)(gl.xres/2);
+        pos[1] = (Flt)(gl.yres/2);
+        pos[2] = 0.0f;
+        VecZero(vel);
+        angle = 0.0;
+        color[0] = color[1] = color[2] - 1.0;
+        prev = NULL;
+        next = NULL;
+    }
+};
 class Bullet {
 public:
 	Vec pos;
@@ -212,13 +227,13 @@ public:
 	struct timespec mouseThrustTimer;
 	bool mouseThrustOn;
 	bool show_credits;
-	int mtext;
-	int asteroidCount;
-	
+	float mtext;
 public:
 	Game() {
 		show_credits = false;
+		ahead = NULL;
 		barr = new Bullet[MAX_BULLETS];
+		nasteroids = 0;
 		nbullets = 0;
 		mouseThrustOn = false;
 		mtext = 0;
@@ -228,10 +243,8 @@ public:
 		//build x asteroids...
 		
 		for (int j=0; j<asteroidCount; j++) {
-			
 			createAsteroid();
 		}
-		
 		clock_gettime(CLOCK_REALTIME, &bulletTimer);
 	}
 	~Game() {
@@ -271,6 +284,7 @@ void createAsteroid()
 	++g.nasteroids;	
 	
 }
+
 
 //X Windows variables
 class X11_wrapper {
@@ -403,9 +417,81 @@ public:
 	}
 } x11(0, 0);
 
+//function prototypes
+void init_opengl(void);
+void check_mouse(XEvent *e);
+int check_keys(XEvent *e);
+void physics();
+void render();
 
+#ifdef USE_OPENAL_SOUND
+class OPENAL_SOUND_ENGINE {
+public: 
+	float vec[6] = {0.0f,0.0f,1.0f, 0.0f,1.0f,0.0f};
+	ALuint alBuffer[1];
+	ALuint alSource[1];
+public: 
+	OPENAL_SOUND_ENGINE() {
+		alutInit(0, NULL);
+		if(alGetError() != AL_NO_ERROR) {
+			printf("ERROR: alutInit()\n");
+			exit(EXIT_FAILURE);//0;
+		}
+		//Clear error state.
+		alGetError();
+		//
+		//Setup Listener
+		//Forward and Upward vectors are used
+		float vec[6] = {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f};
+		alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
+		alListenerfv(AL_ORIENTATION, vec);
+		alListenerf(AL_GAIN, 1.0f);
+		//
+		//Setup Buffer: holds the sound information
+		alBuffer[0] = alutCreateBufferFromFile("./bullet_fire.wav");;
+		//Generate a source, store it in a buffer
+		alGenSources(1, alSource);
+		alSourcei(alSource[0], AL_BUFFER, alBuffer[0]);
+		//Set Volume and Pitch to normal
+		//No Looping of Sound
+		alSourcef(alSource[0], AL_GAIN, 0.1f);
+		alSourcef(alSource[0], AL_PITCH, 1.0f);
+		alSourcei(alSource[0], AL_LOOPING, AL_FALSE);
+		if (alGetError() != AL_NO_ERROR) {
+			printf("ERROR: setting source\n");
+			exit(EXIT_FAILURE);//0;
+		}
+	}
+	~OPENAL_SOUND_ENGINE() {
+		//Cleanup
+		//1st delete Sources
+		alDeleteSources(1, &alSource[0]);
+		//2nd delete Buffers
+		alDeleteBuffers(1, &alBuffer[0]);
+		//Close out OpenAL itself
+		//Get active Context
+		ALCcontext *Context = alcGetCurrentContext();
+		//Get Device for active Context
+		ALCdevice *Device = alcGetContextsDevice(Context);
+		//Disable Context
+		alcMakeContextCurrent(NULL);
+		//Release Context(s)
+		alcDestroyContext(Context);
+		//Close Device
+		alcCloseDevice(Device);
+	}
+} audiothing;
+#endif
 
-
+//OPENAL function prototypes
+//START OVER -Chris to Chris
+/*void setUpOPENAL();
+void setUpListener();
+void setUpBuffer();
+void setUpSource();
+//void pewPew();
+void audioCleanup();
+*/
 //==========================================================================
 // M A I N
 //==========================================================================
@@ -417,6 +503,12 @@ int main()
 	clock_gettime(CLOCK_REALTIME, &timePause);
 	clock_gettime(CLOCK_REALTIME, &timeStart);
 	x11.set_mouse_position(100,100);
+	//Init OPENAL
+	/*
+	setUpOPENAL();
+	setUpListener();
+	//setUpBuffer();
+	*/
 	int done=0;
 	while (!done) {
 		while (x11.getXPending()) {
@@ -432,8 +524,6 @@ int main()
 			physicsCountdown += timeSpan;
 			while (physicsCountdown >= physicsRate) {
 				physics();
-				difficulty();
-				
 				physicsCountdown -= physicsRate;
 			}
 		}
@@ -442,6 +532,8 @@ int main()
 	}
 	cleanup_fonts();
 	logClose();
+	//OPENAL Cleanup
+	//audioCleanup();
 	return 0;
 }
 
@@ -578,6 +670,13 @@ void check_mouse(XEvent *e)
 					b->color[1] = 1.0f;
 					b->color[2] = 1.0f;
 					++g.nbullets;
+					//play pewPew() soundFX
+#ifdef USE_OPEN_SOUND
+					//pewPew();
+					//alSourcePlay(audiothing.alSource[1]);
+					//setUpBuffer();
+#endif
+
 				}
 			}
 		}
@@ -634,6 +733,15 @@ void check_mouse(XEvent *e)
 	}
 }
 
+void AdolfoValenciaPicture(int x, int y, GLuint textid);
+void andrewH(int x, int y, GLuint textid, int move);
+void creditsLuis(int x, int y, GLuint textid);
+void showChrisRamirez(int x, int y, GLuint textid);
+void josephG(int x, int y, GLuint textid);
+void pathFinding(float* a, float* b, int x, int y);
+
+void difficulty();
+void createAsteroid();
 // add prototypes of all external functions
 
 int check_keys(XEvent *e)
@@ -672,6 +780,10 @@ int check_keys(XEvent *e)
 		case XK_equal:
 			break;
 		case XK_minus:
+			for (int i=0; i<4; i++) {
+				alSourcePlay(audiothing.alSource[0]);
+				//usleep(250000);
+			}
 			break;
 	}
 	return 0;
@@ -787,12 +899,15 @@ void physics()
 	}
 	//
 	//Update asteroid positions
-	Asteroid *a = g.ahead;
+	//pathFinding(&a->pos[0], &a->pos[2]
+    Asteroid *a = g.ahead;
 	while (a) {
-		a->pos[0] += a->vel[0];
-		a->pos[1] += a->vel[1];
+        a->pos[0] += a->vel[0];
+        a->pos[0] += a->vel[1];
+        
+        pathFinding(&a->pos[0],&a->pos[1],g.ship.pos[0], g.ship.pos[1]);
 		//Check for collision with window edges
-		if (a->pos[0] < -100.0) {
+        if (a->pos[0] < -100.0) {
 			a->pos[0] += (float)gl.xres+200;
 		}
 		else if (a->pos[0] > (float)gl.xres+100) {
@@ -966,6 +1081,8 @@ void render()
 		glVertex2f(  0.0f, -6.0f);
 		glVertex2f(  0.0f, 20.0f);
 		glVertex2f( 12.0f, -10.0f);
+        //glVertex2f( 12.0f, -5.0f);
+        //glVertex2f( 30.0f, -5.0f);
 		glEnd();
 		glColor3f(1.0f, 0.0f, 0.0f);
 		glBegin(GL_POINTS);
@@ -1047,14 +1164,9 @@ void render()
 	    andrewH(.5*gl.xres, .9*gl.yres, gl.bigfootTexture,g.mtext);
   	    creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
 	    AdolfoValenciaPicture(.5*gl.xres, .5*gl.yres, gl.AdolfoTexture);
-        showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
+		showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
 	    josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
-	    g.mtext++;
+		g.mtext++;
         // function calls for everyone with parameters
 	}
-
-
 }
-
-
-
