@@ -1,8 +1,9 @@
 //author:  Luis Manahan
-//modified: 2/14/19 12:15pm
+//modified: 3/14/19 11:25AM
 //
 #include <GL/glx.h>
 #include "fonts.h"
+
 
 void creditsLuis(int x, int y, GLuint luisTexture)
 {
@@ -28,4 +29,11 @@ void creditsLuis(int x, int y, GLuint luisTexture)
 	glEnd();
 	glPopMatrix();
 
+}
+
+
+int difficulty()
+{
+	
+	return 0;
 }
