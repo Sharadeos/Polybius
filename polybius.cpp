@@ -21,6 +21,16 @@
 #include "log.h"
 #include "fonts.h"
 
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#ifdef USE_OPENAL_SOUND
+#include </usr/include/AL/alut.h>
+#endif 
+
 //defined types
 typedef float Flt;
 typedef float Vec[3];
@@ -34,8 +44,8 @@ typedef Flt	Matrix[4][4];
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 #define VecDot(a,b)	((a)[0]*(b)[0]+(a)[1]*(b)[1]+(a)[2]*(b)[2])
 #define VecSub(a,b,c) (c)[0]=(a)[0]-(b)[0]; \
-						(c)[1]=(a)[1]-(b)[1]; \
-						(c)[2]=(a)[2]-(b)[2]
+							 (c)[1]=(a)[1]-(b)[1]; \
+(c)[2]=(a)[2]-(b)[2]
 //constants
 const float timeslice = 1.0f;
 const float gravity = -0.2f;
@@ -56,344 +66,349 @@ extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
 class Image {
-public:
-        int width, height;
-        unsigned char *data;
-        ~Image() { delete [] data; }
-        Image(const char *fname) {
-                if (fname[0] == '\0')
-                        return;
-                //printf("fname **%s**\n", fname);
-                int ppmFlag = 0;
-                char name[40];
-                strcpy(name, fname);
-                int slen = strlen(name);
-                char ppmname[80];
-                if (strncmp(name+(slen-4), ".ppm", 4) == 0)
-                        ppmFlag = 1;
-                if (ppmFlag) {
-                        strcpy(ppmname, name);
-                } else {
-                        name[slen-4] = '\0';
-                        //printf("name **%s**\n", name);
-                        sprintf(ppmname,"%s.ppm", name);
-                        //printf("ppmname **%s**\n", ppmname);
-                        char ts[100];
-                        //system("convert eball.jpg eball.ppm");
-                        sprintf(ts, "convert %s %s", fname, ppmname);
-                        system(ts);
-                }
-                //sprintf(ts, "%s", name);
-                FILE *fpi = fopen(ppmname, "r");
-                if (fpi) {
-                        char line[200];
-                        fgets(line, 200, fpi);
-                        fgets(line, 200, fpi);
-                        //skip comments and blank lines
-                        while (line[0] == '#' || strlen(line) < 2)
-                                fgets(line, 200, fpi);
-                        sscanf(line, "%i %i", &width, &height);
-                        fgets(line, 200, fpi);
-                        //get pixel data
-                        int n = width * height * 3;
-                        data = new unsigned char[n];
-                        for (int i=0; i<n; i++)
-                                data[i] = fgetc(fpi);
-                        fclose(fpi);
-                } else {
-                printf("ERROR opening image: %s\n",ppmname);
-                        exit(0);
-                }
-                if (!ppmFlag)
-			unlink(ppmname);
-	}
+	public:
+		int width, height;
+		unsigned char *data;
+		~Image() { delete [] data; }
+		Image(const char *fname) {
+			if (fname[0] == '\0')
+				return;
+			//printf("fname **%s**\n", fname);
+			int ppmFlag = 0;
+			char name[40];
+			strcpy(name, fname);
+			int slen = strlen(name);
+			char ppmname[80];
+			if (strncmp(name+(slen-4), ".ppm", 4) == 0)
+				ppmFlag = 1;
+			if (ppmFlag) {
+				strcpy(ppmname, name);
+			} else {
+				name[slen-4] = '\0';
+				//printf("name **%s**\n", name);
+				sprintf(ppmname,"%s.ppm", name);
+				//printf("ppmname **%s**\n", ppmname);
+				char ts[100];
+				//system("convert eball.jpg eball.ppm");
+				sprintf(ts, "convert %s %s", fname, ppmname);
+				system(ts);
+			}
+			//sprintf(ts, "%s", name);
+			FILE *fpi = fopen(ppmname, "r");
+			if (fpi) {
+				char line[200];
+				fgets(line, 200, fpi);
+				fgets(line, 200, fpi);
+				//skip comments and blank lines
+				while (line[0] == '#' || strlen(line) < 2)
+					fgets(line, 200, fpi);
+				sscanf(line, "%i %i", &width, &height);
+				fgets(line, 200, fpi);
+				//get pixel data
+				int n = width * height * 3;
+				data = new unsigned char[n];
+				for (int i=0; i<n; i++)
+					data[i] = fgetc(fpi);
+				fclose(fpi);
+			} else {
+				printf("ERROR opening image: %s\n",ppmname);
+				exit(0);
+			}
+			if (!ppmFlag)
+				unlink(ppmname);
+		}
 };
 // add png files name and create array based on # of pngs
 //Image img("./images/bigfoot.png");
 Image img[5] = {
-"./images/bigfoot.png",	
-"./images/luis_3350.png",
-"./images/IMG_Adolfo_Valencia.png",
-"./images/chris_ramirez.png",
-"./images/josephG.png"
+	"./images/bigfoot.png",	
+	"./images/luis_3350.png",
+	"./images/IMG_Adolfo_Valencia.png",
+	"./images/chris_ramirez.png",
+	"./images/josephG.png"
 };
 
 class Global {
-public:
-	int xres, yres;
-	char keys[65536];
-	GLuint bigfootTexture;
-	GLuint luisTexture;
-	GLuint AdolfoTexture;
-	GLuint chrisTexture;
-        GLuint josephTexture;
-    // declare GLuint textid for each png
-	Global() {
-		xres = 1250;
-		yres = 900;
-		memset(keys, 0, 65536);
-	}
+	public:
+		int xres, yres;
+		char keys[65536];
+		GLuint bigfootTexture;
+		GLuint luisTexture;
+		GLuint AdolfoTexture;
+		GLuint chrisTexture;
+		GLuint josephTexture;
+		// declare GLuint textid for each png
+		Global() {
+			xres = 1250;
+			yres = 900;
+			memset(keys, 0, 65536);
+		}
 } gl;
 
 class Ship {
-public:
-	Vec dir;
-	Vec pos;
-	Vec vel;
-	float angle;
-	float color[3];
-public:
-	Ship() {
-		VecZero(dir);
-		pos[0] = (Flt)(gl.xres/2);
-		pos[1] = (Flt)(gl.yres/2);
-		pos[2] = 0.0f;
-		VecZero(vel);
-		angle = 0.0;
-		color[0] = color[1] = color[2] = 1.0;
-	}
+	public:
+		Vec dir;
+		Vec pos;
+		Vec vel;
+		float angle;
+		float color[3];
+	public:
+		Ship() {
+			VecZero(dir);
+			pos[0] = (Flt)(gl.xres/2);
+			pos[1] = (Flt)(gl.yres/2);
+			pos[2] = 0.0f;
+			VecZero(vel);
+			angle = 0.0;
+			color[0] = color[1] = color[2] = 1.0;
+		}
 };
 
 class Enemies {
-public:
-    Vec dir;
-    Vec pos;
-    Vec vel;
-    float angle;
-    float color[3];
-    Flt radius;
-    float rotate;
-    struct Enemy *prev;
-    struct Enemy *next;
-public:
-    Enemies() {
-        pos[0] = (Flt)(gl.xres/2);
-        pos[1] = (Flt)(gl.yres/2);
-        pos[2] = 0.0f;
-        VecZero(vel);
-        angle = 0.0;
-        color[0] = color[1] = color[2] - 1.0;
-        prev = NULL;
-        next = NULL;
-    }
+	public:
+		Vec dir;
+		Vec pos;
+		Vec vel;
+		Vec vert[8];
+		int nverts;	
+		float angle;
+		float color[3];
+		Flt radius;
+		float rotate;
+		struct Enemies *prev;
+		struct Enemies *next;
+	public:
+		Enemies() {
+			pos[0] = (Flt)(gl.xres/2);
+			pos[1] = (Flt)(gl.yres/2);
+			pos[2] = 0.0f;
+			VecZero(vel);
+			angle = 0.0;
+			color[0] = color[1] = color[2] - 1.0;
+			prev = NULL;
+			next = NULL;
+		}
 };
 class Bullet {
-public:
-	Vec pos;
-	Vec vel;
-	float color[3];
-	struct timespec time;
-public:
-	Bullet() { }
+	public:
+		Vec pos;
+		Vec vel;
+		float color[3];
+		struct timespec time;
+	public:
+		Bullet() { }
 };
 
 class Asteroid {
-public:
-	Vec pos;
-	Vec vel;
-	int nverts;
-	Flt radius;
-	Vec vert[8];
-	float angle;
-	float rotate;
-	float color[3];
-	struct Asteroid *prev;
-	struct Asteroid *next;
-public:
-	Asteroid() {
-		prev = NULL;
-		next = NULL;
-	}
+	public:
+		Vec pos;
+		Vec vel;
+		int nverts;
+		Flt radius;
+		Vec vert[8];
+		float angle;
+		float rotate;
+		float color[3];
+		struct Asteroid *prev;
+		struct Asteroid *next;
+	public:
+		Asteroid() {
+			prev = NULL;
+			next = NULL;
+		}
 };
 
 class Game {
-public:
-	Ship ship;
-	Asteroid *ahead;
-	Bullet *barr;
-	int nasteroids;
-	int nbullets;
-	struct timespec bulletTimer;
-	struct timespec mouseThrustTimer;
-	bool mouseThrustOn;
-	bool show_credits;
-	float mtext;
-public:
-	Game() {
-		show_credits = false;
-		ahead = NULL;
-		barr = new Bullet[MAX_BULLETS];
-		nasteroids = 0;
-		nbullets = 0;
-		mouseThrustOn = false;
-		mtext = 0;
-		//build 10 asteroids...
-		for (int j=0; j<10; j++) {
-			Asteroid *a = new Asteroid;
-			a->nverts = 8;
-			a->radius = rnd()*80.0 + 40.0;
-			Flt r2 = a->radius / 2.0;
-			Flt angle = 0.0f;
-			Flt inc = (PI * 2.0) / (Flt)a->nverts;
-			for (int i=0; i<a->nverts; i++) {
-				a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
-				a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
-				angle += inc;
+	public:
+		Ship ship;
+		Asteroid *ahead;
+		Bullet *barr;
+		Enemies *a;
+		int nasteroids;
+		int nbullets;
+		int nenemies;
+		struct timespec bulletTimer;
+		struct timespec mouseThrustTimer;
+		bool mouseThrustOn;
+		bool show_credits;
+		float mtext;
+	public:
+		Game() {
+			show_credits = false;
+			ahead = NULL;
+			barr = new Bullet[MAX_BULLETS];
+			nasteroids = 0;
+			nbullets = 0;
+			nenemies = 0;
+			mouseThrustOn = false;
+			mtext = 0;
+			//build 10 asteroids...
+			for (int j=0; j<10; j++) {
+				Asteroid *a = new Asteroid;
+				a->nverts = 8;
+				a->radius = rnd()*80.0 + 40.0;
+				Flt r2 = a->radius / 2.0;
+				Flt angle = 0.0f;
+				Flt inc = (PI * 2.0) / (Flt)a->nverts;
+				for (int i=0; i<a->nverts; i++) {
+					a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
+					a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
+					angle += inc;
+				}
+				a->pos[0] = (Flt)(rand() % gl.xres);
+				a->pos[1] = (Flt)(rand() % gl.yres);
+				a->pos[2] = 0.0f;
+				a->angle = 0.0;
+				a->rotate = rnd() * 4.0 - 2.0;
+				a->color[0] = 0.8;
+				a->color[1] = 0.8;
+				a->color[2] = 0.7;
+				a->vel[0] = (Flt)(rnd()*2.0-1.0);
+				a->vel[1] = (Flt)(rnd()*2.0-1.0);
+				//std::cout << "asteroid" << std::endl;
+				//add to front of linked list
+				a->next = ahead;
+				if (ahead != NULL)
+					ahead->prev = a;
+				ahead = a;
+				++nasteroids;
 			}
-			a->pos[0] = (Flt)(rand() % gl.xres);
-			a->pos[1] = (Flt)(rand() % gl.yres);
-			a->pos[2] = 0.0f;
-			a->angle = 0.0;
-			a->rotate = rnd() * 4.0 - 2.0;
-			a->color[0] = 0.8;
-			a->color[1] = 0.8;
-			a->color[2] = 0.7;
-			a->vel[0] = (Flt)(rnd()*2.0-1.0);
-			a->vel[1] = (Flt)(rnd()*2.0-1.0);
-			//std::cout << "asteroid" << std::endl;
-			//add to front of linked list
-			a->next = ahead;
-			if (ahead != NULL)
-				ahead->prev = a;
-			ahead = a;
-			++nasteroids;
+			clock_gettime(CLOCK_REALTIME, &bulletTimer);
 		}
-		clock_gettime(CLOCK_REALTIME, &bulletTimer);
-	}
-	~Game() {
-		delete [] barr;
-	}
+		~Game() {
+			delete [] barr;
+		}
 } g;
 
 //X Windows variables
 class X11_wrapper {
-private:
-	Display *dpy;
-	Window win;
-	GLXContext glc;
-public:
-	X11_wrapper() { }
-	X11_wrapper(int w, int h) {
-		GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
-		//GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, None };
-		XSetWindowAttributes swa;
-		setup_screen_res(gl.xres, gl.yres);
-		dpy = XOpenDisplay(NULL);
-		if (dpy == NULL) {
-			std::cout << "\n\tcannot connect to X server" << std::endl;
-			exit(EXIT_FAILURE);
+	private:
+		Display *dpy;
+		Window win;
+		GLXContext glc;
+	public:
+		X11_wrapper() { }
+		X11_wrapper(int w, int h) {
+			GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
+			//GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, None };
+			XSetWindowAttributes swa;
+			setup_screen_res(gl.xres, gl.yres);
+			dpy = XOpenDisplay(NULL);
+			if (dpy == NULL) {
+				std::cout << "\n\tcannot connect to X server" << std::endl;
+				exit(EXIT_FAILURE);
+			}
+			Window root = DefaultRootWindow(dpy);
+			XWindowAttributes getWinAttr;
+			XGetWindowAttributes(dpy, root, &getWinAttr);
+			int fullscreen=0;
+			gl.xres = w;
+			gl.yres = h;
+			if (!w && !h) {
+				//Go to fullscreen.
+				gl.xres = getWinAttr.width;
+				gl.yres = getWinAttr.height;
+				//When window is fullscreen, there is no client window
+				//so keystrokes are linked to the root window.
+				XGrabKeyboard(dpy, root, False,
+						GrabModeAsync, GrabModeAsync, CurrentTime);
+				fullscreen=1;
+			}
+			XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
+			if (vi == NULL) {
+				std::cout << "\n\tno appropriate visual found\n" << std::endl;
+				exit(EXIT_FAILURE);
+			} 
+			Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
+			swa.colormap = cmap;
+			swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
+				PointerMotionMask | MotionNotify | ButtonPress | ButtonRelease |
+				StructureNotifyMask | SubstructureNotifyMask;
+			unsigned int winops = CWBorderPixel|CWColormap|CWEventMask;
+			if (fullscreen) {
+				winops |= CWOverrideRedirect;
+				swa.override_redirect = True;
+			}
+			win = XCreateWindow(dpy, root, 0, 0, gl.xres, gl.yres, 0,
+					vi->depth, InputOutput, vi->visual, winops, &swa);
+			//win = XCreateWindow(dpy, root, 0, 0, gl.xres, gl.yres, 0,
+			//vi->depth, InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
+			set_title();
+			glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
+			glXMakeCurrent(dpy, win, glc);
+			show_mouse_cursor(0);
 		}
-		Window root = DefaultRootWindow(dpy);
-		XWindowAttributes getWinAttr;
-		XGetWindowAttributes(dpy, root, &getWinAttr);
-		int fullscreen=0;
-		gl.xres = w;
-		gl.yres = h;
-		if (!w && !h) {
-			//Go to fullscreen.
-			gl.xres = getWinAttr.width;
-			gl.yres = getWinAttr.height;
-			//When window is fullscreen, there is no client window
-			//so keystrokes are linked to the root window.
-			XGrabKeyboard(dpy, root, False,
-				GrabModeAsync, GrabModeAsync, CurrentTime);
-			fullscreen=1;
+		~X11_wrapper() {
+			XDestroyWindow(dpy, win);
+			XCloseDisplay(dpy);
 		}
-		XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
-		if (vi == NULL) {
-			std::cout << "\n\tno appropriate visual found\n" << std::endl;
-			exit(EXIT_FAILURE);
-		} 
-		Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
-		swa.colormap = cmap;
-		swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
-			PointerMotionMask | MotionNotify | ButtonPress | ButtonRelease |
-			StructureNotifyMask | SubstructureNotifyMask;
-		unsigned int winops = CWBorderPixel|CWColormap|CWEventMask;
-		if (fullscreen) {
-			winops |= CWOverrideRedirect;
-			swa.override_redirect = True;
+		void set_title() {
+			//Set the window title bar.
+			XMapWindow(dpy, win);
+			XStoreName(dpy, win, "Asteroids template");
 		}
-		win = XCreateWindow(dpy, root, 0, 0, gl.xres, gl.yres, 0,
-			vi->depth, InputOutput, vi->visual, winops, &swa);
-		//win = XCreateWindow(dpy, root, 0, 0, gl.xres, gl.yres, 0,
-		//vi->depth, InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
-		set_title();
-		glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
-		glXMakeCurrent(dpy, win, glc);
-		show_mouse_cursor(0);
-	}
-	~X11_wrapper() {
-		XDestroyWindow(dpy, win);
-		XCloseDisplay(dpy);
-	}
-	void set_title() {
-		//Set the window title bar.
-		XMapWindow(dpy, win);
-		XStoreName(dpy, win, "Asteroids template");
-	}
-	void check_resize(XEvent *e) {
-		//The ConfigureNotify is sent by the
-		//server if the window is resized.
-		if (e->type != ConfigureNotify)
-			return;
-		XConfigureEvent xce = e->xconfigure;
-		if (xce.width != gl.xres || xce.height != gl.yres) {
-			//Window size did change.
-			reshape_window(xce.width, xce.height);
+		void check_resize(XEvent *e) {
+			//The ConfigureNotify is sent by the
+			//server if the window is resized.
+			if (e->type != ConfigureNotify)
+				return;
+			XConfigureEvent xce = e->xconfigure;
+			if (xce.width != gl.xres || xce.height != gl.yres) {
+				//Window size did change.
+				reshape_window(xce.width, xce.height);
+			}
 		}
-	}
-	void reshape_window(int width, int height) {
-		//window has been resized.
-		setup_screen_res(width, height);
-		glViewport(0, 0, (GLint)width, (GLint)height);
-		glMatrixMode(GL_PROJECTION); glLoadIdentity();
-		glMatrixMode(GL_MODELVIEW); glLoadIdentity();
-		glOrtho(0, gl.xres, 0, gl.yres, -1, 1);
-		set_title();
-	}
+		void reshape_window(int width, int height) {
+			//window has been resized.
+			setup_screen_res(width, height);
+			glViewport(0, 0, (GLint)width, (GLint)height);
+			glMatrixMode(GL_PROJECTION); glLoadIdentity();
+			glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+			glOrtho(0, gl.xres, 0, gl.yres, -1, 1);
+			set_title();
+		}
 
-	void setup_screen_res(const int w, const int h) {
-		gl.xres = w;
-		gl.yres = h;
-	}
-	void swapBuffers() {
-		glXSwapBuffers(dpy, win);
-	}
-	bool getXPending() {
-		return XPending(dpy);
-	}
-	XEvent getXNextEvent() {
-		XEvent e;
-		XNextEvent(dpy, &e);
-		return e;
-	}
-	void set_mouse_position(int x, int y) {
-		XWarpPointer(dpy, None, win, 0, 0, 0, 0, x, y);
-	}
-	void show_mouse_cursor(const int onoff) {
-		if (onoff) {
-			//this removes our own blank cursor.
-			XUndefineCursor(dpy, win);
-			return;
+		void setup_screen_res(const int w, const int h) {
+			gl.xres = w;
+			gl.yres = h;
 		}
-		//vars to make blank cursor
-		Pixmap blank;
-		XColor dummy;
-		char data[1] = {0};
-		Cursor cursor;
-		//make a blank cursor
-		blank = XCreateBitmapFromData (dpy, win, data, 1, 1);
-		if (blank == None)
-			std::cout << "error: out of memory." << std::endl;
-		cursor = XCreatePixmapCursor(dpy, blank, blank, &dummy, &dummy, 0, 0);
-		XFreePixmap(dpy, blank);
-		//this makes you the cursor. then set it using this function
-		XDefineCursor(dpy, win, cursor);
-		//after you do not need the cursor anymore use this function.
-		//it will undo the last change done by XDefineCursor
-		//(thus do only use ONCE XDefineCursor and then XUndefineCursor):
-	}
+		void swapBuffers() {
+			glXSwapBuffers(dpy, win);
+		}
+		bool getXPending() {
+			return XPending(dpy);
+		}
+		XEvent getXNextEvent() {
+			XEvent e;
+			XNextEvent(dpy, &e);
+			return e;
+		}
+		void set_mouse_position(int x, int y) {
+			XWarpPointer(dpy, None, win, 0, 0, 0, 0, x, y);
+		}
+		void show_mouse_cursor(const int onoff) {
+			if (onoff) {
+				//this removes our own blank cursor.
+				XUndefineCursor(dpy, win);
+				return;
+			}
+			//vars to make blank cursor
+			Pixmap blank;
+			XColor dummy;
+			char data[1] = {0};
+			Cursor cursor;
+			//make a blank cursor
+			blank = XCreateBitmapFromData (dpy, win, data, 1, 1);
+			if (blank == None)
+				std::cout << "error: out of memory." << std::endl;
+			cursor = XCreatePixmapCursor(dpy, blank, blank, &dummy, &dummy, 0, 0);
+			XFreePixmap(dpy, blank);
+			//this makes you the cursor. then set it using this function
+			XDefineCursor(dpy, win, cursor);
+			//after you do not need the cursor anymore use this function.
+			//it will undo the last change done by XDefineCursor
+			//(thus do only use ONCE XDefineCursor and then XUndefineCursor):
+		}
 } x11(0, 0);
 
 //function prototypes
@@ -403,6 +418,74 @@ int check_keys(XEvent *e);
 void physics();
 void render();
 
+#ifdef USE_OPENAL_SOUND
+class OPENAL_SOUND_ENGINE {
+	public: 
+		float vec[6] = {0.0f,0.0f,1.0f, 0.0f,1.0f,0.0f};
+		ALuint alBuffer[1];
+		ALuint alSource[1];
+	public: 
+		OPENAL_SOUND_ENGINE() {
+			alutInit(0, NULL);
+			if(alGetError() != AL_NO_ERROR) {
+				printf("ERROR: alutInit()\n");
+				exit(EXIT_FAILURE);//0;
+			}
+			//Clear error state.
+			alGetError();
+			//
+			//Setup Listener
+			//Forward and Upward vectors are used
+			float vec[6] = {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f};
+			alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
+			alListenerfv(AL_ORIENTATION, vec);
+			alListenerf(AL_GAIN, 1.0f);
+			//
+			//Setup Buffer: holds the sound information
+			alBuffer[0] = alutCreateBufferFromFile("./bullet_fire.wav");;
+			//Generate a source, store it in a buffer
+			alGenSources(1, alSource);
+			alSourcei(alSource[0], AL_BUFFER, alBuffer[0]);
+			//Set Volume and Pitch to normal
+			//No Looping of Sound
+			alSourcef(alSource[0], AL_GAIN, 0.1f);
+			alSourcef(alSource[0], AL_PITCH, 1.0f);
+			alSourcei(alSource[0], AL_LOOPING, AL_FALSE);
+			if (alGetError() != AL_NO_ERROR) {
+				printf("ERROR: setting source\n");
+				exit(EXIT_FAILURE);//0;
+			}
+		}
+		~OPENAL_SOUND_ENGINE() {
+			//Cleanup
+			//1st delete Sources
+			alDeleteSources(1, &alSource[0]);
+			//2nd delete Buffers
+			alDeleteBuffers(1, &alBuffer[0]);
+			//Close out OpenAL itself
+			//Get active Context
+			ALCcontext *Context = alcGetCurrentContext();
+			//Get Device for active Context
+			ALCdevice *Device = alcGetContextsDevice(Context);
+			//Disable Context
+			alcMakeContextCurrent(NULL);
+			//Release Context(s)
+			alcDestroyContext(Context);
+			//Close Device
+			alcCloseDevice(Device);
+		}
+} audiothing;
+#endif
+
+//OPENAL function prototypes
+//START OVER -Chris to Chris
+/*void setUpOPENAL();
+  void setUpListener();
+  void setUpBuffer();
+  void setUpSource();
+//void pewPew();
+void audioCleanup();
+*/
 //==========================================================================
 // M A I N
 //==========================================================================
@@ -414,6 +497,12 @@ int main()
 	clock_gettime(CLOCK_REALTIME, &timePause);
 	clock_gettime(CLOCK_REALTIME, &timeStart);
 	x11.set_mouse_position(100,100);
+	//Init OPENAL
+	/*
+	   setUpOPENAL();
+	   setUpListener();
+	//setUpBuffer();
+	*/
 	int done=0;
 	while (!done) {
 		while (x11.getXPending()) {
@@ -437,6 +526,8 @@ int main()
 	}
 	cleanup_fonts();
 	logClose();
+	//OPENAL Cleanup
+	//audioCleanup();
 	return 0;
 }
 
@@ -460,7 +551,7 @@ void init_opengl(void)
 	//Do this to allow fonts
 	glEnable(GL_TEXTURE_2D);
 	initialize_fonts();
-	
+
 	glGenTextures(1, &gl.bigfootTexture);
 	// Generate texture for each texture id
 	int w = img[0].width;
@@ -468,12 +559,12 @@ void init_opengl(void)
 
 	// Bind texture for each texture id
 	glBindTexture(GL_TEXTURE_2D, gl.bigfootTexture);
-        //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-                 GL_RGB, GL_UNSIGNED_BYTE, img[0].data);
-				
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+			GL_RGB, GL_UNSIGNED_BYTE, img[0].data);
+
 	glGenTextures(1, &gl.luisTexture);
 	// Generate texture for each texture id
 	w = img[1].width;
@@ -481,40 +572,40 @@ void init_opengl(void)
 
 	// Bind texture for each texture id
 	glBindTexture(GL_TEXTURE_2D, gl.luisTexture);
-        //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-		         GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
-	
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+			GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
+
 	glGenTextures(1, &gl.AdolfoTexture);                                              
-        
+
 	w=img[2].width;                                                                   
-    h=img[2].height;                                                                  
-                                                                                          
-    glBindTexture (GL_TEXTURE_2D, gl.AdolfoTexture);                                  
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);              
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);              
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,                                    
-                 GL_RGB, GL_UNSIGNED_BYTE, img[2].data);	
+	h=img[2].height;                                                                  
 
-    glGenTextures(1, &gl.chrisTexture);
-    w = img[3].width;
-    h = img[3].width;
-    glBindTexture(GL_TEXTURE_2D, gl.chrisTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-                 GL_RGB, GL_UNSIGNED_BYTE, img[3].data);
+	glBindTexture (GL_TEXTURE_2D, gl.AdolfoTexture);                                  
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);              
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);              
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,                                    
+			GL_RGB, GL_UNSIGNED_BYTE, img[2].data);	
 
-    glGenTextures(1, &gl.josephTexture);
-    w = img[4].width;
-    h = img[4].width;
-    glBindTexture(GL_TEXTURE_2D, gl.josephTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-                 GL_RGB, GL_UNSIGNED_BYTE, img[4].data);
+	glGenTextures(1, &gl.chrisTexture);
+	w = img[3].width;
+	h = img[3].width;
+	glBindTexture(GL_TEXTURE_2D, gl.chrisTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+			GL_RGB, GL_UNSIGNED_BYTE, img[3].data);
+
+	glGenTextures(1, &gl.josephTexture);
+	w = img[4].width;
+	h = img[4].width;
+	glBindTexture(GL_TEXTURE_2D, gl.josephTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+			GL_RGB, GL_UNSIGNED_BYTE, img[4].data);
 
 }
 
@@ -573,6 +664,13 @@ void check_mouse(XEvent *e)
 					b->color[1] = 1.0f;
 					b->color[2] = 1.0f;
 					++g.nbullets;
+					//play pewPew() soundFX
+#ifdef USE_OPEN_SOUND
+					//pewPew();
+					//alSourcePlay(audiothing.alSource[1]);
+					//setUpBuffer();
+#endif
+
 				}
 			}
 		}
@@ -611,7 +709,7 @@ void check_mouse(XEvent *e)
 			Flt ydir = sin(rad);
 			g.ship.vel[0] += xdir * (float)ydiff * 0.01f;
 			g.ship.vel[1] += ydir * (float)ydiff * 0.01f;
-            Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
+			Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
 					g.ship.vel[1]*g.ship.vel[1]);
 			if (speed > 10.0f) {
 				speed = 10.0f;
@@ -629,10 +727,11 @@ void check_mouse(XEvent *e)
 }
 
 void AdolfoValenciaPicture(int x, int y, GLuint textid);
-void andrewH(int x, int y, GLuint textid, float rad);
+void andrewH(int x, int y, GLuint textid, int move);
 void creditsLuis(int x, int y, GLuint textid);
 void showChrisRamirez(int x, int y, GLuint textid);
 void josephG(int x, int y, GLuint textid);
+void pathFinding(float* a, float* b, int x, int y);
 // add prototypes of all external functions
 
 int check_keys(XEvent *e)
@@ -667,10 +766,14 @@ int check_keys(XEvent *e)
 		case XK_s:
 			break;
 		case XK_Down:
-			break;
+			break; 
 		case XK_equal:
 			break;
 		case XK_minus:
+			for (int i=0; i<4; i++) {
+				alSourcePlay(audiothing.alSource[0]);
+				//usleep(250000);
+			}
 			break;
 	}
 	return 0;
@@ -728,7 +831,31 @@ void buildAsteroidFragment(Asteroid *ta, Asteroid *a)
 	ta->vel[1] = a->vel[1] + (rnd()*2.0-1.0);
 	//std::cout << "frag" << std::endl;
 }
-
+void buildEnemyFragment(Enemies *ta, Enemies *a)                            
+{                                                                                
+	//build ta from a                                                            
+	ta->nverts = 8;                                                              
+	ta->radius = a->radius / 2.0;                                                
+	Flt r2 = ta->radius / 2.0;                                                   
+	Flt angle = 0.0f;                                                            
+	Flt inc = (PI * 2.0) / (Flt)ta->nverts;                                      
+	for (int i=0; i<ta->nverts; i++) {                                           
+		ta->vert[i][0] = sin(angle) * (r2 + rnd() * ta->radius);                 
+		ta->vert[i][1] = cos(angle) * (r2 + rnd() * ta->radius);                 
+		angle += inc;                                                            
+	}                                                                            
+	ta->pos[0] = a->pos[0] + rnd()*10.0-5.0;                                     
+	ta->pos[1] = a->pos[1] + rnd()*10.0-5.0;                                     
+	ta->pos[2] = 0.0f;                                                           
+	ta->angle = 0.0;                                                             
+	ta->rotate = a->rotate + (rnd() * 4.0 - 2.0);                                
+	ta->color[0] = 0.8;                                                          
+	ta->color[1] = 0.8;                                                          
+	ta->color[2] = 0.7;                                                          
+	ta->vel[0] = a->vel[0] + (rnd()*2.0-1.0);                                    
+	ta->vel[1] = a->vel[1] + (rnd()*2.0-1.0);                                    
+	//std::cout << "frag" << std::endl;                                          
+}                         
 void physics()
 {
 	Flt d0,d1,dist;
@@ -761,7 +888,7 @@ void physics()
 		if (ts > 2.5) {
 			//time to delete the bullet.
 			memcpy(&g.barr[i], &g.barr[g.nbullets-1],
-				sizeof(Bullet));
+					sizeof(Bullet));
 			g.nbullets--;
 			//do not increment i.
 			continue;
@@ -786,10 +913,13 @@ void physics()
 	}
 	//
 	//Update asteroid positions
+	//pathFinding(&a->pos[0], &a->pos[2]
 	Asteroid *a = g.ahead;
 	while (a) {
 		a->pos[0] += a->vel[0];
-		a->pos[1] += a->vel[1];
+		a->pos[0] += a->vel[1];
+
+		pathFinding(&a->pos[0],&a->pos[1],g.ship.pos[0], g.ship.pos[1]);
 		//Check for collision with window edges
 		if (a->pos[0] < -100.0) {
 			a->pos[0] += (float)gl.xres+200;
@@ -948,6 +1078,7 @@ void render()
 		ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
 		ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
 		ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
+		ggprint8b(&r, 16, 0x00ffff00, "n enemies: %i", g.nenemies);
 		//-------------------------------------------------------------------------
 		//Draw the ship
 		glColor3fv(g.ship.color);
@@ -965,8 +1096,8 @@ void render()
 		glVertex2f(  0.0f, -6.0f);
 		glVertex2f(  0.0f, 20.0f);
 		glVertex2f( 12.0f, -10.0f);
-        //glVertex2f( 12.0f, -5.0f);
-        //glVertex2f( 30.0f, -5.0f);
+		//glVertex2f( 12.0f, -5.0f);
+		//glVertex2f( 30.0f, -5.0f);
 		glEnd();
 		glColor3f(1.0f, 0.0f, 0.0f);
 		glBegin(GL_POINTS);
@@ -1022,6 +1153,29 @@ void render()
 				a = a->next;
 			}
 		}
+		//----------------------------------------------------------------------
+		//draw the enemies
+		{
+			Enemies *a = g.a;
+			while (a) {
+				glColor3fv(a->color);
+				glPushMatrix();
+				glTranslatef(a->pos[0], a->pos[1], a->pos[2]);
+				glRotatef(a->angle, 0.0f, 0.0f, 1.0f);
+				glBegin(GL_LINE_LOOP);
+				for(int j=0; j<a->nverts; j++) {
+					glVertex2f(a->vert[j][0], a->vert[j][1]);
+				}
+				glEnd();
+				glPopMatrix();
+				glColor3f(0.0f, 1.0f, 0.0f);
+				glBegin(GL_POINTS);
+				glVertex2f(a->pos[0], a->pos[1]);
+				glEnd();
+				a = a->next;
+			}
+		}
+
 		//-------------------------------------------------------------------------
 		//Draw the bullets
 		for (int i=0; i<g.nbullets; i++) {
@@ -1041,18 +1195,16 @@ void render()
 			glVertex2f(b->pos[0]+1.0f, b->pos[1]+1.0f);
 			glEnd();
 		}
+		g.mtext = 0;
 	}
 
 	if (g.show_credits) {
-	    g.mtext -= .02;
-	    andrewH(.5*gl.xres, .9*gl.yres, gl.bigfootTexture,g.mtext);
-  	    creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
-	    AdolfoValenciaPicture(.5*gl.xres, .5*gl.yres, gl.AdolfoTexture);
-            showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
-	    josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
-        // function calls for everyone with parameters
+		andrewH(.5*gl.xres, .9*gl.yres, gl.bigfootTexture,g.mtext);
+		creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
+		AdolfoValenciaPicture(.5*gl.xres, .5*gl.yres, gl.AdolfoTexture);
+		showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
+		josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
+		g.mtext++;
+		// function calls for everyone with parameters
 	}
 }
-
-
-
