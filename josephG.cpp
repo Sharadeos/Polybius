@@ -30,3 +30,22 @@ void josephG(int x, int y, GLuint textid)
     glEnd();
     glPopMatrix();
 }
+//done during lab8 session
+//adds very basic pathfinding to asteroids/enemies
+void pathFinding(float* a,float* b,int x,int y) 
+{
+    int c = *a - x;
+    int z = *b - y;
+    if (c > 30 || z > 30) 
+    {
+        if (*a < x)
+            *a += (float)1;
+        if (*a > x)
+            *a -= (float)1;
+        if (*b < y)
+            *b += (float)1;
+        if (*b > y)
+            *b -= (float)1;
+    }
+
+}

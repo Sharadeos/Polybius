@@ -1,6 +1,12 @@
-# CMPS3350_Polybius
+Main Google Document:
 
-#Lines 113-115
-#lines 432-456
-#lines 574 add prototypes
-#line 984 function calls, dont use same coordinates!
+https://docs.google.com/document/d/1Pgl766NKwfj5RFielhsRwOVK6ev_fVXwoZ62HE9U__U/edit
+
+Members:
+
+Andrew (Joey) Hubbard | (Chris) Ramirez | (Adolfo) Valencia | Jose (Luis) Manahan | (Joseph) Gaede
+
+Changelog:
+
+2/22.19 Created Individual Branches
+2/27/19 Updated ReadMe
