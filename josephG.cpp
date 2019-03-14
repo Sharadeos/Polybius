@@ -30,6 +30,8 @@ void josephG(int x, int y, GLuint textid)
     glEnd();
     glPopMatrix();
 }
+//done during lab8 session
+//adds very basic pathfinding to asteroids/enemies
 void pathFinding(float* a,float* b,int x,int y) 
 {
     int c = *a - x;
