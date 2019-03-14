@@ -633,6 +633,7 @@ void andrewH(int x, int y, GLuint textid, int move);
 void creditsLuis(int x, int y, GLuint textid);
 void showChrisRamirez(int x, int y, GLuint textid);
 void josephG(int x, int y, GLuint textid);
+void pathFinding(float* a, float* b, int x, int y);
 // add prototypes of all external functions
 
 int check_keys(XEvent *e)
@@ -786,12 +787,15 @@ void physics()
 	}
 	//
 	//Update asteroid positions
-	Asteroid *a = g.ahead;
+	//pathFinding(&a->pos[0], &a->pos[2]
+    Asteroid *a = g.ahead;
 	while (a) {
-		a->pos[0] += a->vel[0];
-		a->pos[1] += a->vel[1];
+        a->pos[0] += a->vel[0];
+        a->pos[0] += a->vel[1];
+        
+        pathFinding(&a->pos[0],&a->pos[1],g.ship.pos[0], g.ship.pos[1]);
 		//Check for collision with window edges
-		if (a->pos[0] < -100.0) {
+        if (a->pos[0] < -100.0) {
 			a->pos[0] += (float)gl.xres+200;
 		}
 		else if (a->pos[0] > (float)gl.xres+100) {
@@ -1054,6 +1058,3 @@ void render()
         // function calls for everyone with parameters
 	}
 }
-
-
-
