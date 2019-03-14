@@ -193,7 +193,7 @@ public:
 	bool show_credits;
 public:
 	Game() {
-		bool show_credits = false;
+		show_credits = false;
 		ahead = NULL;
 		barr = new Bullet[MAX_BULLETS];
 		nasteroids = 0;

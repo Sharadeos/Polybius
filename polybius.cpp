@@ -154,6 +154,29 @@ public:
 	}
 };
 
+class Enemies {
+public:
+    Vec dir;
+    Vec pos;
+    Vec vel;
+    float angle;
+    float color[3];
+    Flt radius;
+    float rotate;
+    struct Enemy *prev;
+    struct Enemy *next;
+public:
+    Enemies() {
+        pos[0] = (Flt)(gl.xres/2);
+        pos[1] = (Flt)(gl.yres/2);
+        pos[2] = 0.0f;
+        VecZero(vel);
+        angle = 0.0;
+        color[0] = color[1] = color[2] - 1.0;
+        prev = NULL;
+        next = NULL;
+    }
+};
 class Bullet {
 public:
 	Vec pos;
@@ -606,7 +629,7 @@ void check_mouse(XEvent *e)
 }
 
 void AdolfoValenciaPicture(int x, int y, GLuint textid);
-void andrewH(int x, int y, GLuint textid, float i);
+void andrewH(int x, int y, GLuint textid, int move);
 void creditsLuis(int x, int y, GLuint textid);
 void showChrisRamirez(int x, int y, GLuint textid);
 void josephG(int x, int y, GLuint textid);
@@ -946,6 +969,8 @@ void render()
 		glVertex2f(  0.0f, -6.0f);
 		glVertex2f(  0.0f, 20.0f);
 		glVertex2f( 12.0f, -10.0f);
+        //glVertex2f( 12.0f, -5.0f);
+        //glVertex2f( 30.0f, -5.0f);
 		glEnd();
 		glColor3f(1.0f, 0.0f, 0.0f);
 		glBegin(GL_POINTS);
@@ -1020,15 +1045,16 @@ void render()
 			glVertex2f(b->pos[0]+1.0f, b->pos[1]+1.0f);
 			glEnd();
 		}
+	g.mtext = 0;
 	}
 
 	if (g.show_credits) {
-	    g.mtext -= .02;
 	    andrewH(.5*gl.xres, .9*gl.yres, gl.bigfootTexture,g.mtext);
   	    creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
 	    AdolfoValenciaPicture(.5*gl.xres, .5*gl.yres, gl.AdolfoTexture);
-        showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
+		showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
 	    josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
+		g.mtext++;
         // function calls for everyone with parameters
 	}
 }

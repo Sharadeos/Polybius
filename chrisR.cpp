@@ -2,7 +2,6 @@
 //Author:  Christopher Ramirez
 //Date:    2019
 #include <GL/glx.h>
-#include "log.h"
 #include "fonts.h"
 void showChrisRamirez(int x, int y, GLuint textid)
 {
@@ -15,7 +14,7 @@ void showChrisRamirez(int x, int y, GLuint textid)
 	
 	static int wid = 70;
 	glPushMatrix();
-	glTranslatef(x+30, y-90, 0);
+	glTranslatef(x+250, y, 0);
 	glBindTexture(GL_TEXTURE_2D, textid);
 	glEnable(GL_ALPHA_TEST);
     glColor3ub(255, 255, 255);
@@ -26,5 +25,4 @@ void showChrisRamirez(int x, int y, GLuint textid)
 	       glTexCoord2f(1.0f, 1.0f); glVertex2i( wid,-wid);
 	glEnd();
 	glPopMatrix();
-}
- 
+} 
