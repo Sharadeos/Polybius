@@ -4,7 +4,6 @@
 //
 #include <GL/glx.h>
 #include "fonts.h"
-   
 
 void josephG(int x, int y, GLuint textid) 
 {
@@ -30,22 +29,28 @@ void josephG(int x, int y, GLuint textid)
     glEnd();
     glPopMatrix();
 }
-//done during lab8 session
-//adds very basic pathfinding to asteroids/enemies
+//progress done in lab8 session
+//very very basic pathfinding for asteroids/enemies
 void pathFinding(float* a,float* b,int x,int y) 
 {
     int c = *a - x;
     int z = *b - y;
-    if (c > 30 || z > 30) 
-    {
-        if (*a < x)
-            *a += (float)1;
-        if (*a > x)
-            *a -= (float)1;
-        if (*b < y)
-            *b += (float)1;
-        if (*b > y)
-            *b -= (float)1;
+    if (c <= 300 || z <= 300) {
+            if (*a <= x) 
+                *a += (float)1;            
+            if (*a >= x) 
+                *a -= (float)1;            
+            if (*b <= y) 
+                *b += (float)1;            
+            if (*b >= y) 
+                *b -= (float)1;             
+            if (c == 0 && z >= y)
+                *b -= (float)1;            
+            if (c == 0 && z <= y)
+                *b += (float)1;            
+            if (z == 0 && c >= x)
+                *a -= (float)1;            
+            if (z == 0 && c <= x)
+                *a += (float)1;            
+        }
     }
-
-}
