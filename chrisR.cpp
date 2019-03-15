@@ -37,7 +37,8 @@ void showChrisRamirez(int x, int y, GLuint textid)
 	glEnd();
 	glPopMatrix();
 }
-
+//Organized OPENAL_SOUND_ENGINE class Lab-8
+//      -Need to format indentation
 #ifdef USE_OPENAL_SOUND
 class OPENAL_SOUND_ENGINE {
 public:

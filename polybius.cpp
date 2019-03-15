@@ -429,12 +429,6 @@ int main()
 	clock_gettime(CLOCK_REALTIME, &timePause);
 	clock_gettime(CLOCK_REALTIME, &timeStart);
 	x11.set_mouse_position(100,100);
-	//Init OPENAL
-	/*
-	setUpOPENAL();
-	setUpListener();
-	//setUpBuffer();
-	*/
 	int done=0;
 	while (!done) {
 		while (x11.getXPending()) {
@@ -458,8 +452,6 @@ int main()
 	}
 	cleanup_fonts();
 	logClose();
-	//OPENAL Cleanup
-	//audioCleanup();
 	return 0;
 }
 
@@ -597,11 +589,11 @@ void check_mouse(XEvent *e)
 					b->color[2] = 1.0f;
 					++g.nbullets;
 					//play pewPew() soundFX
-#ifdef USE_OPEN_SOUND
+                    #ifdef USE_OPEN_SOUND
 					//pewPew();
 					//alSourcePlay(audiothing.alSource[1]);
 					//setUpBuffer();
-#endif
+                    #endif
 
 				}
 			}
@@ -961,7 +953,8 @@ void physics()
 				b->color[1] = 1.0f;
 				b->color[2] = 1.0f;
 				g.nbullets++;
-				pewPew();
+				//Play ship firing sound
+                pewPew();
 			}
 		}
 	}
