@@ -37,3 +37,9 @@ int difficulty()
 	
 	return 0;
 }
+
+void deleteAsteroids()
+{
+	
+	
+}
