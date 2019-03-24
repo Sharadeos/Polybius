@@ -31,26 +31,122 @@ void josephG(int x, int y, GLuint textid)
 }
 //progress done in lab8 session
 //very very basic pathfinding for asteroids/enemies
-void pathFinding(float* a,float* b,int x,int y) 
+void fighterPF(float* a,float* b,int x,int y) 
 {
     int c = *a - x;
     int z = *b - y;
     if (c <= 300 || z <= 300) {
-            if (*a <= x) 
+        if (*a <= x) 
                 *a += (float)1;            
-            if (*a >= x) 
-                *a -= (float)1;            
-            if (*b <= y) 
-                *b += (float)1;            
-            if (*b >= y) 
-                *b -= (float)1;             
-            if (c == 0 && z >= y)
-                *b -= (float)1;            
-            if (c == 0 && z <= y)
-                *b += (float)1;            
-            if (z == 0 && c >= x)
-                *a -= (float)1;            
-            if (z == 0 && c <= x)
-                *a += (float)1;            
-        }
+        if (*a >= x) 
+            *a -= (float)1;            
+        if (*b <= y) 
+            *b += (float)1;            
+        if (*b >= y) 
+            *b -= (float)1;             
+        if (c == 0 && z >= y)
+            *b -= (float)1;            
+        if (c == 0 && z <= y)
+            *b += (float)1;            
+        if (z == 0 && c >= x)
+            *a -= (float)1;            
+        if (z == 0 && c <= x)
+            *a += (float)1;   
+        if (c == 70) 
+            *a -= 0;
+        if (z == 70)
+            *b -= 0;
     }
+}
+void squadronPF(float* a,float* b,int x,int y)
+{
+    int c = *a - x;
+    int z = *b - y;
+    if (c <= 300 || z <= 300) {
+        if (*a <= x)
+            *a += (float)1;
+        if (*a >= x)
+            *a -= (float)1;
+        if (*b <= y)
+            *b += (float)1;
+        if (*b >= y)
+            *b -= (float)1;
+        if (c == 0 && z >= y)
+            *b -= (float)1;
+        if (c == 0 && z <= y)
+            *b += (float)1;
+        if (z == 0 && c >= x)
+            *a -= (float)1;
+        if (z == 0 && c <= x)
+            *a += (float)1;
+        if (c == 70) 
+            *a -= 0;
+        if (z == 70)              
+            *b -= 0;                                                                                                     
+    }
+}
+void frigatePF(float* a, float* b,int x)
+{
+    int c = *a - x;
+    int missiles = 6;
+    *b += 0;
+    if (c <= 400) 
+        *a -= (float)1;
+    if (c>= 400)
+        *a += (float)1;
+}
+//spawned by firgate
+void missilePF(float* a,float* b, int x, int y)
+{
+    int c = *a - x;
+    int z = *b - y;
+    if (c <= 300 || z <= 300) {
+        if (*a <= x)
+            *a += (float)1;
+        if (*a >= x)
+            *a -= (float)1;
+        if (*b <= y)
+            *b += (float)1;
+        if (*b >= y)
+            *b -= (float)1;
+        if (c == 0 && z >= y)
+            *b -= (float)1;
+        if (c == 0 && z <= y)
+            *b += (float)1;
+        if (z == 0 && c >= x)
+            *a -= (float)1;
+        if (z == 0 && c <= x)
+            *a += (float)1;
+    }
+}
+void carrierPF(float* a,float* b,int x,int y)
+{
+    int c = *a - x;
+    int z = *b - y;
+    //number of docked ships
+    int SD = 4;
+    if (c <= 300 || z <= 300) {
+        if (*a <= x)
+            *a += (float)1;
+        if (*a >= x)
+            *a -= (float)1;
+        if (*b <= y)
+            *b += (float)1;
+        if (*b >= y)
+            *b -= (float)1;
+        if (c == 0 && z >= y)
+            *b -= (float)1;
+        if (c == 0 && z <= y)
+            *b += (float)1;
+        if (z == 0 && c >= x)
+            *a -= (float)1;
+        if (z == 0 && c <= x)
+            *a += (float)1;
+        if (c <= 120)
+            *a -= 0;
+        if (z <= 120)
+            *b -= 0;
+    }
+}
+
+
