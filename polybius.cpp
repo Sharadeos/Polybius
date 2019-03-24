@@ -65,6 +65,10 @@ extern double timeSpan;
 extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
+
+void difficulty();
+void createAsteroid();
+
 class Image {
 public:
         int width, height;
@@ -228,6 +232,8 @@ public:
 	bool mouseThrustOn;
 	bool show_credits;
 	float mtext;
+	int asteroidCount;
+
 public:
 	Game() {
 		show_credits = false;
@@ -237,36 +243,12 @@ public:
 		nbullets = 0;
 		mouseThrustOn = false;
 		mtext = 0;
-		//build 10 asteroids...
-		for (int j=0; j<10; j++) {
-			Asteroid *a = new Asteroid;
-			a->nverts = 8;
-			a->radius = rnd()*80.0 + 40.0;
-			Flt r2 = a->radius / 2.0;
-			Flt angle = 0.0f;
-			Flt inc = (PI * 2.0) / (Flt)a->nverts;
-			for (int i=0; i<a->nverts; i++) {
-				a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
-				a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
-				angle += inc;
-			}
-			a->pos[0] = (Flt)(rand() % gl.xres);
-			a->pos[1] = (Flt)(rand() % gl.yres);
-			a->pos[2] = 0.0f;
-			a->angle = 0.0;
-			a->rotate = rnd() * 4.0 - 2.0;
-			a->color[0] = 0.8;
-			a->color[1] = 0.8;
-			a->color[2] = 0.7;
-			a->vel[0] = (Flt)(rnd()*2.0-1.0);
-			a->vel[1] = (Flt)(rnd()*2.0-1.0);
-			//std::cout << "asteroid" << std::endl;
-			//add to front of linked list
-			a->next = ahead;
-			if (ahead != NULL)
-				ahead->prev = a;
-			ahead = a;
-			++nasteroids;
+		asteroidCount = 1;
+		ahead = NULL;
+		//build x asteroids...
+		
+		for (int j=0; j<asteroidCount; j++) {
+			createAsteroid();
 		}
 		clock_gettime(CLOCK_REALTIME, &bulletTimer);
 	}
@@ -274,6 +256,40 @@ public:
 		delete [] barr;
 	}
 } g;
+
+void createAsteroid()
+{
+	Asteroid *a = new Asteroid;
+	a->nverts = 8;
+	a->radius = rnd()*80.0 + 40.0;
+	Flt r2 = a->radius / 2.0;
+	Flt angle = 0.0f;
+	Flt inc = (PI * 2.0) / (Flt)a->nverts;
+	for (int i=0; i<a->nverts; i++) {
+		a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
+		a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
+		angle += inc;
+	}
+	a->pos[0] = (Flt)(rand() % gl.xres);
+	a->pos[1] = (Flt)(rand() % gl.yres);
+	a->pos[2] = 0.0f;
+	a->angle = 0.0;
+	a->rotate = rnd() * 4.0 - 2.0;
+	a->color[0] = 0.8;
+	a->color[1] = 0.8;
+	a->color[2] = 0.7;
+	a->vel[0] = (Flt)(rnd()*2.0-1.0);
+	a->vel[1] = (Flt)(rnd()*2.0-1.0);
+	//std::cout << "asteroid" << std::endl;
+	//add to front of linked list
+	a->next = g.ahead;
+	if (g.ahead != NULL)
+		g.ahead->prev = a;
+	g.ahead = a;
+	++g.nasteroids;	
+	
+}
+
 
 //X Windows variables
 class X11_wrapper {
@@ -413,10 +429,80 @@ int check_keys(XEvent *e);
 void physics();
 void render();
 
+
 //OPENAL PlaySound Prototypes
 #ifdef USE_OPENAL_SOUND
 void pewPew();
 #endif
+
+#ifdef USE_OPENAL_SOUND
+class OPENAL_SOUND_ENGINE {
+public: 
+	float vec[6] = {0.0f,0.0f,1.0f, 0.0f,1.0f,0.0f};
+	ALuint alBuffer[1];
+	ALuint alSource[1];
+public: 
+	OPENAL_SOUND_ENGINE() {
+		alutInit(0, NULL);
+		if(alGetError() != AL_NO_ERROR) {
+			printf("ERROR: alutInit()\n");
+			exit(EXIT_FAILURE);//0;
+		}
+		//Clear error state.
+		alGetError();
+		//
+		//Setup Listener
+		//Forward and Upward vectors are used
+		float vec[6] = {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f};
+		alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
+		alListenerfv(AL_ORIENTATION, vec);
+		alListenerf(AL_GAIN, 1.0f);
+		//
+		//Setup Buffer: holds the sound information
+		alBuffer[0] = alutCreateBufferFromFile("./bullet_fire.wav");;
+		//Generate a source, store it in a buffer
+		alGenSources(1, alSource);
+		alSourcei(alSource[0], AL_BUFFER, alBuffer[0]);
+		//Set Volume and Pitch to normal
+		//No Looping of Sound
+		alSourcef(alSource[0], AL_GAIN, 0.1f);
+		alSourcef(alSource[0], AL_PITCH, 1.0f);
+		alSourcei(alSource[0], AL_LOOPING, AL_FALSE);
+		if (alGetError() != AL_NO_ERROR) {
+			printf("ERROR: setting source\n");
+			exit(EXIT_FAILURE);//0;
+		}
+	}
+	~OPENAL_SOUND_ENGINE() {
+		//Cleanup
+		//1st delete Sources
+		alDeleteSources(1, &alSource[0]);
+		//2nd delete Buffers
+		alDeleteBuffers(1, &alBuffer[0]);
+		//Close out OpenAL itself
+		//Get active Context
+		ALCcontext *Context = alcGetCurrentContext();
+		//Get Device for active Context
+		ALCdevice *Device = alcGetContextsDevice(Context);
+		//Disable Context
+		alcMakeContextCurrent(NULL);
+		//Release Context(s)
+		alcDestroyContext(Context);
+		//Close Device
+		alcCloseDevice(Device);
+	}
+} audiothing;
+#endif
+
+//OPENAL function prototypes
+//START OVER -Chris to Chris
+/*void setUpOPENAL();
+void setUpListener();
+void setUpBuffer();
+void setUpSource();
+//void pewPew();
+void audioCleanup();
+*/
 
 //==========================================================================
 // M A I N
@@ -429,6 +515,12 @@ int main()
 	clock_gettime(CLOCK_REALTIME, &timePause);
 	clock_gettime(CLOCK_REALTIME, &timeStart);
 	x11.set_mouse_position(100,100);
+	//Init OPENAL
+	/*
+	setUpOPENAL();
+	setUpListener();
+	//setUpBuffer();
+	*/
 	int done=0;
 	while (!done) {
 		while (x11.getXPending()) {
@@ -452,6 +544,8 @@ int main()
 	}
 	cleanup_fonts();
 	logClose();
+	//OPENAL Cleanup
+	//audioCleanup();
 	return 0;
 }
 
@@ -600,6 +694,7 @@ void check_mouse(XEvent *e)
 		}
 		if (e->xbutton.button==3) {
 			//Right button is down
+			createAsteroid();
 		}
 	}
 	//keys[XK_Up] = 0;
@@ -656,6 +751,7 @@ void creditsLuis(int x, int y, GLuint textid);
 void showChrisRamirez(int x, int y, GLuint textid);
 void josephG(int x, int y, GLuint textid);
 void pathFinding(float* a, float* b, int x, int y);
+
 // add prototypes of all external functions
 
 int check_keys(XEvent *e)
