@@ -21,6 +21,16 @@
 #include "log.h"
 #include "fonts.h"
 
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#ifdef USE_OPENAL_SOUND
+#include </usr/include/AL/alut.h>
+#endif 
+
 //defined types
 typedef float Flt;
 typedef float Vec[3];
@@ -55,6 +65,10 @@ extern double timeSpan;
 extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
+
+void difficulty();
+void createAsteroid();
+
 class Image {
 public:
         int width, height;
@@ -154,6 +168,29 @@ public:
 	}
 };
 
+class Enemies {
+public:
+    Vec dir;
+    Vec pos;
+    Vec vel;
+    float angle;
+    float color[3];
+    Flt radius;
+    float rotate;
+    struct Enemy *prev;
+    struct Enemy *next;
+public:
+    Enemies() {
+        pos[0] = (Flt)(gl.xres/2);
+        pos[1] = (Flt)(gl.yres/2);
+        pos[2] = 0.0f;
+        VecZero(vel);
+        angle = 0.0;
+        color[0] = color[1] = color[2] - 1.0;
+        prev = NULL;
+        next = NULL;
+    }
+};
 class Bullet {
 public:
 	Vec pos;
@@ -176,7 +213,7 @@ public:
 	float color[3];
 	struct Asteroid *prev;
 	struct Asteroid *next;
-    int shipClass = rand()%5;
+	int shipClass = rand()%5;
 public:
 	Asteroid() {
 		prev = NULL;
@@ -196,6 +233,8 @@ public:
 	bool mouseThrustOn;
 	bool show_credits;
 	float mtext;
+	int asteroidCount;
+
 public:
 	Game() {
 		show_credits = false;
@@ -205,36 +244,12 @@ public:
 		nbullets = 0;
 		mouseThrustOn = false;
 		mtext = 0;
-		//build 10 asteroids...
-		for (int j=0; j<10; j++) {
-			Asteroid *a = new Asteroid;
-			a->nverts = 8;
-			a->radius = rnd()*80.0 + 40.0;
-			Flt r2 = a->radius / 2.0;
-			Flt angle = 0.0f;
-			Flt inc = (PI * 2.0) / (Flt)a->nverts;
-			for (int i=0; i<a->nverts; i++) {
-				a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
-				a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
-				angle += inc;
-			}
-			a->pos[0] = (Flt)(rand() % gl.xres);
-			a->pos[1] = (Flt)(rand() % gl.yres);
-			a->pos[2] = 0.0f;
-			a->angle = 0.0;
-			a->rotate = rnd() * 4.0 - 2.0;
-			a->color[0] = 0.8;
-			a->color[1] = 0.8;
-			a->color[2] = 0.7;
-			a->vel[0] = (Flt)(rnd()*2.0-1.0);
-			a->vel[1] = (Flt)(rnd()*2.0-1.0);
-			//std::cout << "asteroid" << std::endl;
-			//add to front of linked list
-			a->next = ahead;
-			if (ahead != NULL)
-				ahead->prev = a;
-			ahead = a;
-			++nasteroids;
+		asteroidCount = 1;
+		ahead = NULL;
+		//build x asteroids...
+		
+		for (int j=0; j<asteroidCount; j++) {
+			createAsteroid();
 		}
 		clock_gettime(CLOCK_REALTIME, &bulletTimer);
 	}
@@ -242,6 +257,40 @@ public:
 		delete [] barr;
 	}
 } g;
+
+void createAsteroid()
+{
+	Asteroid *a = new Asteroid;
+	a->nverts = 8;
+	a->radius = rnd()*80.0 + 40.0;
+	Flt r2 = a->radius / 2.0;
+	Flt angle = 0.0f;
+	Flt inc = (PI * 2.0) / (Flt)a->nverts;
+	for (int i=0; i<a->nverts; i++) {
+		a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
+		a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
+		angle += inc;
+	}
+	a->pos[0] = (Flt)(rand() % gl.xres);
+	a->pos[1] = (Flt)(rand() % gl.yres);
+	a->pos[2] = 0.0f;
+	a->angle = 0.0;
+	a->rotate = rnd() * 4.0 - 2.0;
+	a->color[0] = 0.8;
+	a->color[1] = 0.8;
+	a->color[2] = 0.7;
+	a->vel[0] = (Flt)(rnd()*2.0-1.0);
+	a->vel[1] = (Flt)(rnd()*2.0-1.0);
+	//std::cout << "asteroid" << std::endl;
+	//add to front of linked list
+	a->next = g.ahead;
+	if (g.ahead != NULL)
+		g.ahead->prev = a;
+	g.ahead = a;
+	++g.nasteroids;	
+	
+}
+
 
 //X Windows variables
 class X11_wrapper {
@@ -381,6 +430,12 @@ int check_keys(XEvent *e);
 void physics();
 void render();
 
+
+//OPENAL PlaySound Prototypes
+#ifdef USE_OPENAL_SOUND
+void pewPew();
+#endif
+
 //==========================================================================
 // M A I N
 //==========================================================================
@@ -392,6 +447,12 @@ int main()
 	clock_gettime(CLOCK_REALTIME, &timePause);
 	clock_gettime(CLOCK_REALTIME, &timeStart);
 	x11.set_mouse_position(100,100);
+	//Init OPENAL
+	/*
+	setUpOPENAL();
+	setUpListener();
+	//setUpBuffer();
+	*/
 	int done=0;
 	while (!done) {
 		while (x11.getXPending()) {
@@ -415,6 +476,8 @@ int main()
 	}
 	cleanup_fonts();
 	logClose();
+	//OPENAL Cleanup
+	//audioCleanup();
 	return 0;
 }
 
@@ -551,11 +614,19 @@ void check_mouse(XEvent *e)
 					b->color[1] = 1.0f;
 					b->color[2] = 1.0f;
 					++g.nbullets;
+					//play pewPew() soundFX
+                    #ifdef USE_OPEN_SOUND
+					//pewPew();
+					//alSourcePlay(audiothing.alSource[1]);
+					//setUpBuffer();
+                    #endif
+
 				}
 			}
 		}
 		if (e->xbutton.button==3) {
 			//Right button is down
+			createAsteroid();
 		}
 	}
 	//keys[XK_Up] = 0;
@@ -607,13 +678,13 @@ void check_mouse(XEvent *e)
 }
 
 void AdolfoValenciaPicture(int x, int y, GLuint textid);
-void andrewH(int x, int y, GLuint textid, float i);
+void andrewH(int x, int y, GLuint textid, int move);
 void creditsLuis(int x, int y, GLuint textid);
 void showChrisRamirez(int x, int y, GLuint textid);
 void josephG(int x, int y, GLuint textid);
 void fighterPF(float* a, float* b, int x, int y);
-void frigatePF(float* a, float* b, int x);
 void squadronPF(float* a, float* b, int x, int y);
+void frigatePF(float* a, float* b, int x, int y);
 void missilePF(float* a, float* b, int x, int y);
 void carrierPF(float* a, float* b, int x, int y);
 // add prototypes of all external functions
@@ -654,6 +725,11 @@ int check_keys(XEvent *e)
 		case XK_equal:
 			break;
 		case XK_minus:
+			for (int i=0; i<4; i++) {
+				pewPew();
+                //alSourcePlay(audiothing.alSource[0]);
+				//usleep(250000);
+			}
 			break;
 	}
 	return 0;
@@ -774,26 +850,27 @@ void physics()
 	while (a) {
         a->pos[0] += a->vel[0];
         a->pos[0] += a->vel[1];
-        switch(a->shipClass) {
-            case 1:
-                fighterPF(&a->pos[0],&a->pos[1],g.ship.pos[0], g.ship.pos[1]);
-                break;
-            case 2:
-                frigatePF(&a->pos[0],&a->pos[1], g.ship.pos[0]);
-                break;
-            case 3:
-                squadronPF(&a->pos[0],&a->pos[1],g.ship.pos[0], g.ship.pos[1]);
-                break;
-            case 4:
-                missilePF(&a->pos[0],&a->pos[1],g.ship.pos[0], g.ship.pos[1]);
-                break;
-            case 5:
-		        carrierPF(&a->pos[0],&a->pos[1],g.ship.pos[0],g.ship.pos[1]);
-                break;
-            default:
-                break;
-        }
-                //Check for collision with window edges
+        
+	switch(a->shipClass) {
+	    case 1:
+		fighterPF(&a->pos[0],&a->pos[1],g.ship.pos[0],g.ship.pos[1]);
+		break;
+	    case 2:
+		frigatePF(&a->pos[0],&a->pos[1],g.ship.pos[0]);
+  	    	break;
+	    case 3:
+		squadronPF(&a->pos[0],&a->pos[1],g.ship.pos[0],g.ship.pos[1]);
+	    	break;
+	    case 4:
+		missilePF(&a->pos[0],&a->pos[1],g.ship.pos[0],g.ship.pos[1]);
+	    	break;
+	    case 5:
+		carrierPF(&a->pos[0],&a->pos[1],g.ship.pos[0],g.ship.pos[1]);
+	    	break;
+	    default:
+		break;
+	}
+		//Check for collision with window edges
         if (a->pos[0] < -100.0) {
 			a->pos[0] += (float)gl.xres+200;
 		}
@@ -806,7 +883,7 @@ void physics()
 		else if (a->pos[1] > (float)gl.yres+100) {
 			a->pos[1] -= (float)gl.yres+200;
 		}
-		//a->angle += a->rotate;
+		a->angle += a->rotate;
 		a = a->next;
 	}
 	//
@@ -881,7 +958,7 @@ void physics()
 	if (gl.keys[XK_Up]) {
 		//apply thrust
 		//convert ship angle to radians
-        Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
+		Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
 		//convert angle to a vector
 		Flt xdir = cos(rad);
 		Flt ydir = sin(rad);
@@ -925,6 +1002,8 @@ void physics()
 				b->color[1] = 1.0f;
 				b->color[2] = 1.0f;
 				g.nbullets++;
+				//Play ship firing sound
+                pewPew();
 			}
 		}
 	}
@@ -968,6 +1047,8 @@ void render()
 		glVertex2f(  0.0f, -6.0f);
 		glVertex2f(  0.0f, 20.0f);
 		glVertex2f( 12.0f, -10.0f);
+        //glVertex2f( 12.0f, -5.0f);
+        //glVertex2f( 30.0f, -5.0f);
 		glEnd();
 		glColor3f(1.0f, 0.0f, 0.0f);
 		glBegin(GL_POINTS);
@@ -1042,15 +1123,16 @@ void render()
 			glVertex2f(b->pos[0]+1.0f, b->pos[1]+1.0f);
 			glEnd();
 		}
+	g.mtext = 0;
 	}
 
 	if (g.show_credits) {
-	    g.mtext -= .02;
 	    andrewH(.5*gl.xres, .9*gl.yres, gl.bigfootTexture,g.mtext);
   	    creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
 	    AdolfoValenciaPicture(.5*gl.xres, .5*gl.yres, gl.AdolfoTexture);
-        showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
+		showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
 	    josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
+		g.mtext++;
         // function calls for everyone with parameters
 	}
 }
