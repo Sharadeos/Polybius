@@ -1,3 +1,4 @@
+
 CFLAGS = -I ./include
 ##LIB    = ./libggfonts.so
 LFLAGS = -lrt -lX11 -lGLU -lGL -pthread -lm #-lXrandr
@@ -13,4 +14,5 @@ polybius: polybius.cpp log.cpp timers.cpp andrewH.cpp luisM.cpp adolfoV.cpp chri
 clean:
 	rm -f polybius
 	rm -f *.o
+
 
