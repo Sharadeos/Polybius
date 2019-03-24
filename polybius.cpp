@@ -213,7 +213,6 @@ public:
 	float color[3];
 	struct Asteroid *prev;
 	struct Asteroid *next;
-	int shipClass = rand()%5;
 public:
 	Asteroid() {
 		prev = NULL;
@@ -682,11 +681,8 @@ void andrewH(int x, int y, GLuint textid, int move);
 void creditsLuis(int x, int y, GLuint textid);
 void showChrisRamirez(int x, int y, GLuint textid);
 void josephG(int x, int y, GLuint textid);
-void fighterPF(float* a, float* b, int x, int y);
-void squadronPF(float* a, float* b, int x, int y);
-void frigatePF(float* a, float* b, int x, int y);
-void missilePF(float* a, float* b, int x, int y);
-void carrierPF(float* a, float* b, int x, int y);
+void pathFinding(float* a, float* b, int x, int y);
+
 // add prototypes of all external functions
 
 int check_keys(XEvent *e)
@@ -851,25 +847,7 @@ void physics()
         a->pos[0] += a->vel[0];
         a->pos[0] += a->vel[1];
         
-	switch(a->shipClass) {
-	    case 1:
-		fighterPF(&a->pos[0],&a->pos[1],g.ship.pos[0],g.ship.pos[1]);
-		break;
-	    case 2:
-		frigatePF(&a->pos[0],&a->pos[1],g.ship.pos[0]);
-  	    	break;
-	    case 3:
-		squadronPF(&a->pos[0],&a->pos[1],g.ship.pos[0],g.ship.pos[1]);
-	    	break;
-	    case 4:
-		missilePF(&a->pos[0],&a->pos[1],g.ship.pos[0],g.ship.pos[1]);
-	    	break;
-	    case 5:
-		carrierPF(&a->pos[0],&a->pos[1],g.ship.pos[0],g.ship.pos[1]);
-	    	break;
-	    default:
-		break;
-	}
+        pathFinding(&a->pos[0],&a->pos[1],g.ship.pos[0], g.ship.pos[1]);
 		//Check for collision with window edges
         if (a->pos[0] < -100.0) {
 			a->pos[0] += (float)gl.xres+200;
