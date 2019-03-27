@@ -7,7 +7,7 @@
 #include "fonts.h"
 #include <math.h>
 static float spin = 20;
-void andrewH(int x, int y, GLuint textid, int move) 
+void andrewH(int x, int y, GLuint textid, float move) 
 {
     if(!move)
 	spin = 20;
