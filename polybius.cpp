@@ -21,6 +21,16 @@
 #include "log.h"
 #include "fonts.h"
 
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#ifdef USE_OPENAL_SOUND
+#include </usr/include/AL/alut.h>
+#endif 
+
 //defined types
 typedef float Flt;
 typedef float Vec[3];
@@ -464,17 +474,17 @@ void init_opengl(void)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
 		         GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
-	
-	glGenTextures(1, &gl.AdolfoTexture);                                              
-        
-	w=img[2].width;                                                                   
-    h=img[2].height;                                                                  
-                                                                                          
-    glBindTexture (GL_TEXTURE_2D, gl.AdolfoTexture);                                  
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);              
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);              
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,                                    
-                 GL_RGB, GL_UNSIGNED_BYTE, img[2].data);	
+
+	glGenTextures(1, &gl.AdolfoTexture);
+
+	w=img[2].width;
+    h=img[2].height;
+
+    glBindTexture (GL_TEXTURE_2D, gl.AdolfoTexture);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+                 GL_RGB, GL_UNSIGNED_BYTE, img[2].data);
 
     glGenTextures(1, &gl.chrisTexture);
     w = img[3].width;
