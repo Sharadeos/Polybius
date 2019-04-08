@@ -3,7 +3,7 @@
 //
 #include <GL/glx.h>
 #include "fonts.h"
-
+#include "classes.h"
 
 void creditsLuis(int x, int y, GLuint luisTexture)
 {
@@ -15,7 +15,7 @@ void creditsLuis(int x, int y, GLuint luisTexture)
 	ggprint8b(&r, 16, c, "Luis Manahan");
 
 	float wid = 120.0f;
-	
+
 	glPushMatrix();
 	glTranslatef(x + 250, y - 50, 0);
 	glEnable(GL_ALPHA_TEST);
@@ -32,14 +32,8 @@ void creditsLuis(int x, int y, GLuint luisTexture)
 }
 
 
-int difficulty()
+void modify_singleton(Num n)
 {
-	
-	return 0;
-}
+	cout << n.getNum() << endl;
 
-void deleteAsteroids()
-{
-	
-	
 }

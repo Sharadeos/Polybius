@@ -6,252 +6,40 @@
 //This program is a game starting point for a 3350 project.
 //
 //
-#include <iostream>
-#include <cstdlib>
-#include <cstring>
-#include <unistd.h>
-#include <ctime>
-#include <cmath>
-#include <X11/Xlib.h>
-//#include <X11/Xutil.h>
-//#include <GL/gl.h>
-//#include <GL/glu.h>
-#include <X11/keysym.h>
-#include <GL/glx.h>
-#include "log.h"
-#include "fonts.h"
+#include "classes.h"
 
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#ifdef USE_OPENAL_SOUND
-#include </usr/include/AL/alut.h>
-#endif 
 
-//defined types
-typedef float Flt;
-typedef float Vec[3];
-typedef Flt	Matrix[4][4];
+//function prototypes
+void init_opengl(void);
+void check_mouse(XEvent *e);
+int check_keys(XEvent *e);
+void physics();
+void render();
 
-//macros
-#define rnd() (((Flt)rand())/(Flt)RAND_MAX)
-#define random(a) (rand()%a)
-#define VecZero(v) (v)[0]=0.0,(v)[1]=0.0,(v)[2]=0.0
-#define MakeVector(x, y, z, v) (v)[0]=(x),(v)[1]=(y),(v)[2]=(z)
-#define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
-#define VecDot(a,b)	((a)[0]*(b)[0]+(a)[1]*(b)[1]+(a)[2]*(b)[2])
-#define VecSub(a,b,c) (c)[0]=(a)[0]-(b)[0]; \
-						(c)[1]=(a)[1]-(b)[1]; \
-						(c)[2]=(a)[2]-(b)[2]
-//constants
-const float timeslice = 1.0f;
-const float gravity = -0.2f;
-#define PI 3.141592653589793
-#define ALPHA 1
-const int MAX_BULLETS = 11;
-const Flt MINIMUM_ASTEROID_SIZE = 60.0;
-
-//-----------------------------------------------------------------------------
-//Setup timers
-const double physicsRate = 1.0 / 60.0;
-const double oobillion = 1.0 / 1e9;
-extern struct timespec timeStart, timeCurrent;
-extern struct timespec timePause;
-extern double physicsCountdown;
-extern double timeSpan;
-extern double timeDiff(struct timespec *start, struct timespec *end);
-extern void timeCopy(struct timespec *dest, struct timespec *source);
-//-----------------------------------------------------------------------------
-class Image {
-public:
-        int width, height;
-        unsigned char *data;
-        ~Image() { delete [] data; }
-        Image(const char *fname) {
-                if (fname[0] == '\0')
-                        return;
-                //printf("fname **%s**\n", fname);
-                int ppmFlag = 0;
-                char name[40];
-                strcpy(name, fname);
-                int slen = strlen(name);
-                char ppmname[80];
-                if (strncmp(name+(slen-4), ".ppm", 4) == 0)
-                        ppmFlag = 1;
-                if (ppmFlag) {
-                        strcpy(ppmname, name);
-                } else {
-                        name[slen-4] = '\0';
-                        //printf("name **%s**\n", name);
-                        sprintf(ppmname,"%s.ppm", name);
-                        //printf("ppmname **%s**\n", ppmname);
-                        char ts[100];
-                        //system("convert eball.jpg eball.ppm");
-                        sprintf(ts, "convert %s %s", fname, ppmname);
-                        system(ts);
-                }
-                //sprintf(ts, "%s", name);
-                FILE *fpi = fopen(ppmname, "r");
-                if (fpi) {
-                        char line[200];
-                        fgets(line, 200, fpi);
-                        fgets(line, 200, fpi);
-                        //skip comments and blank lines
-                        while (line[0] == '#' || strlen(line) < 2)
-                                fgets(line, 200, fpi);
-                        sscanf(line, "%i %i", &width, &height);
-                        fgets(line, 200, fpi);
-                        //get pixel data
-                        int n = width * height * 3;
-                        data = new unsigned char[n];
-                        for (int i=0; i<n; i++)
-                                data[i] = fgetc(fpi);
-                        fclose(fpi);
-                } else {
-                printf("ERROR opening image: %s\n",ppmname);
-                        exit(0);
-                }
-                if (!ppmFlag)
-			unlink(ppmname);
-	}
-};
 // add png files name and create array based on # of pngs
 //Image img("./images/bigfoot.png");
 Image img[5] = {
-"./images/bigfoot.png",	
+"./images/bigfoot.png",
 "./images/luis_3350.png",
 "./images/IMG_Adolfo_Valencia.png",
 "./images/chris_ramirez.png",
 "./images/josephG.png"
 };
 
-class Global {
-public:
-	int xres, yres;
-	char keys[65536];
-	GLuint bigfootTexture;
-	GLuint luisTexture;
-	GLuint AdolfoTexture;
-	GLuint chrisTexture;
-        GLuint josephTexture;
-    // declare GLuint textid for each png
-	Global() {
-		xres = 1250;
-		yres = 900;
-		memset(keys, 0, 65536);
-	}
-} gl;
 
-class Ship {
-public:
-	Vec dir;
-	Vec pos;
-	Vec vel;
-	float angle;
-	float color[3];
-public:
-	Ship() {
-		VecZero(dir);
-		pos[0] = (Flt)(gl.xres/2);
-		pos[1] = (Flt)(gl.yres/2);
-		pos[2] = 0.0f;
-		VecZero(vel);
-		angle = 0.0;
-		color[0] = color[1] = color[2] = 1.0;
-	}
-};
+Global gl(1250, 900);
 
-class Bullet {
-public:
-	Vec pos;
-	Vec vel;
-	float color[3];
-	struct timespec time;
-public:
-	Bullet() { }
-};
+Game* Game::instance = 0;
+Game* Game::getInstance()
+{
+    if (instance == 0)
+    {
+        instance = new Game();
+    }
 
-class Asteroid {
-public:
-	Vec pos;
-	Vec vel;
-	int nverts;
-	Flt radius;
-	Vec vert[8];
-	float angle;
-	float rotate;
-	float color[3];
-	struct Asteroid *prev;
-	struct Asteroid *next;
-    	int shipClass = rand()%5;
-public:
-	Asteroid() {
-		prev = NULL;
-		next = NULL;
-	}
-};
+    return instance;
+}
 
-class Game {
-public:
-	Ship ship;
-	Asteroid *ahead;
-	Bullet *barr;
-	int nasteroids;
-	int nbullets;
-	struct timespec bulletTimer;
-	struct timespec mouseThrustTimer;
-	bool mouseThrustOn;
-	bool show_credits;
-	float mtext;
-public:
-	Game() {
-		show_credits = false;
-		ahead = NULL;
-		barr = new Bullet[MAX_BULLETS];
-		nasteroids = 0;
-		nbullets = 0;
-		mouseThrustOn = false;
-		mtext = 0;
-		//build 10 asteroids...
-		for (int j=0; j<10; j++) {
-			Asteroid *a = new Asteroid;
-			a->nverts = 8;
-			a->radius = rnd()*80.0 + 40.0;
-			Flt r2 = a->radius / 2.0;
-			Flt angle = 0.0f;
-			Flt inc = (PI * 2.0) / (Flt)a->nverts;
-			for (int i=0; i<a->nverts; i++) {
-				a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
-				a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
-				angle += inc;
-			}
-			a->pos[0] = (Flt)(rand() % gl.xres);
-			a->pos[1] = (Flt)(rand() % gl.yres);
-			a->pos[2] = 0.0f;
-			a->angle = 0.0;
-			a->rotate = rnd() * 4.0 - 2.0;
-			a->color[0] = 0.8;
-			a->color[1] = 0.8;
-			a->color[2] = 0.7;
-			a->vel[0] = (Flt)(rnd()*2.0-1.0);
-			a->vel[1] = (Flt)(rnd()*2.0-1.0);
-			//std::cout << "asteroid" << std::endl;
-			//add to front of linked list
-			a->next = ahead;
-			if (ahead != NULL)
-				ahead->prev = a;
-			ahead = a;
-			++nasteroids;
-		}
-		clock_gettime(CLOCK_REALTIME, &bulletTimer);
-	}
-	~Game() {
-		delete [] barr;
-	}
-} g;
 
 //X Windows variables
 class X11_wrapper {
@@ -291,7 +79,7 @@ public:
 		if (vi == NULL) {
 			std::cout << "\n\tno appropriate visual found\n" << std::endl;
 			exit(EXIT_FAILURE);
-		} 
+		}
 		Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
 		swa.colormap = cmap;
 		swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
@@ -384,12 +172,8 @@ public:
 	}
 } x11(0, 0);
 
-//function prototypes
-void init_opengl(void);
-void check_mouse(XEvent *e);
-int check_keys(XEvent *e);
-void physics();
-void render();
+Game* g = Game::getInstance();
+Num n(35);
 
 //==========================================================================
 // M A I N
@@ -413,7 +197,7 @@ int main()
 		clock_gettime(CLOCK_REALTIME, &timeCurrent);
 		timeSpan = timeDiff(&timeStart, &timeCurrent);
 		timeCopy(&timeStart, &timeCurrent);
-		if (!g.show_credits) {
+		if (!(*g).show_credits) {
 			physicsCountdown += timeSpan;
 			while (physicsCountdown >= physicsRate) {
 				physics();
@@ -448,7 +232,7 @@ void init_opengl(void)
 	//Do this to allow fonts
 	glEnable(GL_TEXTURE_2D);
 	initialize_fonts();
-	
+
 	glGenTextures(1, &gl.bigfootTexture);
 	// Generate texture for each texture id
 	int w = img[0].width;
@@ -461,7 +245,7 @@ void init_opengl(void)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
                  GL_RGB, GL_UNSIGNED_BYTE, img[0].data);
-				
+
 	glGenTextures(1, &gl.luisTexture);
 	// Generate texture for each texture id
 	w = img[1].width;
@@ -537,19 +321,19 @@ void check_mouse(XEvent *e)
 			//a little time between each bullet
 			struct timespec bt;
 			clock_gettime(CLOCK_REALTIME, &bt);
-			double ts = timeDiff(&g.bulletTimer, &bt);
+			double ts = timeDiff(&(*g).bulletTimer, &bt);
 			if (ts > 0.1) {
-				timeCopy(&g.bulletTimer, &bt);
+				timeCopy(&(*g).bulletTimer, &bt);
 				//shoot a bullet...
-				if (g.nbullets < MAX_BULLETS) {
-					Bullet *b = &g.barr[g.nbullets];
+				if ((*g).nbullets < MAX_BULLETS) {
+					Bullet *b = &(*g).barr[(*g).nbullets];
 					timeCopy(&b->time, &bt);
-					b->pos[0] = g.ship.pos[0];
-					b->pos[1] = g.ship.pos[1];
-					b->vel[0] = g.ship.vel[0];
-					b->vel[1] = g.ship.vel[1];
+					b->pos[0] = (*g).ship.pos[0];
+					b->pos[1] = (*g).ship.pos[1];
+					b->vel[0] = (*g).ship.vel[0];
+					b->vel[1] = (*g).ship.vel[1];
 					//convert ship angle to radians
-					Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
+					Flt rad = (((*g).ship.angle+90.0) / 360.0f) * PI * 2.0;
 					//convert angle to a vector
 					Flt xdir = cos(rad);
 					Flt ydir = sin(rad);
@@ -560,7 +344,7 @@ void check_mouse(XEvent *e)
 					b->color[0] = 1.0f;
 					b->color[1] = 1.0f;
 					b->color[2] = 1.0f;
-					++g.nbullets;
+					++(*g).nbullets;
 				}
 			}
 		}
@@ -574,41 +358,41 @@ void check_mouse(XEvent *e)
 		int xdiff = savex - e->xbutton.x;
 		int ydiff = savey - e->xbutton.y;
 		if (++ct < 10)
-			return;		
+			return;
 		//std::cout << "savex: " << savex << std::endl << std::flush;
 		//std::cout << "e->xbutton.x: " << e->xbutton.x << std::endl <<
 		//std::flush;
 		if (xdiff > 0) {
 			//std::cout << "xdiff: " << xdiff << std::endl << std::flush;
-			g.ship.angle += 0.05f * (float)xdiff;
-			if (g.ship.angle >= 360.0f)
-				g.ship.angle -= 360.0f;
+			(*g).ship.angle += 0.05f * (float)xdiff;
+			if ((*g).ship.angle >= 360.0f)
+				(*g).ship.angle -= 360.0f;
 		}
 		else if (xdiff < 0) {
 			//std::cout << "xdiff: " << xdiff << std::endl << std::flush;
-			g.ship.angle += 0.05f * (float)xdiff;
-			if (g.ship.angle < 0.0f)
-				g.ship.angle += 360.0f;
+			(*g).ship.angle += 0.05f * (float)xdiff;
+			if ((*g).ship.angle < 0.0f)
+				(*g).ship.angle += 360.0f;
 		}
 		if (ydiff > 0) {
 			//apply thrust
 			//convert ship angle to radians
-			Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
+			Flt rad = (((*g).ship.angle+90.0) / 360.0f) * PI * 2.0;
 			//convert angle to a vector
 			Flt xdir = cos(rad);
 			Flt ydir = sin(rad);
-			g.ship.vel[0] += xdir * (float)ydiff * 0.01f;
-			g.ship.vel[1] += ydir * (float)ydiff * 0.01f;
-            Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
-					g.ship.vel[1]*g.ship.vel[1]);
+			(*g).ship.vel[0] += xdir * (float)ydiff * 0.01f;
+			(*g).ship.vel[1] += ydir * (float)ydiff * 0.01f;
+            Flt speed = sqrt((*g).ship.vel[0]*(*g).ship.vel[0]+
+					(*g).ship.vel[1]*(*g).ship.vel[1]);
 			if (speed > 10.0f) {
 				speed = 10.0f;
-				normalize2d(g.ship.vel);
-				g.ship.vel[0] *= speed;
-				g.ship.vel[1] *= speed;
+				normalize2d((*g).ship.vel);
+				(*g).ship.vel[0] *= speed;
+				(*g).ship.vel[1] *= speed;
 			}
-			g.mouseThrustOn = true;
-			clock_gettime(CLOCK_REALTIME, &g.mouseThrustTimer);
+			(*g).mouseThrustOn = true;
+			clock_gettime(CLOCK_REALTIME, &(*g).mouseThrustTimer);
 		}
 		x11.set_mouse_position(100,100);
 		savex=100;
@@ -626,6 +410,8 @@ void frigatePF(float* a, float* b, int x);
 void squadronPF(float* a, float* b, int x, int y);
 void missilePF(float* a, float* b, int x, int y);
 void carrierPF(float* a, float* b, int x, int y);
+void modify_singleton(Num n);
+
 // add prototypes of all external functions
 
 int check_keys(XEvent *e)
@@ -655,7 +441,7 @@ int check_keys(XEvent *e)
 		case XK_Escape:
 			return 1;
 		case XK_c:
-			g.show_credits = !g.show_credits;
+			(*g).show_credits = !(*g).show_credits;
 			break;
 		case XK_s:
 			break;
@@ -726,20 +512,20 @@ void physics()
 {
 	Flt d0,d1,dist;
 	//Update ship position
-	g.ship.pos[0] += g.ship.vel[0];
-	g.ship.pos[1] += g.ship.vel[1];
+	(*g).ship.pos[0] += (*g).ship.vel[0];
+	(*g).ship.pos[1] += (*g).ship.vel[1];
 	//Check for collision with window edges
-	if (g.ship.pos[0] < 0.0) {
-		g.ship.pos[0] += (float)gl.xres;
+	if ((*g).ship.pos[0] < 0.0) {
+		(*g).ship.pos[0] += (float)gl.xres;
 	}
-	else if (g.ship.pos[0] > (float)gl.xres) {
-		g.ship.pos[0] -= (float)gl.xres;
+	else if ((*g).ship.pos[0] > (float)gl.xres) {
+		(*g).ship.pos[0] -= (float)gl.xres;
 	}
-	else if (g.ship.pos[1] < 0.0) {
-		g.ship.pos[1] += (float)gl.yres;
+	else if ((*g).ship.pos[1] < 0.0) {
+		(*g).ship.pos[1] += (float)gl.yres;
 	}
-	else if (g.ship.pos[1] > (float)gl.yres) {
-		g.ship.pos[1] -= (float)gl.yres;
+	else if ((*g).ship.pos[1] > (float)gl.yres) {
+		(*g).ship.pos[1] -= (float)gl.yres;
 	}
 	//
 	//
@@ -747,15 +533,15 @@ void physics()
 	struct timespec bt;
 	clock_gettime(CLOCK_REALTIME, &bt);
 	int i=0;
-	while (i < g.nbullets) {
-		Bullet *b = &g.barr[i];
+	while (i < (*g).nbullets) {
+		Bullet *b = &(*g).barr[i];
 		//How long has bullet been alive?
 		double ts = timeDiff(&b->time, &bt);
 		if (ts > 2.5) {
 			//time to delete the bullet.
-			memcpy(&g.barr[i], &g.barr[g.nbullets-1],
+			memcpy(&(*g).barr[i], &(*g).barr[(*g).nbullets-1],
 				sizeof(Bullet));
-			g.nbullets--;
+			(*g).nbullets--;
 			//do not increment i.
 			continue;
 		}
@@ -780,25 +566,25 @@ void physics()
 	//
 	//Update asteroid positions
 	//pathFinding(&a->pos[0], &a->pos[2]
-    Asteroid *a = g.ahead;
+    Asteroid *a = (*g).ahead;
 	while (a) {
         a->pos[0] += a->vel[0];
         a->pos[0] += a->vel[1];
         switch(a->shipClass) {
             case 1:
-                fighterPF(&a->pos[0],&a->pos[1],g.ship.pos[0], g.ship.pos[1]);
+                fighterPF(&a->pos[0],&a->pos[1],(*g).ship.pos[0], (*g).ship.pos[1]);
                 break;
             case 2:
-                frigatePF(&a->pos[0],&a->pos[1], g.ship.pos[0]);
+                frigatePF(&a->pos[0],&a->pos[1], (*g).ship.pos[0]);
                 break;
             case 3:
-                squadronPF(&a->pos[0],&a->pos[1],g.ship.pos[0], g.ship.pos[1]);
+                squadronPF(&a->pos[0],&a->pos[1],(*g).ship.pos[0], (*g).ship.pos[1]);
                 break;
             case 4:
-                missilePF(&a->pos[0],&a->pos[1],g.ship.pos[0], g.ship.pos[1]);
+                missilePF(&a->pos[0],&a->pos[1],(*g).ship.pos[0], (*g).ship.pos[1]);
                 break;
             case 5:
-		        carrierPF(&a->pos[0],&a->pos[1],g.ship.pos[0],g.ship.pos[1]);
+		        carrierPF(&a->pos[0],&a->pos[1],(*g).ship.pos[0],(*g).ship.pos[1]);
                 break;
             default:
                 break;
@@ -825,12 +611,12 @@ void physics()
 	//     1. delete the bullet
 	//     2. break the asteroid into pieces
 	//        if asteroid small, delete it
-	a = g.ahead;
+	a = (*g).ahead;
 	while (a) {
 		//is there a bullet within its radius?
 		int i=0;
-		while (i < g.nbullets) {
-			Bullet *b = &g.barr[i];
+		while (i < (*g).nbullets) {
+			Bullet *b = &(*g).barr[i];
 			d0 = b->pos[0] - a->pos[0];
 			d1 = b->pos[1] - a->pos[1];
 			dist = (d0*d0 + d1*d1);
@@ -847,11 +633,11 @@ void physics()
 						Asteroid *ta = new Asteroid;
 						buildAsteroidFragment(ta, a);
 						//add to front of asteroid linked list
-						ta->next = g.ahead;
-						if (g.ahead != NULL)
-							g.ahead->prev = ta;
-						g.ahead = ta;
-						g.nasteroids++;
+						ta->next = (*g).ahead;
+						if ((*g).ahead != NULL)
+							(*g).ahead->prev = ta;
+						(*g).ahead = ta;
+						(*g).nasteroids++;
 					}
 				} else {
 					a->color[0] = 1.0;
@@ -860,13 +646,13 @@ void physics()
 					//asteroid is too small to break up
 					//delete the asteroid and bullet
 					Asteroid *savea = a->next;
-					deleteAsteroid(&g, a);
+					deleteAsteroid(g, a);
 					a = savea;
-					g.nasteroids--;
+					(*g).nasteroids--;
 				}
 				//delete the bullet...
-				memcpy(&g.barr[i], &g.barr[g.nbullets-1], sizeof(Bullet));
-				g.nbullets--;
+				memcpy(&(*g).barr[i], &(*g).barr[(*g).nbullets-1], sizeof(Bullet));
+				(*g).nbullets--;
 				if (a == NULL)
 					break;
 			}
@@ -879,51 +665,51 @@ void physics()
 	//---------------------------------------------------
 	//check keys pressed now
 	if (gl.keys[XK_Left]) {
-		g.ship.angle += 4.0;
-		if (g.ship.angle >= 360.0f)
-			g.ship.angle -= 360.0f;
+		(*g).ship.angle += 4.0;
+		if ((*g).ship.angle >= 360.0f)
+			(*g).ship.angle -= 360.0f;
 	}
 	if (gl.keys[XK_Right]) {
-		g.ship.angle -= 4.0;
-		if (g.ship.angle < 0.0f)
-			g.ship.angle += 360.0f;
+		(*g).ship.angle -= 4.0;
+		if ((*g).ship.angle < 0.0f)
+			(*g).ship.angle += 360.0f;
 	}
 	if (gl.keys[XK_Up]) {
 		//apply thrust
 		//convert ship angle to radians
-        Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
+        Flt rad = (((*g).ship.angle+90.0) / 360.0f) * PI * 2.0;
 		//convert angle to a vector
 		Flt xdir = cos(rad);
 		Flt ydir = sin(rad);
-		g.ship.vel[0] += xdir*0.02f;
-		g.ship.vel[1] += ydir*0.02f;
-		Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
-				g.ship.vel[1]*g.ship.vel[1]);
+		(*g).ship.vel[0] += xdir*0.02f;
+		(*g).ship.vel[1] += ydir*0.02f;
+		Flt speed = sqrt((*g).ship.vel[0]*(*g).ship.vel[0]+
+				(*g).ship.vel[1]*(*g).ship.vel[1]);
 		if (speed > 10.0f) {
 			speed = 10.0f;
-			normalize2d(g.ship.vel);
-			g.ship.vel[0] *= speed;
-			g.ship.vel[1] *= speed;
+			normalize2d((*g).ship.vel);
+			(*g).ship.vel[0] *= speed;
+			(*g).ship.vel[1] *= speed;
 		}
 	}
 	if (gl.keys[XK_space]) {
 		//a little time between each bullet
 		struct timespec bt;
 		clock_gettime(CLOCK_REALTIME, &bt);
-		double ts = timeDiff(&g.bulletTimer, &bt);
+		double ts = timeDiff(&(*g).bulletTimer, &bt);
 		if (ts > 0.1) {
-			timeCopy(&g.bulletTimer, &bt);
-			if (g.nbullets < MAX_BULLETS) {
+			timeCopy(&(*g).bulletTimer, &bt);
+			if ((*g).nbullets < MAX_BULLETS) {
 				//shoot a bullet...
 				//Bullet *b = new Bullet;
-				Bullet *b = &g.barr[g.nbullets];
+				Bullet *b = &(*g).barr[(*g).nbullets];
 				timeCopy(&b->time, &bt);
-				b->pos[0] = g.ship.pos[0];
-				b->pos[1] = g.ship.pos[1];
-				b->vel[0] = g.ship.vel[0];
-				b->vel[1] = g.ship.vel[1];
+				b->pos[0] = (*g).ship.pos[0];
+				b->pos[1] = (*g).ship.pos[1];
+				b->vel[0] = (*g).ship.vel[0];
+				b->vel[1] = (*g).ship.vel[1];
 				//convert ship angle to radians
-				Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
+				Flt rad = (((*g).ship.angle+90.0) / 360.0f) * PI * 2.0;
 				//convert angle to a vector
 				Flt xdir = cos(rad);
 				Flt ydir = sin(rad);
@@ -934,40 +720,40 @@ void physics()
 				b->color[0] = 1.0f;
 				b->color[1] = 1.0f;
 				b->color[2] = 1.0f;
-				g.nbullets++;
+				(*g).nbullets++;
 			}
 		}
 	}
-	if (g.mouseThrustOn) {
+	if ((*g).mouseThrustOn) {
 		//should thrust be turned off
 		struct timespec mtt;
 		clock_gettime(CLOCK_REALTIME, &mtt);
-		double tdif = timeDiff(&mtt, &g.mouseThrustTimer);
+		double tdif = timeDiff(&mtt, &(*g).mouseThrustTimer);
 		//std::cout << "tdif: " << tdif << std::endl;
 		if (tdif < -0.3)
-			g.mouseThrustOn = false;
+			(*g).mouseThrustOn = false;
 	}
 }
 
 void render()
-{ 
+{
 	glClear(GL_COLOR_BUFFER_BIT);
-	if (!g.show_credits) {
+	if (!(*g).show_credits) {
 		Rect r;
 		//
 		r.bot = gl.yres - 20;
 		r.left = 10;
 		r.center = 0;
 		ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
-		ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
-		ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
+		ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", (*g).nbullets);
+		ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", (*g).nasteroids);
 		//-------------------------------------------------------------------------
 		//Draw the ship
-		glColor3fv(g.ship.color);
+		glColor3fv((*g).ship.color);
 		glPushMatrix();
-		glTranslatef(g.ship.pos[0], g.ship.pos[1], g.ship.pos[2]);
+		glTranslatef((*g).ship.pos[0], (*g).ship.pos[1], (*g).ship.pos[2]);
 		//float angle = atan2(ship.dir[1], ship.dir[0]);
-		glRotatef(g.ship.angle, 0.0f, 0.0f, 1.0f);
+		glRotatef((*g).ship.angle, 0.0f, 0.0f, 1.0f);
 		glBegin(GL_TRIANGLES);
 		//glVertex2f(-10.0f, -10.0f);
 		//glVertex2f(  0.0f, 20.0f);
@@ -984,10 +770,10 @@ void render()
 		glVertex2f(0.0f, 0.0f);
 		glEnd();
 		glPopMatrix();
-		if (gl.keys[XK_Up] || g.mouseThrustOn) {
+		if (gl.keys[XK_Up] || (*g).mouseThrustOn) {
 			int i;
 			//draw thrust
-			Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
+			Flt rad = (((*g).ship.angle+90.0) / 360.0f) * PI * 2.0;
 			//convert angle to a vector
 			Flt xdir = cos(rad);
 			Flt ydir = sin(rad);
@@ -1000,15 +786,15 @@ void render()
 				xe = -xdir * r + rnd() * 18.0 - 9.0;
 				ye = -ydir * r + rnd() * 18.0 - 9.0;
 				glColor3f(rnd()*.3+.7, rnd()*.3+.7, 0);
-				glVertex2f(g.ship.pos[0]+xs,g.ship.pos[1]+ys);
-				glVertex2f(g.ship.pos[0]+xe,g.ship.pos[1]+ye);
+				glVertex2f((*g).ship.pos[0]+xs,(*g).ship.pos[1]+ys);
+				glVertex2f((*g).ship.pos[0]+xe,(*g).ship.pos[1]+ye);
 			}
 			glEnd();
 		}
 		//-------------------------------------------------------------------------
 		//Draw the asteroids
 		{
-			Asteroid *a = g.ahead;
+			Asteroid *a = (*g).ahead;
 			while (a) {
 				//Log("draw asteroid...\n");
 				glColor3fv(a->color);
@@ -1035,8 +821,8 @@ void render()
 		}
 		//-------------------------------------------------------------------------
 		//Draw the bullets
-		for (int i=0; i<g.nbullets; i++) {
-			Bullet *b = &g.barr[i];
+		for (int i=0; i<(*g).nbullets; i++) {
+			Bullet *b = &(*g).barr[i];
 			//Log("draw bullet...\n");
 			glColor3f(1.0, 1.0, 1.0);
 			glBegin(GL_POINTS);
@@ -1054,13 +840,14 @@ void render()
 		}
 	}
 
-	if (g.show_credits) {
-	    g.mtext -= .02;
-	    andrewH(.5*gl.xres, .9*gl.yres, gl.bigfootTexture,g.mtext);
+	if ((*g).show_credits) {
+	    (*g).mtext -= .02;
+	    andrewH(.5*gl.xres, .9*gl.yres, gl.bigfootTexture,(*g).mtext);
   	    creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
 	    AdolfoValenciaPicture(.5*gl.xres, .5*gl.yres, gl.AdolfoTexture);
         showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
 	    josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
+			modify_singleton(n);
         // function calls for everyone with parameters
 	}
 }
