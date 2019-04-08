@@ -76,7 +76,7 @@ class Num {
 
 class Global {
   public:
-    Global(int x, int y);
+    Global();
 	  int xres, yres;
   	char keys[65536];
 	  GLuint bigfootTexture;

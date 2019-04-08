@@ -10,7 +10,7 @@ int Num::getNum()
   return num;
 }
 
-Global::Global(int x, int y) {
+Global::Global() {
   xres = XRES;
   yres = YRES;
   memset(keys, 0, 65536);
@@ -95,7 +95,7 @@ Game::Game(){
 	mouseThrustOn = false;
 	mtext = 0;
 
-	//build 10 asteroids...
+	//build 1 asteroids...
 	for (int j=0; j<1; j++) {
 		Asteroid *a = new Asteroid;
 		a->nverts = 8;

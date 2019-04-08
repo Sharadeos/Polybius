@@ -8,7 +8,6 @@
 //
 #include "classes.h"
 
-
 //function prototypes
 void init_opengl(void);
 void check_mouse(XEvent *e);
@@ -43,7 +42,7 @@ Image img[5] = {
 };
 
 
-Global gl(1250, 900);
+Global gl;
 
 Game* Game::instance = 0;
 Game* Game::getInstance()
