@@ -10,3 +10,4 @@ Changelog:
 
 2/22.19 Created Individual Branches
 2/27/19 Updated ReadMe
+4/7/19 Restructued the code to have singleton functionality and freely access Game g and ability to use classes from different files.
