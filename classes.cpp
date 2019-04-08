@@ -94,8 +94,9 @@ Game::Game(){
 	nbullets = 0;
 	mouseThrustOn = false;
 	mtext = 0;
+
 	//build 10 asteroids...
-	for (int j=0; j<10; j++) {
+	for (int j=0; j<1; j++) {
 		Asteroid *a = new Asteroid;
 		a->nverts = 8;
 		a->radius = rnd()*80.0 + 40.0;

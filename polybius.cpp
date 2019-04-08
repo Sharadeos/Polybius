@@ -16,6 +16,22 @@ int check_keys(XEvent *e);
 void physics();
 void render();
 
+// add prototypes of all external functions
+
+void AdolfoValenciaPicture(int x, int y, GLuint textid);
+void andrewH(int x, int y, GLuint textid, float i);
+void creditsLuis(int x, int y, GLuint textid);
+void showChrisRamirez(int x, int y, GLuint textid);
+void josephG(int x, int y, GLuint textid);
+void fighterPF(float* a, float* b, int x, int y);
+void frigatePF(float* a, float* b, int x);
+void squadronPF(float* a, float* b, int x, int y);
+void missilePF(float* a, float* b, int x, int y);
+void carrierPF(float* a, float* b, int x, int y);
+void modify_singleton(Num n);
+void createAsteroid(Game *g);
+
+
 // add png files name and create array based on # of pngs
 //Image img("./images/bigfoot.png");
 Image img[5] = {
@@ -32,11 +48,9 @@ Global gl(1250, 900);
 Game* Game::instance = 0;
 Game* Game::getInstance()
 {
-    if (instance == 0)
-    {
+    if (instance == 0) {
         instance = new Game();
     }
-
     return instance;
 }
 
@@ -400,19 +414,6 @@ void check_mouse(XEvent *e)
 	}
 }
 
-void AdolfoValenciaPicture(int x, int y, GLuint textid);
-void andrewH(int x, int y, GLuint textid, float i);
-void creditsLuis(int x, int y, GLuint textid);
-void showChrisRamirez(int x, int y, GLuint textid);
-void josephG(int x, int y, GLuint textid);
-void fighterPF(float* a, float* b, int x, int y);
-void frigatePF(float* a, float* b, int x);
-void squadronPF(float* a, float* b, int x, int y);
-void missilePF(float* a, float* b, int x, int y);
-void carrierPF(float* a, float* b, int x, int y);
-void modify_singleton(Num n);
-
-// add prototypes of all external functions
 
 int check_keys(XEvent *e)
 {
@@ -443,7 +444,9 @@ int check_keys(XEvent *e)
 		case XK_c:
 			(*g).show_credits = !(*g).show_credits;
 			break;
-		case XK_s:
+		case XK_q:
+			modify_singleton(n);
+			createAsteroid(g);
 			break;
 		case XK_Down:
 			break;
@@ -847,7 +850,6 @@ void render()
 	    AdolfoValenciaPicture(.5*gl.xres, .5*gl.yres, gl.AdolfoTexture);
         showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
 	    josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
-			modify_singleton(n);
         // function calls for everyone with parameters
 	}
 }
