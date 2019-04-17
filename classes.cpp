@@ -11,8 +11,8 @@ int Num::getNum()
 }
 
 Global::Global() {
-  xres = XRES;
-  yres = YRES;
+  xres = 0;
+  yres = 0;
   memset(keys, 0, 65536);
 }
 
@@ -64,10 +64,10 @@ Image::Image(const char *fname) {
 unlink(ppmname);
 }
 
-Ship::Ship() {
+Ship::Ship(int xPos, int yPos) {
   VecZero(dir);
-  pos[0] = (Flt)(XRES/2);
-  pos[1] = (Flt)(YRES/2);
+  pos[0] = (Flt)(xPos/2);
+  pos[1] = (Flt)(yPos/2);
   pos[2] = 0.0f;
   VecZero(vel);
   angle = 0.0;
@@ -86,7 +86,8 @@ Asteroid::Asteroid() {
 }
 
 
-Game::Game(){
+Game::Game(int xWindowSize, int yWindowSize, const Ship& ship) : ship(ship) {
+
 	show_credits = false;
 	ahead = NULL;
 	barr = new Bullet[MAX_BULLETS];
@@ -94,7 +95,7 @@ Game::Game(){
 	nbullets = 0;
 	mouseThrustOn = false;
 	mtext = 0;
-
+  difficulty = 1.0;
 	//build 1 asteroids...
 	for (int j=0; j<1; j++) {
 		Asteroid *a = new Asteroid;
@@ -108,8 +109,8 @@ Game::Game(){
 			a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
 			angle += inc;
 		}
-		a->pos[0] = (Flt)(rand() % XRES);
-		a->pos[1] = (Flt)(rand() % YRES);
+		a->pos[0] = (Flt)(rand() % xWindowSize);
+		a->pos[1] = (Flt)(rand() % yWindowSize);
 		a->pos[2] = 0.0f;
 		a->angle = 0.0;
 		a->rotate = rnd() * 4.0 - 2.0;

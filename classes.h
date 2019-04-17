@@ -47,8 +47,6 @@ const float timeslice = 1.0f;
 const float gravity = -0.2f;
 #define PI 3.141592653589793
 #define ALPHA 1
-#define XRES 1250
-#define YRES 900
 const int MAX_BULLETS = 11;
 const Flt MINIMUM_ASTEROID_SIZE = 60.0;
 
@@ -84,6 +82,7 @@ class Global {
 	  GLuint AdolfoTexture;
 	  GLuint chrisTexture;
     GLuint josephTexture;
+    GLuint blackholeTexture;
     // declare GLuint textid for each png
 
 };
@@ -107,7 +106,9 @@ public:
 	float angle;
 	float color[3];
 	int number;
-	Ship();
+  int x;
+  int y;
+	Ship(int xPos, int yPos);
 };
 
 
@@ -142,7 +143,7 @@ class Game {
 
 private:
 	static Game* instance;
-	Game();
+
 public:
 	Ship ship;
 	Asteroid *ahead;
@@ -154,6 +155,10 @@ public:
 	bool mouseThrustOn;
 	bool show_credits;
 	float mtext;
+  float difficulty;
+	Game(int xWindowSize, int yWindowSize, const Ship & ship);
+
+
 
 	static Game* getInstance();
 	~Game() {
