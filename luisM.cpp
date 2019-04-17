@@ -4,6 +4,56 @@
 #include <GL/glx.h>
 #include "fonts.h"
 #include "classes.h"
+#include <string>
+
+class Blackhole {
+public:
+	Vec dir;
+	Vec pos;
+	Vec vel;
+	float angle;
+	float color[3];
+	float gravity;
+	Blackhole(int xPos, int yPos);
+};
+
+Blackhole::Blackhole(int xPos, int yPos) {
+  VecZero(dir);
+  pos[0] = (Flt)(xPos/2);
+  pos[1] = (Flt)(yPos/2);
+  pos[2] = 0.0f;
+  VecZero(vel);
+  angle = 0.0;
+  color[0] = color[1] = color[2] = 1.0;
+}
+
+void blackholePhysics()
+{
+
+}
+
+
+
+void DrawCircle(float cx, float cy, float r, int num_segments)
+{
+	float theta = 2 * 3.1415926 / float(num_segments);
+	float c = cosf(theta);//precalculate the sine and cosine
+	float s = sinf(theta);
+	float t;
+	float x = r;//we start at angle = 0
+	float y = 0;
+	glBegin(GL_LINE_LOOP);
+	for(int ii = 0; ii < num_segments; ii++)
+	{
+		glVertex2f(x + cx, y + cy);//output vertex
+		//apply the rotation matrix
+		t = x;
+		x = c * x - s * y;
+		y = s * t + c * y;
+	}
+	glEnd();
+}
+
 
 void creditsLuis(int x, int y, GLuint luisTexture)
 {
@@ -38,7 +88,7 @@ void modify_singleton(Num n)
 
 }
 
-void createAsteroid(Game *g)
+void createAsteroid(Game *g, Global gl, int xPos, int yPos)
 {
 	Asteroid *a = new Asteroid;
 	a->nverts = 8;
@@ -51,8 +101,8 @@ void createAsteroid(Game *g)
 		a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
 		angle += inc;
 	}
-	a->pos[0] = (Flt)(rand() % XRES);
-	a->pos[1] = (Flt)(rand() % YRES);
+	a->pos[0] = (Flt)(rand() % gl.xres);
+	a->pos[1] = (Flt)(rand() % gl.yres);
 	a->pos[2] = 0.0f;
 	a->angle = 0.0;
 	a->rotate = rnd() * 4.0 - 2.0;
@@ -67,4 +117,20 @@ void createAsteroid(Game *g)
 	if ((*g).ahead != NULL)
 		(*g).ahead->prev = a;
 		(*g).ahead = a;
+}
+
+
+
+void difficultyScaling(Game *g, Global gl, int xPos, int yPos)
+{
+	Rect r;
+	unsigned int c = 0x00ffff44;
+	r.bot = yPos;
+	r.left = xPos;
+	r.center = -50;
+	(*g).difficulty += 0.001;
+	ggprint8b(&r, 16, c, "%f", log((*g).difficulty));
+
+	DrawCircle(gl.xres/2, gl.yres/2, 100, 10);
+
 }

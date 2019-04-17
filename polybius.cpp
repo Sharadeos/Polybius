@@ -27,32 +27,25 @@ void frigatePF(float* a, float* b, int x);
 void squadronPF(float* a, float* b, int x, int y);
 void missilePF(float* a, float* b, int x, int y);
 void carrierPF(float* a, float* b, int x, int y);
+//luis extern functions
 void modify_singleton(Num n);
-void createAsteroid(Game *g);
+void createAsteroid(Game *g, Global gl, int xPos, int yPos);
+void difficultyScaling(Game *g, Global gl, int xPos, int yPos);
 
 
 // add png files name and create array based on # of pngs
 //Image img("./images/bigfoot.png");
-Image img[5] = {
+Image img[6] = {
 "./images/bigfoot.png",
 "./images/luis_3350.png",
 "./images/IMG_Adolfo_Valencia.png",
 "./images/chris_ramirez.png",
-"./images/josephG.png"
+"./images/josephG.png",
+"./images/blackhole.jpg"
 };
 
 
 Global gl;
-
-Game* Game::instance = 0;
-Game* Game::getInstance()
-{
-    if (instance == 0) {
-        instance = new Game();
-    }
-    return instance;
-}
-
 
 //X Windows variables
 class X11_wrapper {
@@ -185,8 +178,20 @@ public:
 	}
 } x11(0, 0);
 
+
+Game* Game::instance = 0;
+Game* Game::getInstance()
+{
+    if (instance == 0) {
+        instance = new Game(gl.xres, gl.yres, Ship(gl.xres,gl.yres));
+    }
+    return instance;
+}
+
+
 Game* g = Game::getInstance();
-Num n(35);
+Num n(1337);
+
 
 //==========================================================================
 // M A I N
@@ -210,21 +215,28 @@ int main()
 		clock_gettime(CLOCK_REALTIME, &timeCurrent);
 		timeSpan = timeDiff(&timeStart, &timeCurrent);
 		timeCopy(&timeStart, &timeCurrent);
+
+		render();
+		//functions before render will not render on the setup_screen_res
+
 		if (!(*g).show_credits) {
 			physicsCountdown += timeSpan;
 			while (physicsCountdown >= physicsRate) {
 				physics();
+
 				physicsCountdown -= physicsRate;
 			}
 		}
-		render();
+		difficultyScaling(g, gl, (*g).ship.pos[0], (*g).ship.pos[1] );
+
+
 		x11.swapBuffers();
 	}
 	cleanup_fonts();
 	logClose();
 	return 0;
 }
-
+// in charge of initalizing image textures
 void init_opengl(void)
 {
 	//OpenGL initialization
@@ -254,10 +266,10 @@ void init_opengl(void)
 	// Bind texture for each texture id
 	glBindTexture(GL_TEXTURE_2D, gl.bigfootTexture);
         //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-                 GL_RGB, GL_UNSIGNED_BYTE, img[0].data);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+		GL_RGB, GL_UNSIGNED_BYTE, img[0].data);
 
 	glGenTextures(1, &gl.luisTexture);
 	// Generate texture for each texture id
@@ -267,39 +279,49 @@ void init_opengl(void)
 	// Bind texture for each texture id
 	glBindTexture(GL_TEXTURE_2D, gl.luisTexture);
         //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-		         GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+		GL_RGB, GL_UNSIGNED_BYTE, img[1].data);
 
 	glGenTextures(1, &gl.AdolfoTexture);
 
 	w=img[2].width;
-    h=img[2].height;
+  h=img[2].height;
+  glBindTexture (GL_TEXTURE_2D, gl.AdolfoTexture);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+     GL_RGB, GL_UNSIGNED_BYTE, img[2].data);
 
-    glBindTexture (GL_TEXTURE_2D, gl.AdolfoTexture);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-                 GL_RGB, GL_UNSIGNED_BYTE, img[2].data);
+  glGenTextures(1, &gl.chrisTexture);
+  w = img[3].width;
+  h = img[3].width;
+  glBindTexture(GL_TEXTURE_2D, gl.chrisTexture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+     GL_RGB, GL_UNSIGNED_BYTE, img[3].data);
 
-    glGenTextures(1, &gl.chrisTexture);
-    w = img[3].width;
-    h = img[3].width;
-    glBindTexture(GL_TEXTURE_2D, gl.chrisTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-                 GL_RGB, GL_UNSIGNED_BYTE, img[3].data);
+  glGenTextures(1, &gl.josephTexture);
+  w = img[4].width;
+  h = img[4].width;
+  glBindTexture(GL_TEXTURE_2D, gl.josephTexture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+     GL_RGB, GL_UNSIGNED_BYTE, img[4].data);
 
-    glGenTextures(1, &gl.josephTexture);
-    w = img[4].width;
-    h = img[4].width;
-    glBindTexture(GL_TEXTURE_2D, gl.josephTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-                 GL_RGB, GL_UNSIGNED_BYTE, img[4].data);
+ 	glGenTextures(1, &gl.blackholeTexture);
+  w = img[5].width;
+  h = img[5].width;
+  glBindTexture(GL_TEXTURE_2D, gl.blackholeTexture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+    GL_RGB, GL_UNSIGNED_BYTE, img[5].data);
+
+
 
 }
 
@@ -445,7 +467,7 @@ int check_keys(XEvent *e)
 			break;
 		case XK_q:
 			modify_singleton(n);
-			createAsteroid(g);
+			createAsteroid(g, gl, 0, 0);
 			break;
 		case XK_Down:
 			break;
@@ -741,6 +763,18 @@ void render()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 	if (!(*g).show_credits) {
+		/*
+		//Draw the blackhole
+			glColor3ub(255,255,255);
+		glBindTexture(GL_TEXTURE_2D, gl.blackholeTexture);
+		glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, 0.0f); glVertex2f(0,  0);
+			glTexCoord2f(1.0f, 0.0f); glVertex2f(0,  YRES);
+			glTexCoord2f(1.0f, 1.0f); glVertex2f(XRES, YRES);
+			glTexCoord2f(0.0f, 1.0f); glVertex2f(XRES, 0);
+		glEnd();
+		*/
+
 		Rect r;
 		//
 		r.bot = gl.yres - 20;
@@ -750,6 +784,8 @@ void render()
 		ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", (*g).nbullets);
 		ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", (*g).nasteroids);
 		//-------------------------------------------------------------------------
+
+
 		//Draw the ship
 		glColor3fv((*g).ship.color);
 		glPushMatrix();
