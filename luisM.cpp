@@ -6,34 +6,6 @@
 #include "classes.h"
 #include <string>
 
-class Blackhole {
-public:
-	Vec dir;
-	Vec pos;
-	Vec vel;
-	float angle;
-	float color[3];
-	float gravity;
-	Blackhole(int xPos, int yPos);
-};
-
-Blackhole::Blackhole(int xPos, int yPos) {
-  VecZero(dir);
-  pos[0] = (Flt)(xPos/2);
-  pos[1] = (Flt)(yPos/2);
-  pos[2] = 0.0f;
-  VecZero(vel);
-  angle = 0.0;
-  color[0] = color[1] = color[2] = 1.0;
-}
-
-void blackholePhysics()
-{
-
-}
-
-
-
 void DrawCircle(float cx, float cy, float r, int num_segments)
 {
 	float theta = 2 * 3.1415926 / float(num_segments);
@@ -53,6 +25,65 @@ void DrawCircle(float cx, float cy, float r, int num_segments)
 	}
 	glEnd();
 }
+
+class Scrap {
+public:
+	Vec dir;
+  Vec pos;
+  Vec vel;
+	Scrap();
+
+	} *scraps = new Scrap[MAX];
+
+Scrap::Scrap() {
+	VecZero(dir);
+	VecZero(pos);
+	VecZero(vel);
+
+}
+
+
+
+class Blackhole {
+public:
+	Vec dir;
+	Vec pos;
+	Vec vel;
+	float angle;
+	float color[3];
+	float gravity;
+	float size;
+	Blackhole();
+	void physics();
+	void render();
+} blackhole;
+
+Blackhole::Blackhole() {
+  VecZero(dir);
+  pos[0] = 0;
+  pos[1] = 0;
+  pos[2] = 0.0f;
+  VecZero(vel);
+  angle = 0.0;
+  color[0] = color[1] = color[2] = 1.0;
+	size = 100;
+	void physics();
+	void render();
+
+};
+
+
+void Blackhole::physics()
+{
+
+}
+
+void Blackhole::render()
+{
+	DrawCircle(pos[0]/2, pos[1]/2, size, 100);
+}
+
+
 
 
 void creditsLuis(int x, int y, GLuint luisTexture)
@@ -78,17 +109,9 @@ void creditsLuis(int x, int y, GLuint luisTexture)
 		glTexCoord2f(0.0f, 1.0f); glVertex2f(-wid, -wid);
 	glEnd();
 	glPopMatrix();
-
 }
 
-
-void modify_singleton(Num n)
-{
-	cout << n.getNum() << endl;
-
-}
-
-void createAsteroid(Game *g, Global gl, int xPos, int yPos)
+void createAsteroid(Game *g, Global gl)
 {
 	Asteroid *a = new Asteroid;
 	a->nverts = 8;
@@ -117,20 +140,95 @@ void createAsteroid(Game *g, Global gl, int xPos, int yPos)
 	if ((*g).ahead != NULL)
 		(*g).ahead->prev = a;
 		(*g).ahead = a;
+
+	(*g).nasteroids++;
 }
 
+void createBullet(Game *g, Global gl, Object object)
+{
+	struct timespec bt;
+	clock_gettime(CLOCK_REALTIME, &bt);
+	double ts = timeDiff(&(*g).bulletTimer, &bt);
+	if (ts > 0.1) {
+		timeCopy(&(*g).bulletTimer, &bt);
+		//shoot a bullet...
+		if ((*g).nbullets < object.maxBullets) {
+			Flt rad;
+			Flt xdir;
+			Flt ydir;
+			Bullet *b;
+			switch(object.powerLevel)
+			{
+			case 1:
+
+				b = &(*g).barr[(*g).nbullets];
+				timeCopy(&b->time, &bt);
+				b->pos[0] = object.pos[0];
+				b->pos[1] = object.pos[1];
+				b->vel[0] = object.vel[0];
+				b->vel[1] = object.vel[1];
+				//convert ship angle to radians
+				rad = ((object.angle+90.0) / 360.0f) * PI * 2.0;
+				//convert angle to a vector
+				xdir = cos(rad);
+				ydir = sin(rad);
+				b->pos[0] += xdir*20.0f;
+				b->pos[1] += ydir*20.0f;
+				b->vel[0] += xdir*6.0f + rnd()*0.1;
+				b->vel[1] += ydir*6.0f + rnd()*0.1;
+				b->color[0] = 1.0f;
+				b->color[1] = 1.0f;
+				b->color[2] = 1.0f;
+				++(*g).nbullets;
+
+			break;
+			case 2:
+
+			for( int i = 45; i <= 135; i+=45 )
+			{
+				b = &(*g).barr[(*g).nbullets];
+				timeCopy(&b->time, &bt);
+				b->pos[0] = object.pos[0];
+				b->pos[1] = object.pos[1];
+				b->vel[0] = object.vel[0];
+				b->vel[1] = object.vel[1];
+				//convert ship angle to radians
+				rad = ((object.angle + i) / 360.0f) * PI * 2.0;
+				//convert angle to a vector
+				xdir = cos(rad);
+				ydir = sin(rad);
+				b->pos[0] += xdir*20.0f;
+				b->pos[1] += ydir*20.0f;
+				b->vel[0] += xdir*6.0f + rnd()*0.1;
+				b->vel[1] += ydir*6.0f + rnd()*0.1;
+				b->color[0] = 1.0f;
+				b->color[1] = 1.0f;
+				b->color[2] = 1.0f;
+				++(*g).nbullets;
+			}
 
 
-void difficultyScaling(Game *g, Global gl, int xPos, int yPos)
+			break;
+		}
+	}
+
+	}
+}
+void difficultyScaling(Game *g, Global gl)
 {
 	Rect r;
 	unsigned int c = 0x00ffff44;
-	r.bot = yPos;
-	r.left = xPos;
+	r.bot = (*g).ship.pos[1];
+	r.left = (*g).ship.pos[0];
 	r.center = -50;
 	(*g).difficulty += 0.001;
-	ggprint8b(&r, 16, c, "%f", log((*g).difficulty));
+	ggprint8b(&r, 16, c, "%f", (*g).difficulty);
 
-	DrawCircle(gl.xres/2, gl.yres/2, 100, 10);
+	blackhole.pos[0] = gl.xres;
+	blackhole.pos[1] = gl.yres;
+	blackhole.render();
+
+
+
 
 }

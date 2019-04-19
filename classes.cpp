@@ -1,15 +1,5 @@
 #include "classes.h"
 
-
-Num::Num(int n) : num(n)
-{
-}
-
-int Num::getNum()
-{
-  return num;
-}
-
 Global::Global() {
   xres = 0;
   yres = 0;
@@ -72,6 +62,10 @@ Ship::Ship(int xPos, int yPos) {
   VecZero(vel);
   angle = 0.0;
   color[0] = color[1] = color[2] = 1.0;
+  maxHealth = 5;
+  currentHealth = maxHealth;
+  powerLevel = 1;
+  maxBullets = MAX;
 }
 
 Bullet::Bullet()
@@ -83,6 +77,8 @@ Asteroid::Asteroid() {
 		prev = NULL;
 		next = NULL;
     shipClass  = rand()%5;
+    maxHealth = 3;
+    currentHealth = maxHealth;
 }
 
 
@@ -90,7 +86,7 @@ Game::Game(int xWindowSize, int yWindowSize, const Ship& ship) : ship(ship) {
 
 	show_credits = false;
 	ahead = NULL;
-	barr = new Bullet[MAX_BULLETS];
+	barr = new Bullet[MAX];
 	nasteroids = 0;
 	nbullets = 0;
 	mouseThrustOn = false;
