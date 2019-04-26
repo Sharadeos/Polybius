@@ -148,6 +148,8 @@ public:
 	Bullet *barr;
 	int nasteroids;
 	int nbullets;
+	Enemy *ahead;
+	int nenemy;
 	struct timespec bulletTimer;
 	struct timespec mouseThrustTimer;
 	bool mouseThrustOn;
@@ -165,4 +167,15 @@ public:
 
 };
 
+class Enemy: public Object {
+    int nverts;
+    Flt radius;
+    Vec verts[6];
+    float rotate;
+    float color[3];
+    struct Enemy *prev;
+    int shipClass;
+    
+    struct Enemy *next;
+Enemy();
 #endif

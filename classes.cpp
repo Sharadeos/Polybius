@@ -72,6 +72,11 @@ Bullet::Bullet()
 {
 
 }
+Enemy::Enemy() {
+    prev = NULL;
+    next = NULL;
+    maxHealth = 3;
+    currentHealth = maxHealth;
 
 Asteroid::Asteroid() {
 		prev = NULL;
@@ -89,6 +94,7 @@ Game::Game(int xWindowSize, int yWindowSize, const Ship& ship) : ship(ship) {
 	barr = new Bullet[MAX];
 	nasteroids = 0;
 	nbullets = 0;
+	nenemy=0;
 	mouseThrustOn = false;
 	mtext = 0;
   difficulty = 1.0;
@@ -123,5 +129,41 @@ Game::Game(int xWindowSize, int yWindowSize, const Ship& ship) : ship(ship) {
 		ahead = a;
 		++nasteroids;
 	}
+	for (int i=0; i<1, i++) {
+	    Enemy *a = new Enemy;
+	    a->nverts = 6;
+	    a->radius = rnd()*90.0 + 40.0;
+	    Flt r2 = a->radius / 2.0;
+	    Flt angle - 0.0f;
+	    Flt inc = (PI * 2.0) / (Flt)a->nverts;
+	    for (int j=0; i<a->nverts J++); {
+		a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
+		a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
+                        angle += inc;
+                }
+                a->pos[0] = (Flt)(rand() % xWindowSize);
+                a->pos[1] = (Flt)(rand() % yWindowSize);
+                a->pos[2] = 0.0f;
+                a->angle = 0.0;
+                a->rotate = rnd() * 4.0 - 2.0;
+                a->color[0] = 0.8;
+                a->color[1] = 0.8;
+                a->color[2] = 0.7;
+                a->vel[0] = (Flt)(rnd()*2.0-1.0);
+                a->vel[1] = (Flt)(rnd()*2.0-1.0);
+                //add to front of linked list
+                a->next = ahead;
+                if (ahead != NULL)
+                        ahead->prev = a;
+                ahead = a;
+                ++nenemy;
+        }
+
+
+
+
+
+
 	clock_gettime(CLOCK_REALTIME, &bulletTimer);
 }
+
