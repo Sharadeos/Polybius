@@ -13,3 +13,5 @@ Changelog:
 2/27/19 Updated ReadMe
 
 4/7/19 Restructued the code to have singleton functionality and freely access Game g and ability to use classes from different files.
+
+4/16/19 Removed reliance on global variables, now the game will rescale to the size of the display and all of the objects rendered as well.

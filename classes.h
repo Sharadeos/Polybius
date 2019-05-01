@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <bits/stdc++.h>
 using namespace std;
 #ifdef USE_OPENAL_SOUND
 #include </usr/include/AL/alut.h>
@@ -46,10 +47,8 @@ typedef Flt	Matrix[4][4];
 const float timeslice = 1.0f;
 const float gravity = -0.2f;
 #define PI 3.141592653589793
+#define MAX 2^20
 #define ALPHA 1
-#define XRES 1250
-#define YRES 900
-const int MAX_BULLETS = 11;
 const Flt MINIMUM_ASTEROID_SIZE = 60.0;
 
 
@@ -66,14 +65,6 @@ extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
 
-class Num {
-  private:
-    int num;
-  public:
-    Num(int n);
-    int getNum();
-};
-
 class Global {
   public:
     Global();
@@ -84,6 +75,7 @@ class Global {
 	  GLuint AdolfoTexture;
 	  GLuint chrisTexture;
     GLuint josephTexture;
+    GLuint blackholeTexture;
     // declare GLuint textid for each png
 
 };
@@ -99,36 +91,43 @@ class Image {
 };
 
 
-class Ship {
+class Object {
+
 public:
-	Vec dir;
-	Vec pos;
-	Vec vel;
-	float angle;
+  Vec dir;
+  Vec pos;
+  Vec vel;
+  float angle;
+  int maxHealth;
+  int currentHealth;
+  int maxBullets;
+  int powerLevel;
+};
+
+class Ship : public Object {
+public:
 	float color[3];
 	int number;
-	Ship();
+  int x;
+  int y;
+
+	Ship(int xPos, int yPos);
 };
 
 
-class Bullet {
+class Bullet: public Object {
 public:
-	Vec pos;
-	Vec vel;
 	float color[3];
 	struct timespec time;
 	Bullet();
 };
 
 
-class Asteroid {
+class Asteroid: public Object {
 public:
-	Vec pos;
-	Vec vel;
 	int nverts;
 	Flt radius;
 	Vec vert[8];
-	float angle;
 	float rotate;
 	float color[3];
 	struct Asteroid *prev;
@@ -142,7 +141,7 @@ class Game {
 
 private:
 	static Game* instance;
-	Game();
+
 public:
 	Ship ship;
 	Asteroid *ahead;
@@ -154,6 +153,10 @@ public:
 	bool mouseThrustOn;
 	bool show_credits;
 	float mtext;
+  float difficulty;
+	Game(int xWindowSize, int yWindowSize, const Ship & ship);
+
+
 
 	static Game* getInstance();
 	~Game() {
