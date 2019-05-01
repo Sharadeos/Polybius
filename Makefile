@@ -1,16 +1,13 @@
-
 CFLAGS = -I ./include
 ##LIB    = ./libggfonts.so
 LFLAGS = -lrt -lX11 -lGLU -lGL -pthread -lm #-lXrandr
 
-all: polybius
+all: asteroids
 
-polybius: polybius.cpp log.cpp timers.cpp andrewH.cpp luisM.cpp adolfoV.cpp chrisR.cpp josephG.cpp classes.cpp
-	g++ $(CFLAGS) polybius.cpp log.cpp timers.cpp andrewH.cpp luisM.cpp adolfoV.cpp chrisR.cpp josephG.cpp classes.cpp libggfonts.a -Wall -Wextra $(LFLAGS) -opolybius \
-	-D USE_OPENAL_SOUND \
-	/usr/lib/x86_64-linux-gnu/libopenal.so \
-	/usr/lib/x86_64-linux-gnu/libalut.so
+asteroids: asteroids.cpp log.cpp timers.cpp
+	g++ $(CFLAGS) asteroids.cpp log.cpp timers.cpp libggfonts.a -Wall -Wextra $(LFLAGS) -oasteroids
 
 clean:
-	rm -f polybius
+	rm -f asteroids
 	rm -f *.o
+

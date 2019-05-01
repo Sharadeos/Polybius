@@ -1,0 +1,77 @@
+Keyboard controls
+
+w = angle up
+s = angle down        // optional switch up and down
+a = angle left
+d = angle right
+z = roll left
+c = roll right
+e or > = thrust inc.
+q or < = thrust dec.
+spacebar = fire
+j = gun 1
+k = gun 2
+l = gun 3
+
+
+angle
+// 2PI = 360 degrees 
+float angle[3];         // (angle_xy, angle_z, roll)
+            // when angle_z = 0, ship points straight up, 180 = straight down
+
+need to guarantee angle stays within ranges [0,360] and [0,180]
+if z is inc., once above 180, z decreases count back down from 179 on opposite heading
+
+float velocity [0, MAX_VEL]
+
+float position [3];    // (x, y, z)
+
+
+
+
+    position[0] += velocity*cos(angle_xy)*sin(angle_z);
+    position[1] += velocity*sin(angle_xy)*sin(angle_z);
+    position[2] += velocity*cos(angle_z);
+
+
+
+float space[3];
+const float SPACE_SIZE = 1000000.0
+space[0] = space[1] = space[2] = SPACE_SIZE;
+start in the middle of space,
+position[0] = position[1] = position[2] = SPACE_SIZE/2;
+
+
+float stars[num_stars][2];    //0 = angle_xy; 1 = angle_z
+
+FOV = 160 degrees/90 degrees
+initialization of stars
+for (int i = 0; i < num_stars; i ++) {
+    stars[i][0] = (rand() % 359999) * .001     // in degrees, 
+    stars[i][1] = (rand() % 179999) * .001     
+
+
+float ships_xy = angle[0];
+float ships_z = angle[1];
+
+// possible errors when reaching edge, 360 and 180
+if (  stars[i][0] > (ships_xy - 80) && stars[i][0] < (ships_xy + 80)     // if star is in FOV based on 
+&& stars[i][1] > (ships_z - 45) && stars[i][1] < (ships_z + 45))    // the ships heading, straight
+                                    // towards middle of screen
+/*
+160 degrees = gl.xres;
+360 degrees = 2.25*gl.xres;
+90 degrees = gl.yres;
+180 degrees = 2*gl.yres;
+*/
+
+//if within fov, convert degrees to x and y coordinates
+stars_x = (stars[i][0]/360) * 2.25*gl.xres;
+stars_x = stars[i][0] * .00625*gl.xres;        //reduced above line
+stars_y = (stars[i][1]/180) * 2*gl.yres;
+stars_y = (stars[i][1]/90)*gl.res;        // reduced above line
+
+//rotate if ship is rolling
+draw at the vertex (stars_x, stars_y);
+
+
