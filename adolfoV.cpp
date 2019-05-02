@@ -88,3 +88,68 @@ public:
         */
         glEnd();
         glPopMatrix();
+
+
+	int w=gl.xres * .50;
+	int z=gl.yres * .50;
+	float Blue[4];
+	Blue[0]=0;
+	Blue[1]=1;
+	Blue[2]=1;
+	Blue[3]=0;
+	glColor3fv(Blue);
+	glPushMatrix();
+	glBegin(GL_POLYGON);
+	for (int i=0; i<g.enemy.numVertices; i++) {
+	    glVertex2f(w + g.enemy.Vertices[i][0], z + g.enemy.Vertices[i][1]);
+	}
+	glEnd();
+	glPopMatrix();
+
+	int c=gl.xres * .75;
+	int d=gl.yres * .75;
+	float Purple[4];
+	Purple[0]=1;
+	Purple[1]=0;
+	Purple[2]=1;
+	Purple[3]=0;
+	glColor3fv(Purple);
+	glPushMatrix();
+	glBegin(GL_POLYGON);
+	for (int i=0; i<g.enemy.numVertices; i++) {
+	    glVertex2f(c + g.enemy.Vertices[i][0], d + g.enemy.Vertices[i][1]);
+	}
+	glEnd();
+	glPopMatrix();
+
+	int e=gl.xres * .25;
+	int f=gl.yres * .75;
+	float Green[4];
+	Green[0]=0;
+	Green[1]=1;
+	Green[2]=0;
+	Green[3]=1;
+	glColor3fv(Green);
+	glPushMatrix();
+	glBegin(GL_POLYGON);
+	for (int i=0; i<g.enemy.numVertices; i++) {
+	    glVertex2f(e + g.enemy.Vertices[i][0], f + g.enemy.Vertices[i][1]);
+	}
+	glEnd();
+	glPopMatrix();
+
+	int k=gl.xres * .75;
+	int h=gl.yres * .25;
+	float Yellow[4];
+	Yellow[0]=1;
+	Yellow[1]=1;
+	Yellow[2]=0;
+	Yellow[3]=0;
+	glColor3fv(Yellow);
+	glPushMatrix();
+	glBegin(GL_POLYGON);
+	for (int i=0; i<g.enemy.numVertices; i++) {
+	    glVertex2f(k + g.enemy.Vertices[i][0], h + g.enemy.Vertices[i][1]);
+	}
+       glEnd();
+glPopMatrix(); 
