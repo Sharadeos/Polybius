@@ -45,7 +45,6 @@ const int MAX_BULLETS = 11;
 const Flt MINIMUM_ASTEROID_SIZE = 60.0;
 const float PITCH = .6;
 const float TURN = .6;
-const float ROLL = -.8;
 const int KEYS = 100;
 //-----------------------------------------------------------------------------
 //Setup timers
@@ -60,9 +59,17 @@ extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
 
 
-float distanceFunc()
+float distanceFunc(Vec p1, Vec p2)
 {
-	return 0;
+    float x,y,z;
+    x = p2[0]-p1[0];
+    x *= x;
+    y = p2[1]-p1[1];
+    y *= y;
+    z = p2[2]-p1[2];
+    z *= z;
+    float dist = sqrt(x + y + z);
+	return dist;
 }
 
 class Global {
@@ -126,14 +133,7 @@ public:
 			 polar[1] -= 180;
 			 polar[1] = 180 - polar[2];
 		}
-/*	
-		if (polar[1] < 0) {
-			 polar[1] += 180;
-		}
-*/		
-		
-		}
-
+	}
 } object(0, 100, 0);
 
 
@@ -164,12 +164,55 @@ class Bullet {
 public:
 	Vec pos;
 	float vel;
-	Vec vec;
 	Vec angle;
 	float color[3];
-	struct timespec time;
+    struct timespec time;
+	Vec drawSize; //x, y axis for the resolution screen
+	Vec xyz;
+	Vec xyz2;
+	Vec polar;
 public:
-	Bullet() { }
+	Bullet() { 
+
+		xyz[0] = 0.0;
+		xyz[1] = 0.0;
+		xyz[2] = 0.0;
+		xyz2[0] = 0.0;
+		xyz2[1] = 0.0;
+		xyz2[2] = 0.0;
+		polar[0] = 0.0;
+		polar[1] = 0.0;
+		polar[2] = 0.0;
+	    color[0] = color[2] = 0.0;
+    	color[1] = 1.0;
+
+	}
+	void updatePolar(Vec ship) {
+
+		xyz[0] = pos[0] - ship[0];
+		xyz2[0] = xyz[0]*xyz[0];
+
+		xyz[1] = pos[1] - ship[1];
+		xyz2[1] = xyz[1] * xyz[1];
+
+		xyz[2] = pos[2] - ship[2];
+	 	xyz2[2] = xyz[2]*xyz[2];
+
+		polar[0] = sqrt(xyz2[0] + xyz2[1] + xyz2[2]);
+		//polar[1] = acos(xyz[2]/(sqrt(xyz2[0] + xyz2[1] + xyz2[2])));
+		polar[2] = acos(xyz[2]/polar[0]);
+		polar[2] *= 180/PI;
+		if (xyz[0]) {
+			polar[1] = atan2(xyz[1],xyz[0]);
+			polar[1] *= 180/PI;
+		}
+		else
+			polar[1] = 90.0;  
+		if (polar[1] > 180) {
+			 polar[1] -= 180;
+			 polar[1] = 180 - polar[2];
+		}
+    }
 };
 
 class Asteroid {
@@ -549,22 +592,23 @@ void physics()
 	g.ship.pos[0] += g.ship.vel*cos(a_xy)*sin(a_z);
 	g.ship.pos[1] += g.ship.vel*sin(a_xy)*sin(a_z);
 	g.ship.pos[2] += g.ship.vel*cos(a_z);
+	
+    //Update bullet positions
+    struct timespec bt;
+    clock_gettime(CLOCK_REALTIME, &bt);
     int i = 0;
 	while (i < g.nbullets) {
 		Bullet *b = &g.barr[i];
 		//How long has bullet been alive?
-	    struct timespec bt;
-    	clock_gettime(CLOCK_REALTIME, &bt);
-	    int i=0;
 		double ts = timeDiff(&b->time, &bt);
 		if (ts > 2.5) {
-			//time to delete the bullet.
+		    //time to delete the bullet.
 			memcpy(&g.barr[i], &g.barr[g.nbullets-1],
 				sizeof(Bullet));
 			g.nbullets--;
 			//do not increment i.
 			continue;
-		}
+        }
 	    float a_xy, a_z;
     	a_xy = b->angle[0];
 	    a_xy *= PI/180;
@@ -574,6 +618,7 @@ void physics()
 		b->pos[0] += b->vel*cos(a_xy)*sin(a_z);
 		b->pos[1] += b->vel*sin(a_xy)*sin(a_z);
 		b->pos[2] += b->vel*cos(a_z);
+        b->updatePolar(g.ship.pos);
 		/*Check for collision with window edges
 		if (b->pos[0] < 0.0) {
 			b->pos[0] += (float)gl.xres;
@@ -591,19 +636,17 @@ void physics()
 		i++;
 	}
 	//object updating position
-
-  object.updatePolar(g.ship.pos);
-	//object.drawSize[0] -= (g.ship.vel*cos(a_xy)*sin(a_z));
-	//object.drawSize[1] -=  g.ship.vel*cos(a_z);
-	//object.pos[0] += (g.ship.vel*cos(a_xy)*sin(a_z));
-	//object.pos[1] += (g.ship.vel*sin(a_xy)*sin(a_z));
-
-
-	//g.ship.pos[0] += g.ship.vel*cos(a_xy)*sin(a_z);
-	//g.ship.pos[1] += g.ship.vel*sin(a_xy)*sin(a_z);
-	//g.ship.pos[2] += g.ship.vel*cos(a_z);
+    object.updatePolar(g.ship.pos);
 	/*
 	//Check for collision with window edges
+	object.drawSize[0] -= (g.ship.vel*cos(a_xy)*sin(a_z));
+	object.drawSize[1] -=  g.ship.vel*cos(a_z);
+	object.pos[0] += (g.ship.vel*cos(a_xy)*sin(a_z));
+	object.pos[1] += (g.ship.vel*sin(a_xy)*sin(a_z));
+
+	g.ship.pos[0] += g.ship.vel*cos(a_xy)*sin(a_z);
+	g.ship.pos[1] += g.ship.vel*sin(a_xy)*sin(a_z);
+	g.ship.pos[2] += g.ship.vel*cos(a_z);
 	if (g.ship.pos[0] < 0.0) {
 		g.ship.pos[0] += (float)gl.xres;
 	}
@@ -616,33 +659,7 @@ void physics()
 	else if (g.ship.pos[1] > (float)gl.yres) {
 		g.ship.pos[1] -= (float)gl.yres;
 	}
-	//
-	//Update bullet positions
-	struct timespec bt;
-	clock_gettime(CLOCK_REALTIME, &bt);
-	int i=0;
-	//Update asteroid positions
-	Asteroid *a = g.ahead;
-	while (a) {
-		a->pos[0] += a->vel[0];
-		a->pos[1] += a->vel[1];
-		//Check for collision with window edges
-		if (a->pos[0] < -100.0) {
-			a->pos[0] += (float)gl.xres+200;
-		}
-		else if (a->pos[0] > (float)gl.xres+100) {
-			a->pos[0] -= (float)gl.xres+200;
-		}
-		else if (a->pos[1] < -100.0) {
-			a->pos[1] += (float)gl.yres+200;
-		}
-		else if (a->pos[1] > (float)gl.yres+100) {
-			a->pos[1] -= (float)gl.yres+200;
-		}
-		a->angle += a->rotate;
-		a = a->next;
-	}
-	//
+	
 	//Asteroid collision with bullets?
 	//If collision detected:
 	//     1. delete the bullet
@@ -756,18 +773,6 @@ void physics()
 
 				//object.drawSize[0] -= 0.008333*gl.xres*TURN;
 	}
-	// z
-	if (gl.keyhits[22]) {
-		g.ship.angle[2] += ROLL;
-		//if (g.ship.angle >= 360.0f)
-		//	g.ship.angle -= 360.0f;
-	}
-	// c
-	if (gl.keyhits[99]) {
-		g.ship.angle[2] -= ROLL;
-		//if (g.ship.angle < 0.0f)
-		//	g.ship.angle += 360.0f;
-	}
 	//left
 	if (gl.keyhits[61]) {
 		//g.ship.pos[0] -= 5;
@@ -786,21 +791,21 @@ void physics()
     // spacebar
 	if (gl.keyhits[32]) {
 		//a little time between each bullet
-		//struct timespec bt;
-		//clock_gettime(CLOCK_REALTIME, &bt);
-		//double ts = timeDiff(&g.bulletTimer, &bt);
-		//if (ts > 0.1) {
-		//	timeCopy(&g.bulletTimer, &bt);
+		struct timespec bt;
+		clock_gettime(CLOCK_REALTIME, &bt);
+		double ts = timeDiff(&g.bulletTimer, &bt);
+		if (ts > 0.1) {
+			timeCopy(&g.bulletTimer, &bt);
 			if (g.nbullets < MAX_BULLETS) {
 				//shoot a bullet...
 				//Bullet *b = new Bullet;
 				Bullet *b = &g.barr[g.nbullets];
-//				timeCopy(&b->time, &bt);
+				timeCopy(&b->time, &bt);
 				b->pos[0] = g.ship.pos[0];
 				b->pos[1] = g.ship.pos[1];
 				b->pos[2] = g.ship.pos[2];
+				//b->vel = g.ship.vel + 25;
 				b->vel = g.ship.vel + 25;
-				b->vel = g.ship.vel;
 				//convert ship angle to radians
 				b->angle[0] = g.ship.angle[0];
 				b->angle[1] = g.ship.angle[1];
@@ -809,7 +814,7 @@ void physics()
 				b->color[2] = 0.0f;
 				g.nbullets++;
 			}
-		//}
+		}
 	}
 	/*
     if (gl.keys[XK_Up]) {
@@ -900,6 +905,68 @@ void drawObject(Object rend_object, float xScale, float yScale)
 		glVertex2f(object.drawSize[0], object.drawSize[1]);
 		glEnd();
 }
+void drawBullet(Bullet rend_object, float xScale, float yScale)
+{
+
+	int sizeofObject = 50;
+	float e[3];
+	e[0] = 0;
+	e[1] = rend_object.polar[1];
+	e[2] = rend_object.polar[2];
+	
+    if (e[1] < 0) {
+        e[1] = 360 + e[1];
+    }
+    float s[2];
+	s[0] = g.ship.angle[0];
+	s[1] = g.ship.angle[1];
+	float low, high;
+	low = s[0] - 60;
+	high = s[0] + 60;
+	high -= low;
+    e[1] -= low;
+    if (e[1] > 360) {
+        e[1] = e[1] - 360;
+    }
+    float x, y;
+	x = ((high - e[1])/120)*gl.xres;
+  	y = ((s[1] + 45 - e[2])/90)*gl.yres;
+
+    glColor3fv(rend_object.color);
+    glPushMatrix();
+    glBegin(GL_POLYGON);
+	glVertex2i(x-5,y);
+	glVertex2i(x,y+5);
+	glVertex2i(x+5,y);
+	glVertex2i(x,y-5);
+	glEnd();
+    glPopMatrix();
+/*
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		glBegin(GL_POLYGON);
+			 glVertex2i(50,100);
+			 glVertex2i(100,100);
+			 glVertex2i(100,150);
+			 glVertex2i(50,150);
+			 glVertex2i(x+rend_object.drawSize[0]-sizeofObject*xScale,y+rend_object.drawSize[1]+sizeofObject*yScale);
+			 glVertex2i(x+rend_object.drawSize[0]+sizeofObject*xScale,y+rend_object.drawSize[1]+sizeofObject*yScale);
+			 glVertex2i(x+rend_object.drawSize[0]+sizeofObject*xScale,y+rend_object.drawSize[1]-sizeofObject*yScale);
+			 glVertex2i(x+rend_object.drawSize[0]-sizeofObject*xScale,y+rend_object.drawSize[1]-sizeofObject*yScale);
+
+			 //glVertex2f(50, 100);
+			 //glVertex2i(100,100);
+			 //glVertex2i(100,150);
+			 //glVertex2i(50,150);
+		glEnd();
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glBegin(GL_POINTS);
+		glVertex2f(object.drawSize[0], object.drawSize[1]);
+		glEnd();
+*/
+}
 
 
 void render()
@@ -907,6 +974,10 @@ void render()
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	drawObject(object, 1, 1);
+	for (int i=0; i<g.nbullets; i++) {
+		Bullet *b = &g.barr[i];
+	    drawBullet(g.barr[i], 1, 1);
+    }
 	//drawObject(object2, 0.5, 1);
 
 
@@ -984,7 +1055,7 @@ void render()
 		}
 	}
 	//-------------------------------------------------------------------------
-	//Draw the bullets
+	/*Draw the bullets
 	for (int i=0; i<g.nbullets; i++) {
 		Bullet *b = &g.barr[i];
 		//Log("draw bullet...\n");
@@ -1002,7 +1073,7 @@ void render()
 		glVertex2f(b->pos[0]+1.0f, b->pos[1]+1.0f);
 		glEnd();
 	}
-    
+    */
     //stars
     float cx = gl.xres/2;
     float cy = gl.yres/2;
@@ -1399,7 +1470,7 @@ void render()
 	r.left = cx-34;
 	r.center = 0;
 	//ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
-	//ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
+	ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
 	ggprint8b(&r, 16, 0x00ffff00, "%.1f : %.1f ", g.ship.angle[0], g.ship.angle[1]);
 	//ggprint8b(&r, 16, 0x00ffff00, "%.1f:%.1f,roll=%.1f)", g.ship.angle[0], g.ship.angle[1], g.ship.angle[2]);
 	//ggprint8b(&r, 16, 0x00ffff00, "(x=%.1f,y=%.1f)", g.ship.pos[0], g.ship.pos[1]);
@@ -1407,7 +1478,7 @@ void render()
 
 	ggprint8b(&r, 16, 0x00ffff00, "(object x=%.1f,object y=%.1f,object z=%.1f)", object.pos[0], object.pos[1], object.pos[2]);
 
-	ggprint8b(&r, 16, 0x00ffff00, "(distance x=%.1f)", sqrt((pow(g.ship.pos[0] - object.pos[0],2)) + (pow(g.ship.pos[1] - object.pos[1],2))) );
+	//ggprint8b(&r, 16, 0x00ffff00, "(distance x=%.1f)", sqrt((pow(g.ship.pos[0] - object.pos[0],2)) + (pow(g.ship.pos[1] - object.pos[1],2))) );
 
 	//ggprint8b(&r, 16, 0x00ffff00, "(object render x=%.1f,object render y=%.1f)", object.polar[1],object.polar[2]);
 
