@@ -564,7 +564,7 @@ void drawObject(Object & rend_object)
 {
 
 	int sizeofObject = 50;
-	int tempValue = 0;
+	float tempValue = 0;
 
 	float e[3];
 	e[0] = 0;
@@ -609,10 +609,10 @@ void drawObject(Object & rend_object)
 			rend_object.yScale = rend_object.yScale - tempValue;
 		}
 
+
 		float distanceScale = 12/rend_object.polar[0];
 
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		glBegin(GL_POLYGON);
 			/*
