@@ -25,6 +25,9 @@ Base::Base() {
   polar[0] = 0.0;
   polar[1] = 0.0;
   polar[2] = 0.0;
+
+  xScale = 0.0;
+  yScale = 0.0;
 }
 
 void Base::updatePolar(Vec ship) {
@@ -140,7 +143,8 @@ Asteroid::Asteroid() {
 }
 
 
-Game::Game(int xWindowSize, int yWindowSize, const Ship& ship) : ship(ship) {
+Game::Game(int xWindowSize, int yWindowSize, const Ship& ship, const Object& object) : ship(ship), object(object)
+ {
 
 	show_credits = false;
 	ahead = NULL;
@@ -150,6 +154,7 @@ Game::Game(int xWindowSize, int yWindowSize, const Ship& ship) : ship(ship) {
 	mouseThrustOn = false;
 	mtext = 0;
   difficulty = 1.0;
+
 
 
 num_stars = 32000;

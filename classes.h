@@ -69,6 +69,8 @@ extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
 
+
+
 class Global {
   public:
     Global();
@@ -113,6 +115,10 @@ public:
 	int currentHealth;
 	int maxBullets;
 	int powerLevel;
+
+
+	float xScale;
+	float yScale;
 
 	void updatePolar(Vec);
 	Base();
@@ -178,13 +184,15 @@ public:
 	Bullet *barr;
 	int nasteroids;
 	int nbullets;
+	Object object;
+
 	struct timespec bulletTimer;
 	struct timespec mouseThrustTimer;
 	bool mouseThrustOn;
 	bool show_credits;
 	float mtext;
   float difficulty;
-	Game(int xWindowSize, int yWindowSize, const Ship & ship);
+	Game(int xWindowSize, int yWindowSize, const Ship & ship, const Object & object);
 
 	int num_stars;
 	float stars[32000][2];
