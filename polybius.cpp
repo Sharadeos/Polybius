@@ -31,6 +31,9 @@ void carrierPF(float* a, float* b, int x, int y);
 void createAsteroid(Game *g, Global gl);
 void createBullet(Game *g, Global gl, Object object);
 void difficultyScaling(Game *g, Global gl);
+//chris extern functions
+void ALExplodeUpdate(ALenum param, float x, float y/*, ALfloat *z*/);
+void playMusic();
 
 // add png files name and create array based on # of pngs
 //Image img("./images/bigfoot.png");
@@ -216,7 +219,11 @@ int main()
 	x11.set_mouse_position(100,100);
 	int done=0;
 
+
+
 // MOVE
+
+	playMusic();
 	for (int i = 0; i < (*g).num_stars; i++) {
 			(*g).stars[i][0] = (rand() % 359999)*.001; // maps to degrees
 			(*g).stars[i][1] = (rand() % 179999)*.001;
