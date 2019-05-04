@@ -75,17 +75,16 @@ class Global {
   public:
     Global();
 	  int xres, yres;
-  	//char keys[65536];
-		int keyhits[KEYS];
+  	  //char keys[65536];
+	  int keyhits[KEYS];
+      // declare GLuint textid for each png
 
 	  GLuint bigfootTexture;
 	  GLuint luisTexture;
 	  GLuint AdolfoTexture;
 	  GLuint chrisTexture;
-    GLuint josephTexture;
-    GLuint blackholeTexture;
-    // declare GLuint textid for each png
-
+      GLuint josephTexture;
+      GLuint blackholeTexture;
 };
 
 class Image {
@@ -107,7 +106,7 @@ public:
 	Vec dir;
 	Vec pos;
 	Vec vec;
-
+	Vec projection;
 	float vel;
 	float color[4];
 
@@ -195,7 +194,7 @@ public:
 	Game(int xWindowSize, int yWindowSize, const Ship & ship, const Object & object);
 
 	int num_stars;
-	float stars[32000][2];
+	float stars[32000][3];
 	float debris[500][3];
 
 	static Game* getInstance();

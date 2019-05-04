@@ -37,7 +37,7 @@ void playMusic();
 //joey extern functions
 void externalPhysics(Game *g, Global gl);
 void externalRender(Game *g, Global gl);
-
+void credit(Game *g, Global gl);
 // add png files name and create array based on # of pngs
 //Image img("./images/bigfoot.png");
 Image img[6] = {
@@ -217,8 +217,6 @@ int main()
 	x11.set_mouse_position(100,100);
 	int done=0;
 
-
-
 // MOVE
 
 	playMusic();
@@ -226,6 +224,7 @@ int main()
 	for (int i = 0; i < (*g).num_stars; i++) {
 			(*g).stars[i][0] = (rand() % 359999)*.001; // maps to degrees
 			(*g).stars[i][1] = (rand() % 179999)*.001;
+			(*g).stars[i][2] = ((rand() % 10)+1) *.1;
 			//(*g).stars[i][0] = i; // maps to degrees
 			//(*g).stars[i][1] = i;
 	}
@@ -244,7 +243,7 @@ int main()
 
 
 		//functions before render will not render on the setup_screen_res
-
+		credit(g,gl);	
 		if (!(*g).show_credits) {
 			physicsCountdown += timeSpan;
 			while (physicsCountdown >= physicsRate) {
@@ -259,6 +258,7 @@ int main()
 	}
 	cleanup_fonts();
 	logClose();
+	system("xset r on");
 	return 0;
 }
 // in charge of initalizing image textures
@@ -365,12 +365,9 @@ void normalize2d(Vec v)
 
 void check_mouse(XEvent *e)
 {
-	/*
-	//Did the mouse move?
-	//Was a mouse button clicked?
+	
 	static int savex = 0;
 	static int savey = 0;
-	//
 	static int ct=0;
 	//std::cout << "m" << std::endl << std::flush;
 	if (e->type == ButtonRelease) {
@@ -378,63 +375,73 @@ void check_mouse(XEvent *e)
 	}
 	if (e->type == ButtonPress) {
 		if (e->xbutton.button==1) {
-			//Left button is down
-			//a little time between each bullet
-					//createBullet(g, gl, (*g).ship);
-
-
-		}
-		if (e->xbutton.button==3) {
-			//Right button is down
-		}
+	    	//a little time between each bullet
+        	struct timespec bt;
+        	clock_gettime(CLOCK_REALTIME, &bt);
+        	double ts = timeDiff(&(*g).bulletTimer, &bt);
+        	if (ts > 0.1) {
+            	timeCopy(&(*g).bulletTimer, &bt);
+            	if ((*g).nbullets < MAX_BULLETS) {
+                	//shoot a bullet...
+	                //Bullet *b = new Bullet;
+    	            Bullet *b = &(*g).barr[(*g).nbullets];
+        	        timeCopy(&b->time, &bt);
+            	    b->pos[0] = (*g).ship.pos[0];
+                	b->pos[1] = (*g).ship.pos[1];
+	                b->pos[2] = (*g).ship.pos[2];
+    	            //b->vel = (*g).ship.vel + 25;
+        	        b->vel = (*g).ship.vel + 25;
+            	    //convert ship angle to radians
+                	b->angle[0] = (*g).ship.angle[0];
+	                b->angle[1] = (*g).ship.angle[1];
+    	            b->color[0] = 0.0f;
+        	        b->color[1] = 1.0f;
+                	b->color[2] = 0.0f;
+                	(*g).nbullets++;
+            	}
+			}
+        }
 	}
-	//keys[XK_Up] = 0;
+	if (e->xbutton.button==3) {
+		//Right button is down
+	}
 	if (savex != e->xbutton.x || savey != e->xbutton.y) {
 		//Mouse moved
-		int xdiff = savex - e->xbutton.x;
-		int ydiff = savey - e->xbutton.y;
-		if (++ct < 10)
+		float xdiff = savex - e->xbutton.x;
+		float ydiff = savey - e->xbutton.y;
+		if (++ct < 2)
 			return;
 		//std::cout << "savex: " << savex << std::endl << std::flush;
 		//std::cout << "e->xbutton.x: " << e->xbutton.x << std::endl <<
 		//std::flush;
-		if (xdiff > 0) {
+		if (xdiff < 0) {
 			//std::cout << "xdiff: " << xdiff << std::endl << std::flush;
-			(*g).ship.angle += 0.05f * (float)xdiff;
-			if ((*g).ship.angle >= 360.0f)
-				(*g).ship.angle -= 360.0f;
+			(*g).ship.angle[0] += .1*TURN*xdiff;
+			if ((*g).ship.angle[0] < 0.0f)
+				(*g).ship.angle[0] += 360.0f;
 		}
-		else if (xdiff < 0) {
+		else if (xdiff > 0) {
 			//std::cout << "xdiff: " << xdiff << std::endl << std::flush;
-			(*g).ship.angle += 0.05f * (float)xdiff;
-			if ((*g).ship.angle < 0.0f)
-				(*g).ship.angle += 360.0f;
+			(*g).ship.angle[0] += .1*TURN*xdiff;
+			if ((*g).ship.angle[0] > 360.0f)
+				(*g).ship.angle[0] -= 360.0f;
 		}
 		if (ydiff > 0) {
-			//apply thrust
-			//convert ship angle to radians
-			Flt rad = (((*g).ship.angle+90.0) / 360.0f) * PI * 2.0;
-			//convert angle to a vector
-			Flt xdir = cos(rad);
-			Flt ydir = sin(rad);
-			(*g).ship.vel[0] += xdir * (float)ydiff * 0.01f;
-			(*g).ship.vel[1] += ydir * (float)ydiff * 0.01f;
-            Flt speed = sqrt((*g).ship.vel[0]*(*g).ship.vel[0]+
-					(*g).ship.vel[1]*(*g).ship.vel[1]);
-			if (speed > 10.0f) {
-				speed = 10.0f;
-				normalize2d((*g).ship.vel);
-				(*g).ship.vel[0] *= speed;
-				(*g).ship.vel[1] *= speed;
-			}
-			(*g).mouseThrustOn = true;
-			clock_gettime(CLOCK_REALTIME, &(*g).mouseThrustTimer);
+			(*g).ship.angle[1] -= .1*PITCH*ydiff;
+			if ((*g).ship.angle[1] < 0.0f)
+				(*g).ship.angle[1] = 0.0f;
+		}
+		else if (ydiff < 0) {
+			//std::cout << "xdiff: " << xdiff << std::endl << std::flush;
+			(*g).ship.angle[1] -= .1*PITCH*ydiff;
+			if ((*g).ship.angle[1] > 180.0f)
+				(*g).ship.angle[1] = 180.0f;
 		}
 		x11.set_mouse_position(100,100);
 		savex=100;
 		savey=100;
 	}
-	*/
+	
 }
 
 
@@ -451,50 +458,6 @@ int check_keys(XEvent *e)
 			return 1;
 	}
 	return 0;
-
-	/*
-	//keyboard input?
-	static int shift=0;
-	int key = (XLookupKeysym(&e->xkey, 0) & 0x0000ffff);
-	//Log("key: %i\n", key);
-	if (e->type == KeyRelease) {
-		gl.keys[key]=0;
-		if (key == XK_Shift_L || key == XK_Shift_R)
-			shift=0;
-		return 0;
-	}
-	if (e->type == KeyPress) {
-		//std::cout << "press" << std::endl;
-		gl.keys[key]=1;
-		if (key == XK_Shift_L || key == XK_Shift_R) {
-			shift=1;
-			return 0;
-		}
-	} else {
-		return 0;
-	}
-	if (shift){}
-	switch (key) {
-		case XK_Escape:
-			return 1;
-		case XK_c:
-			(*g).show_credits = !(*g).show_credits;
-			break;
-		case XK_q:
-			createAsteroid(g, gl);
-			break;
-		case XK_e:
-			(*g).ship.powerLevel++;
-			break;
-		case XK_Down:
-			break;
-		case XK_equal:
-			break;
-		case XK_minus:
-			break;
-	}
-	return 0;
-	*/
 }
 
 void deleteAsteroid(Game *g, Asteroid *node)
@@ -585,12 +548,11 @@ void drawObject(Object & rend_object)
     if (e[1] > 360) {
         e[1] = e[1] - 360;
     }
-    float x, y;
 
-		x = ((high - e[1])/120)*gl.xres;
-  	y = ((s[1] + 45 - e[2])/90)*gl.yres;
-
-
+    rend_object.projection[0] = ((high - e[1])/120)*gl.xres;
+  	rend_object.projection[1] = ((s[1] + 45 - e[2])/90)*gl.yres;
+	float x = rend_object.projection[0];
+    float y = rend_object.projection[1];
 
 		//Scale max at the right edge of the setup_screen
 
@@ -780,10 +742,10 @@ void render()
 	if ((*g).show_credits) {
 	    (*g).mtext -= .02;
 	    andrewH(.5*gl.xres, .9*gl.yres, gl.bigfootTexture,(*g).mtext);
-  	  creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
+  	  	creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
 	    AdolfoValenciaPicture(.5*gl.xres, .5*gl.yres, gl.AdolfoTexture);
     	showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
-	    josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
+	   	josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
         // function calls for everyone with parameters
 	}
 }

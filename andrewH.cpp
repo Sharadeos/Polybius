@@ -45,7 +45,13 @@ void andrewH(int x, int y, GLuint textid, float move)
     if (sin(rad) > .98 || sin(rad) < -.98)
     	spin *= 1.01;
 }
-
+void credit(Game *g, Global gl) {
+	if (gl.keyhits[99]) {
+		(*g).show_credits = !(*g).show_credits;
+		usleep(200000);
+		gl.keyhits[99] = 0;
+	}
+}
 void externalPhysics(Game *g, Global gl)
 {
 
@@ -202,7 +208,7 @@ void externalPhysics(Game *g, Global gl)
   		}
   		//if ((*g).ship.angle < 0.0f)
   		//(*g).ship.angle += 360.0f;
-  	}const int MAX_BULLETS = 11;
+  	}
   	// w
   	if (gl.keyhits[19]) {
   			(*g).ship.angle[1] -= PITCH;
@@ -252,7 +258,7 @@ void externalPhysics(Game *g, Global gl)
   	}
   	if (gl.keyhits[64]) {
   	}
-
+	
       // spacebar
   	if (gl.keyhits[32]) {
   		//a little time between each bullet
@@ -307,46 +313,34 @@ void externalPhysics(Game *g, Global gl)
 
 void externalRender(Game *g, Global gl)
 {
-  //stars
-  float cx = gl.xres/2;
-  float cy = gl.yres/2;
-  glColor3fv((*g).ship.color);
-  glPushMatrix();
-  glBegin(GL_POINTS);
-  for (int i = 0; i < (*g).num_stars; i++) {
-      //float s = (*g).ship.angle[2];
-      //s *= PI/180;
-      //s = sin(s);
-      //float c = (*g).ship.angle[2];
-      //c *= PI/180;
-      //c = cos(c);
-      float x = (*g).ship.angle[0];
-      float y = (*g).ship.angle[1];
-      // converts to a x and y coordinate
-      x = (*g).stars[i][0]+x;
-      if (x >= 360.0f)
-          x -= 360.0f;
-      if (x <= 0)
-          x += 360.0f;
-      x = (x/120)*gl.xres;
-      y = (*g).stars[i][1]+y;
-      if (y >= 180.0f)
-          y -= 180.0f;
-      if (y <= 0)
-          y += 180.0f;
-            y = (y/90)*gl.yres;
-/*
-      x -= cx;
-      y -= cy;
-      float xnew = x * c - y * s;
-      float ynew = x * s + y * c;
-      x = xnew + cx;
-      y = ynew + cy;
-*/
-      glVertex2f(x,y);
-  }
-glEnd();
-glPopMatrix();
+    //stars
+    float cx = gl.xres/2;
+    float cy = gl.yres/2;
+    float stars[4] = {1,1,1,1};
+    for (int i = 0; i < (*g).num_stars; i++) {
+        stars[3] = (*g).stars[i][2];
+        glColor4fv(stars);
+        glPushMatrix();
+        glBegin(GL_POINTS);
+        float x = (*g).ship.angle[0];
+        float y = (*g).ship.angle[1];
+        // converts to a x and y coordinate
+        x = (*g).stars[i][0]+x;
+        if (x >= 360.0f)
+            x -= 360.0f;
+        if (x <= 0)
+            x += 360.0f;
+        x = (x/120)*gl.xres;
+        y = (*g).stars[i][1]+y;
+        if (y >= 180.0f)
+            y -= 180.0f;
+        if (y <= 0)
+            y += 180.0f;
+        y = (y/90)*gl.yres;
+        glVertex2f(x,y);
+        glEnd();
+        glPopMatrix();
+    }
 
   /*debris
   float tan[3];
@@ -563,7 +557,26 @@ glPopMatrix();
       glEnd();
     glPopMatrix();
   }
+  float Red[4] = {1,0,0,1}; 
+  float angle = atan2((*g).object.projection[1]-cy,(*g).object.projection[0]-cx);
+  float tri[3][2];
+  tri[0][0] = cx + (rad[2] + 15)*cos(angle);
+  tri[0][1] = cy + (rad[2] + 15)*sin(angle);
+  tri[1][0] = cx + rad[2]*cos(angle+.02);
+  tri[1][1] = cy + rad[2]*sin(angle+.02);
+  tri[2][0] = cx + rad[2]*cos(angle-.02);
+  tri[2][1] = cy + rad[2]*sin(angle-.02);
 
+  glColor4fv(Red);
+  glPushMatrix();
+  glBegin(GL_TRIANGLE_STRIP);
+  for (int i = 0; i < 3; i++) {
+  	glVertex2f(tri[i][0],tri[i][1]);
+  }
+  glEnd();
+  glPopMatrix();
+
+//  (*g).object.polar[1] 
   //cross beams
   float tribase = 0.02;//measured in radians
   for (int i = 0; i < 8; i++) {
@@ -587,10 +600,10 @@ glPopMatrix();
 
   // fill octagon ring
   for (int i = 0; i < 8; i++) {
-      int j = (i + 1) % 8;
-      glEnable(GL_BLEND);
-    glBlendFunc( GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-      glColor4fv((*g).ship.color);
+  	int j = (i + 1) % 8;
+    glEnable(GL_BLEND);
+   	glBlendFunc( GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glColor4fv((*g).ship.color);
     glPushMatrix();
     glBegin(GL_POLYGON);
     glVertex2f(v8[i][0], v8[i][1]);
@@ -624,6 +637,8 @@ glVertex2f(x,y);
   }
   glEnd();
   glPopMatrix();
+  
+  
 
   //green pizza slice inside radar
     float green[4];
@@ -639,22 +654,17 @@ glVertex2f(x,y);
     p = 12;
     glVertex2f(radar[0],radar[1]);
     for (int i = 0; i <= p; i++) {
-  float c;
+  		float c;
         c = (*g).ship.angle[0];
-  c *= PI/180;
-  c -= PI/3;
-  float x = radar[0] + radar[2]*cos(c + i*(PI/18));
-  float y = radar[1] + radar[2]*sin(c + i*(PI/18));
-  glVertex2f(x,y);
+  		c *= PI/180;
+  		c -= PI/3;
+  		float x = radar[0] + radar[2]*cos(c + i*(PI/18));
+  		float y = radar[1] + radar[2]*sin(c + i*(PI/18));
+  		glVertex2f(x,y);
     }
     glVertex2f(radar[0],radar[1]);
     glEnd();
     glPopMatrix();
-
-
-
-
-
 
   // Gyroscope
   float sd = 40;
@@ -681,22 +691,6 @@ glVertex2f(x,y);
   }
   glEnd();
   glPopMatrix();
-  /*
-  float black[3];
-  black[0] = 0;
-  black[1] = 0;
-  black[2] = 0;
-
-  for (int i = 0; i < 4; i++) {
-    glColor3fv(black);
-glPushMatrix();
-    glBegin(GL_LINE);
-      glVertex2f(vertices[4][0],vertices[4][1]);
-      glVertex2f(vertices[i][0],vertices[i][1]);
-    glEnd();
-    glPopMatrix();
-  }
-  */
 
 Rect r;
 //
