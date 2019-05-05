@@ -217,7 +217,7 @@ public:
 	Game(int xWindowSize, int yWindowSize, const Ship & ship, const Object & object);
 
 	int num_stars;
-	float stars[32000][2];
+	float stars[32000][3];
 	float debris[500][3];
 
 	static Game* getInstance();

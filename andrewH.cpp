@@ -52,7 +52,11 @@ void credit(Game *g, Global gl) {
 		gl.keyhits[99] = 0;
 	}
 }
+<<<<<<< HEAD
 void joeyPhysics(Game *g, Global gl)
+=======
+void externalPhysics(Game *g, Global gl)
+>>>>>>> ffe20c2038d5e55270a9512388e5edec1fa990ef
 {
 
   	float a_xy, a_z;
@@ -261,7 +265,7 @@ void joeyPhysics(Game *g, Global gl)
   	}
   	if (gl.keyhits[64]) {
   	}
-
+	
       // spacebar
   	if (gl.keyhits[32]) {
   		//a little time between each bullet
@@ -315,6 +319,7 @@ void joeyPhysics(Game *g, Global gl)
 
 void joeyRender(Game *g, Global gl)
 {
+<<<<<<< HEAD
   //stars
   float cx = gl.xres/2;
   float cy = gl.yres/2;
@@ -356,6 +361,36 @@ void joeyRender(Game *g, Global gl)
   }
   glEnd();
   glPopMatrix();
+=======
+    //stars
+    float cx = gl.xres/2;
+    float cy = gl.yres/2;
+    float stars[4] = {1,1,1,1};
+    for (int i = 0; i < (*g).num_stars; i++) {
+        stars[3] = (*g).stars[i][2];
+        glColor4fv(stars);
+        glPushMatrix();
+        glBegin(GL_POINTS);
+        float x = (*g).ship.angle[0];
+        float y = (*g).ship.angle[1];
+        // converts to a x and y coordinate
+        x = (*g).stars[i][0]+x;
+        if (x >= 360.0f)
+            x -= 360.0f;
+        if (x <= 0)
+            x += 360.0f;
+        x = (x/120)*gl.xres;
+        y = (*g).stars[i][1]+y;
+        if (y >= 180.0f)
+            y -= 180.0f;
+        if (y <= 0)
+            y += 180.0f;
+        y = (y/90)*gl.yres;
+        glVertex2f(x,y);
+        glEnd();
+        glPopMatrix();
+    }
+>>>>>>> ffe20c2038d5e55270a9512388e5edec1fa990ef
 
   /*debris
   float tan[3];
@@ -572,7 +607,26 @@ glPopMatrix();
       glEnd();
     glPopMatrix();
   }
+  float Red[4] = {1,0,0,1}; 
+  float angle = atan2((*g).object.projection[1]-cy,(*g).object.projection[0]-cx);
+  float tri[3][2];
+  tri[0][0] = cx + (rad[2] + 15)*cos(angle);
+  tri[0][1] = cy + (rad[2] + 15)*sin(angle);
+  tri[1][0] = cx + rad[2]*cos(angle+.02);
+  tri[1][1] = cy + rad[2]*sin(angle+.02);
+  tri[2][0] = cx + rad[2]*cos(angle-.02);
+  tri[2][1] = cy + rad[2]*sin(angle-.02);
 
+  glColor4fv(Red);
+  glPushMatrix();
+  glBegin(GL_TRIANGLE_STRIP);
+  for (int i = 0; i < 3; i++) {
+  	glVertex2f(tri[i][0],tri[i][1]);
+  }
+  glEnd();
+  glPopMatrix();
+
+<<<<<<< HEAD
   // red triangle detector
 
   float Red[4] = {1,0,0,1};
@@ -616,6 +670,9 @@ glPopMatrix();
 
 
 //  (*g).object.polar[1]
+=======
+//  (*g).object.polar[1] 
+>>>>>>> ffe20c2038d5e55270a9512388e5edec1fa990ef
   //cross beams
   float tribase = 0.02;//measured in radians
   for (int i = 0; i < 8; i++) {
@@ -676,6 +733,8 @@ glVertex2f(x,y);
   }
   glEnd();
   glPopMatrix();
+  
+  
 
 
 

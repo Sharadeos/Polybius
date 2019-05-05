@@ -39,10 +39,16 @@ void spawnEnemy(Game *g, Global gl, Vec pos);
 void ALExplodeUpdate(ALenum param, float x, float y/*, ALfloat *z*/);
 void playMusic();
 //joey extern functions
+<<<<<<< HEAD
 void joeyPhysics(Game *g, Global gl);
 void joeyRender(Game *g, Global gl);
 void credit(Game *g, Global gl);
 
+=======
+void externalPhysics(Game *g, Global gl);
+void externalRender(Game *g, Global gl);
+void credit(Game *g, Global gl);
+>>>>>>> ffe20c2038d5e55270a9512388e5edec1fa990ef
 // add png files name and create array based on # of pngs
 //Image img("./images/bigfoot.png");
 Image img[6] = {
@@ -230,6 +236,7 @@ int main()
 	for (int i = 0; i < (*g).num_stars; i++) {
 			(*g).stars[i][0] = (rand() % 359999)*.001; // maps to degrees
 			(*g).stars[i][1] = (rand() % 179999)*.001;
+			(*g).stars[i][2] = ((rand() % 10)+1) *.1;
 			//(*g).stars[i][0] = i; // maps to degrees
 			//(*g).stars[i][1] = i;
 	}
@@ -248,7 +255,11 @@ int main()
 
 
 		//functions before render will not render on the setup_screen_res
+<<<<<<< HEAD
 		credit(g,gl);
+=======
+		credit(g,gl);	
+>>>>>>> ffe20c2038d5e55270a9512388e5edec1fa990ef
 		if (!(*g).show_credits) {
 			physicsCountdown += timeSpan;
 			while (physicsCountdown >= physicsRate) {
@@ -370,7 +381,11 @@ void normalize2d(Vec v)
 
 void check_mouse(XEvent *e)
 {
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> ffe20c2038d5e55270a9512388e5edec1fa990ef
 	static int savex = 0;
 	static int savey = 0;
 	static int ct=0;
@@ -412,7 +427,10 @@ void check_mouse(XEvent *e)
 	}
 	if (savex != e->xbutton.x || savey != e->xbutton.y) {
 		//Mouse moved
+<<<<<<< HEAD
 
+=======
+>>>>>>> ffe20c2038d5e55270a9512388e5edec1fa990ef
 		float xdiff = savex - e->xbutton.x;
 		float ydiff = savey - e->xbutton.y;
 		if (++ct < 2)
@@ -420,24 +438,40 @@ void check_mouse(XEvent *e)
 		//std::cout << "savex: " << savex << std::endl << std::flush;
 		//std::cout << "e->xbutton.x: " << e->xbutton.x << std::endl <<
 		//std::flush;
+<<<<<<< HEAD
 		if (xdiff <= 0) {
+=======
+		if (xdiff < 0) {
+>>>>>>> ffe20c2038d5e55270a9512388e5edec1fa990ef
 			//std::cout << "xdiff: " << xdiff << std::endl << std::flush;
 			(*g).ship.angle[0] += .1*TURN*xdiff;
 			if ((*g).ship.angle[0] < 0.0f)
 				(*g).ship.angle[0] += 360.0f;
 		}
+<<<<<<< HEAD
 		else if (xdiff >= 0) {
+=======
+		else if (xdiff > 0) {
+>>>>>>> ffe20c2038d5e55270a9512388e5edec1fa990ef
 			//std::cout << "xdiff: " << xdiff << std::endl << std::flush;
 			(*g).ship.angle[0] += .1*TURN*xdiff;
 			if ((*g).ship.angle[0] > 360.0f)
 				(*g).ship.angle[0] -= 360.0f;
 		}
+<<<<<<< HEAD
 		if (ydiff >= 0) {
+=======
+		if (ydiff > 0) {
+>>>>>>> ffe20c2038d5e55270a9512388e5edec1fa990ef
 			(*g).ship.angle[1] -= .1*PITCH*ydiff;
 			if ((*g).ship.angle[1] < 0.0f)
 				(*g).ship.angle[1] = 0.0f;
 		}
+<<<<<<< HEAD
 		else if (ydiff <= 0) {
+=======
+		else if (ydiff < 0) {
+>>>>>>> ffe20c2038d5e55270a9512388e5edec1fa990ef
 			//std::cout << "xdiff: " << xdiff << std::endl << std::flush;
 			(*g).ship.angle[1] -= .1*PITCH*ydiff;
 			if ((*g).ship.angle[1] > 180.0f)
@@ -447,7 +481,11 @@ void check_mouse(XEvent *e)
 		savex=100;
 		savey=100;
 	}
+<<<<<<< HEAD
 
+=======
+	
+>>>>>>> ffe20c2038d5e55270a9512388e5edec1fa990ef
 }
 
 
@@ -524,8 +562,90 @@ void physics()
 {
 	//Update ship position
 
+<<<<<<< HEAD
 	joeyPhysics(g, gl);
 	difficultyScaling(g, gl);
+=======
+	externalPhysics(g, gl);
+
+}
+
+
+void drawObject(Object & rend_object)
+{
+
+	int sizeofObject = 50;
+	float tempValue = 0;
+
+	float e[3];
+	e[0] = 0;
+	e[1] = rend_object.polar[1];
+	e[2] = rend_object.polar[2];
+
+    if (e[1] < 0) {
+        e[1] = 360 + e[1];
+    }
+    float s[2];
+	s[0] = (*g).ship.angle[0];
+	s[1] = (*g).ship.angle[1];
+	float low, high;
+	low = s[0] - 60;
+	high = s[0] + 60;
+	high -= low;
+    e[1] -= low;
+    if (e[1] > 360) {
+        e[1] = e[1] - 360;
+    }
+
+    rend_object.projection[0] = ((high - e[1])/120)*gl.xres;
+  	rend_object.projection[1] = ((s[1] + 45 - e[2])/90)*gl.yres;
+	float x = rend_object.projection[0];
+    float y = rend_object.projection[1];
+
+		//Scale max at the right edge of the setup_screen
+
+		rend_object.xScale = ((high - e[1])/60);
+		rend_object.yScale = ((s[1] + 45 - e[2])/45);
+
+		if (rend_object.xScale  > 1.0) {
+			tempValue = rend_object.xScale - 1.0;
+			rend_object.xScale = 1.0;
+			rend_object.xScale = rend_object.xScale - tempValue;
+		}
+
+		if (rend_object.yScale  > 1.0) {
+			tempValue = rend_object.yScale - 1.0;
+			rend_object.yScale = 1.0;
+			rend_object.yScale = rend_object.yScale - tempValue;
+		}
+
+
+		float distanceScale = 12/rend_object.polar[0];
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		glBegin(GL_POLYGON);
+			/*
+			 glVertex2i(50,100);
+			 glVertex2i(100,100);
+			 glVertex2i(100,150);
+			 glVertex2i(50,150);
+			 */
+			 glVertex2i(x-(40*rend_object.xScale*distanceScale),y-(40*rend_object.yScale*distanceScale));
+			 glVertex2i(x-(40*rend_object.xScale*distanceScale),y+(40*rend_object.yScale*distanceScale));
+			 glVertex2i(x+(40*rend_object.xScale*distanceScale),y-(40*rend_object.yScale*distanceScale));
+			 glVertex2i(x+(40*rend_object.xScale*distanceScale),y+(40*rend_object.yScale*distanceScale));
+
+			 //glVertex2f(50, 100);
+			 //glVertex2i(100,100);
+			 //glVertex2i(100,150);
+			 //glVertex2i(50,150);
+		glEnd();
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+
+>>>>>>> ffe20c2038d5e55270a9512388e5edec1fa990ef
 
 
 }
