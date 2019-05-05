@@ -23,6 +23,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <bits/stdc++.h>
+
 using namespace std;
 #ifdef USE_OPENAL_SOUND
 #include </usr/include/AL/alut.h>
@@ -55,6 +56,9 @@ const float TURN = .6;
 const int KEYS = 100;
 const int MAX_THRUST = 1;
 const int MAX_BULLETS = 11;
+const int MAX_ENEMIES = 11;
+
+
 
 
 //-----------------------------------------------------------------------------
@@ -68,24 +72,23 @@ extern double timeSpan;
 extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
-
+class Game;
 
 
 class Global {
   public:
     Global();
 	  int xres, yres;
-  	//char keys[65536];
-		int keyhits[KEYS];
+  	  //char keys[65536];
+	  int keyhits[KEYS];
+      // declare GLuint textid for each png
 
 	  GLuint bigfootTexture;
 	  GLuint luisTexture;
 	  GLuint AdolfoTexture;
 	  GLuint chrisTexture;
-    GLuint josephTexture;
-    GLuint blackholeTexture;
-    // declare GLuint textid for each png
-
+      GLuint josephTexture;
+      GLuint blackholeTexture;
 };
 
 class Image {
@@ -107,7 +110,7 @@ public:
 	Vec dir;
 	Vec pos;
 	Vec vec;
-
+	Vec projection;
 	float vel;
 	float color[4];
 
@@ -116,11 +119,15 @@ public:
 	int maxBullets;
 	int powerLevel;
 
+	float radius;
+
 
 	float xScale;
 	float yScale;
 
 	void updatePolar(Vec);
+	void drawBase(Game *, Global);
+	void drawBullet(Game *, Global);
 	Base();
 };
 
@@ -138,6 +145,17 @@ public:
 	bool invert;
 
 	Ship(int x, int y, int z);
+
+};
+
+class Enemy: public Base {
+
+public:
+	float Vertices[16][2];
+	int numVertices;
+	int enemyType;
+	int size;
+
 
 };
 
@@ -182,7 +200,10 @@ public:
 	Ship ship;
 	Asteroid *ahead;
 	Bullet *barr;
+
+	Enemy *earr;
 	int nasteroids;
+	int nenemies;
 	int nbullets;
 	Object object;
 
@@ -192,6 +213,7 @@ public:
 	bool show_credits;
 	float mtext;
   float difficulty;
+	int level;
 	Game(int xWindowSize, int yWindowSize, const Ship & ship, const Object & object);
 
 	int num_stars;

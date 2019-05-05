@@ -10,6 +10,7 @@ Global::Global() {
 Base::Base() {
   VecZero(dir);
   VecZero(vec);
+  VecZero(projection);
   angle[0] = 90;	// xy plane (360) x is right left, y is forward backwards
   angle[1] = 90;	// z angle (180) 0 = up, 180 = down
   pos[0] = 0;
@@ -28,6 +29,10 @@ Base::Base() {
 
   xScale = 0.0;
   yScale = 0.0;
+
+  radius = 50.0;
+  maxHealth = 3;
+  currentHealth = 3;
 }
 
 void Base::updatePolar(Vec ship) {
@@ -55,6 +60,128 @@ void Base::updatePolar(Vec ship) {
      polar[1] -= 180;
      polar[1] = 180 - polar[2];
   }
+}
+
+void Base::drawBase(Game * g, Global gl) {
+
+  float e[3];
+
+  e[0] = 0;
+  e[1] = polar[1];
+  e[2] = polar[2];
+
+  if (e[1] < 0) {
+    e[1] = 360 + e[1];
+  }
+
+  float s[2];
+  s[0] = (*g).ship.angle[0];
+  s[1] = (*g).ship.angle[1];
+  float low, high;
+  low = s[0] - 60;
+  high = s[0] + 60;
+  high -= low;
+  e[1] -= low;
+
+  if (e[1] > 360) {
+    e[1] = e[1] - 360;
+  }
+
+  projection[0] = ((high - e[1])/120)*gl.xres;
+  projection[1] = ((s[1] + 45 - e[2])/90)*gl.yres;
+  float x = projection[0];
+  float y = projection[1];
+  float tempValue = 0;
+
+  //Scale max at the right edge of the setup_screen
+
+  xScale = ((high - e[1])/60);
+  yScale = ((s[1] + 45 - e[2])/45);
+
+  if (xScale  > 1.0) {
+    tempValue = xScale - 1.0;
+    xScale = 1.0;
+    xScale = xScale - tempValue;
+  }
+
+  if (yScale  > 1.0) {
+    tempValue = yScale - 1.0;
+    yScale = 1.0;
+    yScale = yScale - tempValue;
+  }
+
+
+  float distanceScale = 12/polar[0];
+
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glBegin(GL_POLYGON);
+
+  //Override to different Vertices for different classes?
+  glVertex2i(x-(radius*xScale*distanceScale),y-(radius*yScale*distanceScale));
+  glVertex2i(x-(radius*xScale*distanceScale),y+(radius*yScale*distanceScale));
+  glVertex2i(x+(radius*xScale*distanceScale),y-(radius*yScale*distanceScale));
+  glVertex2i(x+(radius*xScale*distanceScale),y+(radius*yScale*distanceScale));
+
+  glEnd();
+  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  glColor3f(1.0f, 0.0f, 0.0f);
+  glBegin(GL_POINTS);
+
+
+  glEnd();
+
+
+  Rect r;
+  //
+  r.bot = y + 25;
+  r.left = x;
+  r.center = 0;
+  //ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
+  ggprint8b(&r, 16, 0x00ffff00, "%.1i",currentHealth);
+
+
+}
+void Base::drawBullet(Game * g, Global gl) {
+
+  float e[3];
+	e[0] = 0;
+	e[1] = polar[1];
+	e[2] = polar[2];
+
+	 if (e[1] < 0) {
+	      e[1] = 360 + e[1];
+	  }
+
+	float s[2];
+	s[0] = (*g).ship.angle[0];
+	s[1] = (*g).ship.angle[1];
+	float low, high;
+	low = s[0] - 60;
+	high = s[0] + 60;
+	high -= low;
+	e[1] -= low;
+	if (e[1] > 360) {
+	    e[1] = e[1] - 360;
+	}
+	float x, y;
+
+	x = ((high - e[1])/120)*gl.xres;
+	y = ((s[1] + 45 - e[2])/90)*gl.yres;
+
+  float distanceScale = 48/polar[0];
+
+	//glColor3fv(color);
+	glPushMatrix();
+	glBegin(GL_POLYGON);
+
+	glVertex2i(x-radius*distanceScale,y);
+	glVertex2i(x,y+radius*distanceScale);
+	glVertex2i(x+radius*distanceScale,y);
+	glVertex2i(x,y-radius*distanceScale);
+
+	glEnd();
+	glPopMatrix();
+
 }
 
 
@@ -130,7 +257,7 @@ Object::Object(int x, int y, int z) {
 
 Bullet::Bullet()
 {
-
+  radius = 5.0;
 }
 
 
@@ -149,15 +276,18 @@ Game::Game(int xWindowSize, int yWindowSize, const Ship& ship, const Object& obj
 	show_credits = false;
 	ahead = NULL;
 	barr = new Bullet[MAX_BULLETS];
+  earr = new Enemy[MAX_ENEMIES];
 	nasteroids = 0;
+  nenemies = 0;
 	nbullets = 0;
 	mouseThrustOn = false;
 	mtext = 0;
   difficulty = 1.0;
+  level = 1;
 
 
 
-num_stars = 32000;
+  num_stars = 32000;
   /*
 	//build 1 asteroids...
 	for (int j=0; j<1; j++) {

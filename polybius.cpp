@@ -28,15 +28,20 @@ void squadronPF(float* a, float* b, int x, int y);
 void missilePF(float* a, float* b, int x, int y);
 void carrierPF(float* a, float* b, int x, int y);
 //luis extern functions
-void createAsteroid(Game *g, Global gl);
-void createBullet(Game *g, Global gl, Object object);
+//void createAsteroid(Game *g, Global gl);
+//void createBullet(Game *g, Global gl, Object object);
+void luisRender(Game *g, Global gl);
 void difficultyScaling(Game *g, Global gl);
+bool collisionDetection(Base object1, Base object2);
+void spawnEnemy(Game *g, Global gl, Vec pos);
+
 //chris extern functions
 void ALExplodeUpdate(ALenum param, float x, float y/*, ALfloat *z*/);
 void playMusic();
 //joey extern functions
-void externalPhysics(Game *g, Global gl);
-void externalRender(Game *g, Global gl);
+void joeyPhysics(Game *g, Global gl);
+void joeyRender(Game *g, Global gl);
+void credit(Game *g, Global gl);
 
 // add png files name and create array based on # of pngs
 //Image img("./images/bigfoot.png");
@@ -190,6 +195,7 @@ public:
 		//(thus do only use ONCE XDefineCursor and then XUndefineCursor):
 	}
 } x11(0, 0);
+
 Game* Game::instance = 0;
 Game* Game::getInstance()
 {
@@ -214,10 +220,8 @@ int main()
 	srand(time(NULL));
 	clock_gettime(CLOCK_REALTIME, &timePause);
 	clock_gettime(CLOCK_REALTIME, &timeStart);
-	x11.set_mouse_position(100,100);
+	x11.set_mouse_position(0,0);
 	int done=0;
-
-
 
 // MOVE
 
@@ -244,21 +248,22 @@ int main()
 
 
 		//functions before render will not render on the setup_screen_res
-
+		credit(g,gl);
 		if (!(*g).show_credits) {
 			physicsCountdown += timeSpan;
 			while (physicsCountdown >= physicsRate) {
 				physics();
 				physicsCountdown -= physicsRate;
 			}
-			//difficultyScaling(g, gl);
-		}
 
-		render();
+		}
+	render();
+
 		x11.swapBuffers();
 	}
 	cleanup_fonts();
 	logClose();
+	system("xset r on");
 	return 0;
 }
 // in charge of initalizing image textures
@@ -365,12 +370,9 @@ void normalize2d(Vec v)
 
 void check_mouse(XEvent *e)
 {
-	/*
-	//Did the mouse move?
-	//Was a mouse button clicked?
+
 	static int savex = 0;
 	static int savey = 0;
-	//
 	static int ct=0;
 	//std::cout << "m" << std::endl << std::flush;
 	if (e->type == ButtonRelease) {
@@ -378,63 +380,74 @@ void check_mouse(XEvent *e)
 	}
 	if (e->type == ButtonPress) {
 		if (e->xbutton.button==1) {
-			//Left button is down
-			//a little time between each bullet
-					//createBullet(g, gl, (*g).ship);
-
-
-		}
-		if (e->xbutton.button==3) {
-			//Right button is down
-		}
+	    	//a little time between each bullet
+        	struct timespec bt;
+        	clock_gettime(CLOCK_REALTIME, &bt);
+        	double ts = timeDiff(&(*g).bulletTimer, &bt);
+        	if (ts > 0.1) {
+            	timeCopy(&(*g).bulletTimer, &bt);
+            	if ((*g).nbullets < MAX_BULLETS) {
+                	//shoot a bullet...
+	                //Bullet *b = new Bullet;
+    	            Bullet *b = &(*g).barr[(*g).nbullets];
+        	        timeCopy(&b->time, &bt);
+            	    b->pos[0] = (*g).ship.pos[0];
+                	b->pos[1] = (*g).ship.pos[1];
+	                b->pos[2] = (*g).ship.pos[2];
+    	            //b->vel = (*g).ship.vel + 25;
+        	        b->vel = (*g).ship.vel + 25;
+            	    //convert ship angle to radians
+                	b->angle[0] = (*g).ship.angle[0];
+	                b->angle[1] = (*g).ship.angle[1];
+    	            b->color[0] = 0.0f;
+        	        b->color[1] = 1.0f;
+                	b->color[2] = 0.0f;
+                	(*g).nbullets++;
+            	}
+			}
+        }
 	}
-	//keys[XK_Up] = 0;
+	if (e->xbutton.button==3) {
+		//Right button is down
+	}
 	if (savex != e->xbutton.x || savey != e->xbutton.y) {
 		//Mouse moved
-		int xdiff = savex - e->xbutton.x;
-		int ydiff = savey - e->xbutton.y;
-		if (++ct < 10)
+
+		float xdiff = savex - e->xbutton.x;
+		float ydiff = savey - e->xbutton.y;
+		if (++ct < 2)
 			return;
 		//std::cout << "savex: " << savex << std::endl << std::flush;
 		//std::cout << "e->xbutton.x: " << e->xbutton.x << std::endl <<
 		//std::flush;
-		if (xdiff > 0) {
+		if (xdiff <= 0) {
 			//std::cout << "xdiff: " << xdiff << std::endl << std::flush;
-			(*g).ship.angle += 0.05f * (float)xdiff;
-			if ((*g).ship.angle >= 360.0f)
-				(*g).ship.angle -= 360.0f;
+			(*g).ship.angle[0] += .1*TURN*xdiff;
+			if ((*g).ship.angle[0] < 0.0f)
+				(*g).ship.angle[0] += 360.0f;
 		}
-		else if (xdiff < 0) {
+		else if (xdiff >= 0) {
 			//std::cout << "xdiff: " << xdiff << std::endl << std::flush;
-			(*g).ship.angle += 0.05f * (float)xdiff;
-			if ((*g).ship.angle < 0.0f)
-				(*g).ship.angle += 360.0f;
+			(*g).ship.angle[0] += .1*TURN*xdiff;
+			if ((*g).ship.angle[0] > 360.0f)
+				(*g).ship.angle[0] -= 360.0f;
 		}
-		if (ydiff > 0) {
-			//apply thrust
-			//convert ship angle to radians
-			Flt rad = (((*g).ship.angle+90.0) / 360.0f) * PI * 2.0;
-			//convert angle to a vector
-			Flt xdir = cos(rad);
-			Flt ydir = sin(rad);
-			(*g).ship.vel[0] += xdir * (float)ydiff * 0.01f;
-			(*g).ship.vel[1] += ydir * (float)ydiff * 0.01f;
-            Flt speed = sqrt((*g).ship.vel[0]*(*g).ship.vel[0]+
-					(*g).ship.vel[1]*(*g).ship.vel[1]);
-			if (speed > 10.0f) {
-				speed = 10.0f;
-				normalize2d((*g).ship.vel);
-				(*g).ship.vel[0] *= speed;
-				(*g).ship.vel[1] *= speed;
-			}
-			(*g).mouseThrustOn = true;
-			clock_gettime(CLOCK_REALTIME, &(*g).mouseThrustTimer);
+		if (ydiff >= 0) {
+			(*g).ship.angle[1] -= .1*PITCH*ydiff;
+			if ((*g).ship.angle[1] < 0.0f)
+				(*g).ship.angle[1] = 0.0f;
+		}
+		else if (ydiff <= 0) {
+			//std::cout << "xdiff: " << xdiff << std::endl << std::flush;
+			(*g).ship.angle[1] -= .1*PITCH*ydiff;
+			if ((*g).ship.angle[1] > 180.0f)
+				(*g).ship.angle[1] = 180.0f;
 		}
 		x11.set_mouse_position(100,100);
 		savex=100;
 		savey=100;
 	}
-	*/
+
 }
 
 
@@ -451,50 +464,6 @@ int check_keys(XEvent *e)
 			return 1;
 	}
 	return 0;
-
-	/*
-	//keyboard input?
-	static int shift=0;
-	int key = (XLookupKeysym(&e->xkey, 0) & 0x0000ffff);
-	//Log("key: %i\n", key);
-	if (e->type == KeyRelease) {
-		gl.keys[key]=0;
-		if (key == XK_Shift_L || key == XK_Shift_R)
-			shift=0;
-		return 0;
-	}
-	if (e->type == KeyPress) {
-		//std::cout << "press" << std::endl;
-		gl.keys[key]=1;
-		if (key == XK_Shift_L || key == XK_Shift_R) {
-			shift=1;
-			return 0;
-		}
-	} else {
-		return 0;
-	}
-	if (shift){}
-	switch (key) {
-		case XK_Escape:
-			return 1;
-		case XK_c:
-			(*g).show_credits = !(*g).show_credits;
-			break;
-		case XK_q:
-			createAsteroid(g, gl);
-			break;
-		case XK_e:
-			(*g).ship.powerLevel++;
-			break;
-		case XK_Down:
-			break;
-		case XK_equal:
-			break;
-		case XK_minus:
-			break;
-	}
-	return 0;
-	*/
 }
 
 void deleteAsteroid(Game *g, Asteroid *node)
@@ -555,181 +524,42 @@ void physics()
 {
 	//Update ship position
 
-	externalPhysics(g, gl);
-
-}
-
-
-void drawObject(Object & rend_object)
-{
-
-	int sizeofObject = 50;
-	float tempValue = 0;
-
-	float e[3];
-	e[0] = 0;
-	e[1] = rend_object.polar[1];
-	e[2] = rend_object.polar[2];
-
-    if (e[1] < 0) {
-        e[1] = 360 + e[1];
-    }
-    float s[2];
-	s[0] = (*g).ship.angle[0];
-	s[1] = (*g).ship.angle[1];
-	float low, high;
-	low = s[0] - 60;
-	high = s[0] + 60;
-	high -= low;
-    e[1] -= low;
-    if (e[1] > 360) {
-        e[1] = e[1] - 360;
-    }
-    float x, y;
-
-		x = ((high - e[1])/120)*gl.xres;
-  	y = ((s[1] + 45 - e[2])/90)*gl.yres;
+	joeyPhysics(g, gl);
+	difficultyScaling(g, gl);
 
 
-
-		//Scale max at the right edge of the setup_screen
-
-		rend_object.xScale = ((high - e[1])/60);
-		rend_object.yScale = ((s[1] + 45 - e[2])/45);
-
-		if (rend_object.xScale  > 1.0) {
-			tempValue = rend_object.xScale - 1.0;
-			rend_object.xScale = 1.0;
-			rend_object.xScale = rend_object.xScale - tempValue;
-		}
-
-		if (rend_object.yScale  > 1.0) {
-			tempValue = rend_object.yScale - 1.0;
-			rend_object.yScale = 1.0;
-			rend_object.yScale = rend_object.yScale - tempValue;
-		}
-
-
-		float distanceScale = 12/rend_object.polar[0];
-
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-		glBegin(GL_POLYGON);
-			/*
-			 glVertex2i(50,100);
-			 glVertex2i(100,100);
-			 glVertex2i(100,150);
-			 glVertex2i(50,150);
-			 */
-			 glVertex2i(x-(40*rend_object.xScale*distanceScale),y-(40*rend_object.yScale*distanceScale));
-			 glVertex2i(x-(40*rend_object.xScale*distanceScale),y+(40*rend_object.yScale*distanceScale));
-			 glVertex2i(x+(40*rend_object.xScale*distanceScale),y-(40*rend_object.yScale*distanceScale));
-			 glVertex2i(x+(40*rend_object.xScale*distanceScale),y+(40*rend_object.yScale*distanceScale));
-
-			 //glVertex2f(50, 100);
-			 //glVertex2i(100,100);
-			 //glVertex2i(100,150);
-			 //glVertex2i(50,150);
-		glEnd();
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-
-
-
-
-
-		glColor3f(1.0f, 0.0f, 0.0f);
-		glBegin(GL_POINTS);
-		//glVertex2f(object.drawSize[0], object.drawSize[1]);
-		glEnd();
-}
-
-
-void drawBullet(Bullet rend_object, float xScale, float yScale)
-{
-
-	int sizeofObject = 50;
-	float e[3];
-	e[0] = 0;
-	e[1] = rend_object.polar[1];
-	e[2] = rend_object.polar[2];
-
-    if (e[1] < 0) {
-        e[1] = 360 + e[1];
-    }
-    float s[2];
-	s[0] = (*g).ship.angle[0];
-	s[1] = (*g).ship.angle[1];
-	float low, high;
-	low = s[0] - 60;
-	high = s[0] + 60;
-	high -= low;
-  e[1] -= low;
-  if (e[1] > 360) {
-      e[1] = e[1] - 360;
-  }
-  float x, y;
-
-	x = ((high - e[1])/120)*gl.xres;
-	y = ((s[1] + 45 - e[2])/90)*gl.yres;
-
-  glColor3fv(rend_object.color);
-  glPushMatrix();
-  glBegin(GL_POLYGON);
-	glVertex2i(x-5,y);
-	glVertex2i(x,y+5);
-	glVertex2i(x+5,y);
-	glVertex2i(x,y-5);
-	glEnd();
-  glPopMatrix();
-/*
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-		glBegin(GL_POLYGON);
-			 glVertex2i(50,100);
-			 glVertex2i(100,100);
-			 glVertex2i(100,150);
-			 glVertex2i(50,150);
-			 glVertex2i(x+rend_object.drawSize[0]-sizeofObject*xScale,y+rend_object.drawSize[1]+sizeofObject*yScale);
-			 glVertex2i(x+rend_object.drawSize[0]+sizeofObject*xScale,y+rend_object.drawSize[1]+sizeofObject*yScale);
-			 glVertex2i(x+rend_object.drawSize[0]+sizeofObject*xScale,y+rend_object.drawSize[1]-sizeofObject*yScale);
-			 glVertex2i(x+rend_object.drawSize[0]-sizeofObject*xScale,y+rend_object.drawSize[1]-sizeofObject*yScale);
-
-			 //glVertex2f(50, 100);
-			 //glVertex2i(100,100);
-			 //glVertex2i(100,150);
-			 //glVertex2i(50,150);
-		glEnd();
-
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glColor3f(1.0f, 0.0f, 0.0f);
-		glBegin(GL_POINTS);
-		glVertex2f(object.drawSize[0], object.drawSize[1]);
-		glEnd();
-*/
 }
 
 
 
 void render()
 {
-
 	glClear(GL_COLOR_BUFFER_BIT);
 	if (!(*g).show_credits) {
 
-		drawObject((*g).object);
+		(*g).object.drawBase(g, gl);
 
 
 		for (int i=0; i< (*g).nbullets; i++) {
-			Bullet *b = & (*g).barr[i];
-		    drawBullet( (*g).barr[i], 1, 1);
+			//Bullet *b = & (*g).barr[i];
+
+		   (*g).barr[i].drawBullet(g, gl);
+
 	    }
+
+		for (int i=0; i< (*g).nenemies; i++) {
+			//Enemy *e = & (*g).earr[i];
+
+		   (*g).earr[i].drawBase(g, gl);
+			 //enemies dont appear unless they move or ship moves (minor issue)
+	    }
+
 				//Draw the asteroids
+				/*
 				{
 					Asteroid *a =  (*g).ahead;
 					while (a) {
-						//Loig("draw asteroid...\n");
+						//Log("draw asteroid...\n");
 						glColor3fv(a->color);
 						glPushMatrix();
 						glTranslatef(a->pos[0], a->pos[1], a->pos[2]);
@@ -752,38 +582,20 @@ void render()
 						a = a->next;
 					}
 				}
-				//-------------------------------------------------------------------------
-				/*Draw the bullets
-				for (int i=0; i<(*g).nbullets; i++) {
-					Bullet *b = &(*g).barr[i];
-					//Log("draw bullet...\n");
-					glColor3f(0.0, 1.0, 0.0);
-					glBegin(GL_POINTS);
-					glVertex2f(b->pos[0],      b->pos[1]);
-					glVertex2f(b->pos[0]-1.0f, b->pos[1]);
-					glVertex2f(b->pos[0]+1.0f, b->pos[1]);
-					glVertex2f(b->pos[0],      b->pos[1]-1.0f);
-					glVertex2f(b->pos[0],      b->pos[1]+1.0f);
-					glColor3f(0.8, 0.8, 0.8);
-					glVertex2f(b->pos[0]-1.0f, b->pos[1]-1.0f);
-					glVertex2f(b->pos[0]-1.0f, b->pos[1]+1.0f);
-					glVertex2f(b->pos[0]+1.0f, b->pos[1]-1.0f);
-					glVertex2f(b->pos[0]+1.0f, b->pos[1]+1.0f);
-					glEnd();
-				}
-			    */
-					externalRender(g, gl);
-			  	//ggprint8b(&r, 16, 0x00ffff00, "(object render x=%.1f,object render y=%.1f)", (((*g).ship.angle[0] + 60 - object.polar[1])/120)*gl.xres,  (((*g).ship.angle[1] + 45 - object.polar[2])/90)*gl.yres);
+		*/
+		joeyRender(g, gl);
+		luisRender(g, gl);
+		//ggprint8b(&r, 16, 0x00ffff00, "(object render x=%.1f,object render y=%.1f)", (((*g).ship.angle[0] + 60 - object.polar[1])/120)*gl.xres,  (((*g).ship.angle[1] + 45 - object.polar[2])/90)*gl.yres);
 }
 
 
 	if ((*g).show_credits) {
 	    (*g).mtext -= .02;
 	    andrewH(.5*gl.xres, .9*gl.yres, gl.bigfootTexture,(*g).mtext);
-  	  creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
+  	  	creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
 	    AdolfoValenciaPicture(.5*gl.xres, .5*gl.yres, gl.AdolfoTexture);
     	showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
-	    josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
+	   	josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
         // function calls for everyone with parameters
 	}
 }

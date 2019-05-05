@@ -45,8 +45,14 @@ void andrewH(int x, int y, GLuint textid, float move)
     if (sin(rad) > .98 || sin(rad) < -.98)
     	spin *= 1.01;
 }
-
-void externalPhysics(Game *g, Global gl)
+void credit(Game *g, Global gl) {
+	if (gl.keyhits[99]) {
+		(*g).show_credits = !(*g).show_credits;
+		usleep(200000);
+		gl.keyhits[99] = 0;
+	}
+}
+void joeyPhysics(Game *g, Global gl)
 {
 
   	float a_xy, a_z;
@@ -57,7 +63,7 @@ void externalPhysics(Game *g, Global gl)
   	(*g).ship.pos[0] += (*g).ship.vel*cos(a_xy)*sin(a_z);
   	(*g).ship.pos[1] += (*g).ship.vel*sin(a_xy)*sin(a_z);
   	(*g).ship.pos[2] += (*g).ship.vel*cos(a_z);
-
+    (*g).object.updatePolar((*g).ship.pos);
       //Update bullet positions
       struct timespec bt;
       clock_gettime(CLOCK_REALTIME, &bt);
@@ -83,7 +89,7 @@ void externalPhysics(Game *g, Global gl)
   		b->pos[0] += b->vel*cos(a_xy)*sin(a_z);
   		b->pos[1] += b->vel*sin(a_xy)*sin(a_z);
   		b->pos[2] += b->vel*cos(a_z);
-          b->updatePolar((*g).ship.pos);
+      b->updatePolar((*g).ship.pos);
   		/*Check for collision with window edges
   		if (b->pos[0] < 0.0) {
   			b->pos[0] += (float)gl.xres;
@@ -101,7 +107,7 @@ void externalPhysics(Game *g, Global gl)
   		i++;
   	}
   	//object updating position
-      (*g).object.updatePolar((*g).ship.pos);
+
   	/*
   	//Check for collision with window edges
   	object.drawSize[0] -= ((*g).ship.vel*cos(a_xy)*sin(a_z));
@@ -184,6 +190,7 @@ void externalPhysics(Game *g, Global gl)
   	*/
   	//---------------------------------------------------
   	//check keys pressed now
+
   	// q
 
   	if (gl.keyhits[13]) {
@@ -202,7 +209,7 @@ void externalPhysics(Game *g, Global gl)
   		}
   		//if ((*g).ship.angle < 0.0f)
   		//(*g).ship.angle += 360.0f;
-  	}const int MAX_BULLETS = 11;
+  	}
   	// w
   	if (gl.keyhits[19]) {
   			(*g).ship.angle[1] -= PITCH;
@@ -238,6 +245,8 @@ void externalPhysics(Game *g, Global gl)
 
   				//object.drawSize[0] -= 0.008333*gl.xres*TURN;
   	}
+
+
   	//left
   	if (gl.keyhits[61]) {
   		//(*g).ship.pos[0] -= 5;
@@ -269,7 +278,6 @@ void externalPhysics(Game *g, Global gl)
   				b->pos[0] = (*g).ship.pos[0];
   				b->pos[1] = (*g).ship.pos[1];
   				b->pos[2] = (*g).ship.pos[2];
-  				//b->vel = (*g).ship.vel + 25;
   				b->vel = (*g).ship.vel + 25;
   				//convert ship angle to radians
   				b->angle[0] = (*g).ship.angle[0];
@@ -305,12 +313,13 @@ void externalPhysics(Game *g, Global gl)
   	*/
 }
 
-void externalRender(Game *g, Global gl)
+void joeyRender(Game *g, Global gl)
 {
   //stars
   float cx = gl.xres/2;
   float cy = gl.yres/2;
-  glColor3fv((*g).ship.color);
+  float stars[4] = {1,1,1,.9};
+  glColor4fv(stars);
   glPushMatrix();
   glBegin(GL_POINTS);
   for (int i = 0; i < (*g).num_stars; i++) {
@@ -345,8 +354,8 @@ void externalRender(Game *g, Global gl)
 */
       glVertex2f(x,y);
   }
-glEnd();
-glPopMatrix();
+  glEnd();
+  glPopMatrix();
 
   /*debris
   float tan[3];
@@ -564,6 +573,49 @@ glPopMatrix();
     glPopMatrix();
   }
 
+  // red triangle detector
+
+  float Red[4] = {1,0,0,1};
+  float angle = atan2((*g).object.projection[1]-cy,(*g).object.projection[0]-cx);
+  float tri[3][2];
+  tri[0][0] = cx + (rad[2] + 15)*cos(angle);
+  tri[0][1] = cy + (rad[2] + 15)*sin(angle);
+  tri[1][0] = cx + rad[2]*cos(angle+.02);
+  tri[1][1] = cy + rad[2]*sin(angle+.02);
+  tri[2][0] = cx + rad[2]*cos(angle-.02);
+  tri[2][1] = cy + rad[2]*sin(angle-.02);
+
+  glColor4fv(Red);
+  glPushMatrix();
+  glBegin(GL_TRIANGLE_STRIP);
+  for (int i = 0; i < 3; i++) {
+  	glVertex2f(tri[i][0],tri[i][1]);
+  }
+  glEnd();
+  glPopMatrix();
+
+	for (int i=0; i< (*g).nenemies; i++) {
+
+    angle = atan2((*g).earr[i].projection[1]-cy,(*g).earr[i].projection[0]-cx);
+    tri[0][0] = cx + (rad[2] + 15)*cos(angle);
+    tri[0][1] = cy + (rad[2] + 15)*sin(angle);
+    tri[1][0] = cx + rad[2]*cos(angle+.02);
+    tri[1][1] = cy + rad[2]*sin(angle+.02);
+    tri[2][0] = cx + rad[2]*cos(angle-.02);
+    tri[2][1] = cy + rad[2]*sin(angle-.02);
+
+    glColor4fv(Red);
+    glPushMatrix();
+    glBegin(GL_TRIANGLE_STRIP);
+    for (int i = 0; i < 3; i++) {
+      glVertex2f(tri[i][0],tri[i][1]);
+    }
+    glEnd();
+    glPopMatrix();
+  }
+
+
+//  (*g).object.polar[1]
   //cross beams
   float tribase = 0.02;//measured in radians
   for (int i = 0; i < 8; i++) {
@@ -587,10 +639,10 @@ glPopMatrix();
 
   // fill octagon ring
   for (int i = 0; i < 8; i++) {
-      int j = (i + 1) % 8;
-      glEnable(GL_BLEND);
-    glBlendFunc( GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-      glColor4fv((*g).ship.color);
+  	int j = (i + 1) % 8;
+    glEnable(GL_BLEND);
+   	glBlendFunc( GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glColor4fv((*g).ship.color);
     glPushMatrix();
     glBegin(GL_POLYGON);
     glVertex2f(v8[i][0], v8[i][1]);
@@ -625,6 +677,8 @@ glVertex2f(x,y);
   glEnd();
   glPopMatrix();
 
+
+
   //green pizza slice inside radar
     float green[4];
     green[0] = 0;
@@ -639,22 +693,17 @@ glVertex2f(x,y);
     p = 12;
     glVertex2f(radar[0],radar[1]);
     for (int i = 0; i <= p; i++) {
-  float c;
+  		float c;
         c = (*g).ship.angle[0];
-  c *= PI/180;
-  c -= PI/3;
-  float x = radar[0] + radar[2]*cos(c + i*(PI/18));
-  float y = radar[1] + radar[2]*sin(c + i*(PI/18));
-  glVertex2f(x,y);
+  		c *= PI/180;
+  		c -= PI/3;
+  		float x = radar[0] + radar[2]*cos(c + i*(PI/18));
+  		float y = radar[1] + radar[2]*sin(c + i*(PI/18));
+  		glVertex2f(x,y);
     }
     glVertex2f(radar[0],radar[1]);
     glEnd();
     glPopMatrix();
-
-
-
-
-
 
   // Gyroscope
   float sd = 40;
@@ -681,22 +730,6 @@ glVertex2f(x,y);
   }
   glEnd();
   glPopMatrix();
-  /*
-  float black[3];
-  black[0] = 0;
-  black[1] = 0;
-  black[2] = 0;
-
-  for (int i = 0; i < 4; i++) {
-    glColor3fv(black);
-glPushMatrix();
-    glBegin(GL_LINE);
-      glVertex2f(vertices[4][0],vertices[4][1]);
-      glVertex2f(vertices[i][0],vertices[i][1]);
-    glEnd();
-    glPopMatrix();
-  }
-  */
 
 Rect r;
 //
