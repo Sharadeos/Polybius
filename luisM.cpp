@@ -6,8 +6,9 @@
 #include "classes.h"
 #include <string>
 
-void spawnEnemy(Game *g, Global gl, Vec pos);
+void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad);
 
+/*
 void DrawCircle(float cx, float cy, float r, int num_segments)
 {
 	float theta = 2 * 3.1415926 / float(num_segments);
@@ -85,7 +86,7 @@ void Blackhole::render()
 	DrawCircle(pos[0]/2, pos[1]/2, size, 100);
 }
 
-
+*/
 
 
 void creditsLuis(int x, int y, GLuint luisTexture)
@@ -126,19 +127,31 @@ bool collisionDetection(Base object1, Base object2)
 
 void difficultyScaling(Game *g, Global gl)
 {
-	/*
-	Rect r;
-	unsigned int c = 0x00ffff44;
-	r.bot = (*g).ship.pos[1];
-	r.left = (*g).ship.pos[0];
-	r.center = -50;
-	(*g).difficulty += 0.001;
-	ggprint8b(&r, 16, c, "%f", (*g).difficulty);
 
-	blackhole.pos[0] = gl.xres;
-	blackhole.pos[1] = gl.yres;
-	blackhole.render();
-*/
+
+
+//difficulty handler
+switch((*g).level)
+{
+	// level 1
+	case 1:
+	struct timespec dt;
+	clock_gettime(CLOCK_REALTIME, &dt);
+	double ds = timeDiff(&(*g).difficultyTimer, &dt);
+	(*g).difficulty += 0.001;
+	if((*g).nenemies <= 5) {
+		if (ds > 10.0) {
+			Vec location;
+			location[0] = rand() % 500 - 250;
+			location[1] = rand() % 500 - 250;
+			location[2] = rand() % 500 - 250;
+			spawnEnemy(g, gl, location, false);
+			clock_gettime(CLOCK_REALTIME, &(*g).difficultyTimer);
+			}
+		}
+
+	break;
+}
 
 
 	// Enemy Loop
@@ -176,11 +189,12 @@ void difficultyScaling(Game *g, Global gl)
 
 
 
-			float a_xy, a_z;
-			a_xy = e->angle[0];
-			a_xy *= PI/180;
-			a_z = e->angle[1];
-			a_z *= PI/180;
+		float a_xy, a_z;
+		a_xy = e->angle[0];
+		a_xy *= PI/180;
+		a_z = e->angle[1];
+		a_z *= PI/180;
+
 		e->pos[0] += e->vel*cos(a_xy)*sin(a_z);
 		e->pos[1] += e->vel*sin(a_xy)*sin(a_z);
 		e->pos[2] += e->vel*cos(a_z);
@@ -191,7 +205,7 @@ void difficultyScaling(Game *g, Global gl)
 
 // b key
 if (gl.keyhits[98]) {
-		struct timespec bt;
+	struct timespec bt;
 		clock_gettime(CLOCK_REALTIME, &bt);
 		double ts = timeDiff(&(*g).bulletTimer, &bt);
 		if (ts > 0.5) {
@@ -201,7 +215,7 @@ if (gl.keyhits[98]) {
 				location[0] = rand() % 500 - 250;
 				location[1] = rand() % 500 - 250;
 				location[2] = rand() % 500 - 250;
-				spawnEnemy(g, gl, location);
+				spawnEnemy(g, gl, location, false);
 			}
 }
 
@@ -209,6 +223,23 @@ if (gl.keyhits[98]) {
 
 void luisRender(Game *g, Global gl)
 {
+
+
+	/*
+	Rect r;
+	unsigned int c = 0x00ffff44;
+	r.bot = (*g).ship.pos[1];
+	r.left = (*g).ship.pos[0];
+	r.center = -50;
+	(*g).difficulty += 0.001;
+	ggprint8b(&r, 16, c, "%f", (*g).difficulty);
+
+	blackhole.pos[0] = gl.xres;
+	blackhole.pos[1] = gl.yres;
+	blackhole.render();
+*/
+
+
 	float cx = gl.xres/2;
 	//float cy = gl.yres/2;
 	Rect r;
@@ -220,12 +251,12 @@ void luisRender(Game *g, Global gl)
 	ggprint8b(&r, 16, 0x00ffff00, "num Enemies = %.1i",(*g).nenemies);
 	ggprint8b(&r, 16, 0x00ffff00, "ship velocity = %.1f",(*g).ship.vel);
 	ggprint8b(&r, 16, 0x00ffff00, "level= %.1i",(*g).level);
-	ggprint8b(&r, 16, 0x00ffff00, "difficulty= %.1i",(*g).difficulty);
+	ggprint8b(&r, 16, 0x00ffff00, "difficulty= %.1f",(*g).difficulty);
 
 }
 
 
-void spawnEnemy(Game *g, Global gl, Vec pos)
+void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad)
 {
   Enemy *e = &(*g).earr[(*g).nenemies];
   e->pos[0] = (*g).ship.pos[0] + pos[0];
@@ -233,6 +264,7 @@ void spawnEnemy(Game *g, Global gl, Vec pos)
   e->pos[2] = (*g).ship.pos[2] + pos[2];
   e->vel = 0;
 	e->currentHealth = 3;
+	e->squadron = squad;
   //convert ship angle to radians
   e->angle[0] = (*g).ship.angle[0];
   e->angle[1] = (*g).ship.angle[1];

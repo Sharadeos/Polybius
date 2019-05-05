@@ -264,7 +264,7 @@ if (gl.keyhits[32]) {
     double ts = timeDiff(&(*g).bulletTimer, &bt);
     if (ts > 0.1) {
         timeCopy(&(*g).bulletTimer, &bt);
-        if ((*g).nbullets < MAX_BULLETS) {
+        if ((*g).nbullets < MAX_ARRAY) {
             //shoot a bullet...
             //Bullet *b = new Bullet;
             Bullet *b = &(*g).barr[(*g).nbullets];
@@ -661,7 +661,7 @@ void joeyRender(Game *g, Global gl)
     glEnd();
     glPopMatrix();
 
-    
+
 
     //green pizza slice inside radar
     float green[4];

@@ -32,7 +32,7 @@ void carrierPF(float* a, float* b, int x, int y);
 void luisRender(Game *g, Global gl);
 void difficultyScaling(Game *g, Global gl);
 bool collisionDetection(Base object1, Base object2);
-void spawnEnemy(Game *g, Global gl, Vec pos);
+void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad);
 
 //chris extern functions
 void ALExplodeUpdate(ALenum param, float x, float y/*, ALfloat *z*/);
@@ -385,7 +385,7 @@ void check_mouse(XEvent *e)
         	double ts = timeDiff(&(*g).bulletTimer, &bt);
         	if (ts > 0.1) {
             	timeCopy(&(*g).bulletTimer, &bt);
-            	if ((*g).nbullets < MAX_BULLETS) {
+            	if ((*g).nbullets < MAX_ARRAY) {
                 	//shoot a bullet...
 	                //Bullet *b = new Bullet;
     	            Bullet *b = &(*g).barr[(*g).nbullets];

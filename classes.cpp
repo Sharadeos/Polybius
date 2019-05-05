@@ -174,7 +174,7 @@ void Base::drawBullet(Game * g, Global gl) {
 
   float distanceScale = 48/polar[0];
 
-	//glColor3fv(color);
+	glColor3fv(color);
 	glPushMatrix();
 	glBegin(GL_POLYGON);
 
@@ -279,11 +279,13 @@ Game::Game(int xWindowSize, int yWindowSize, const Ship& ship, const Object& obj
 
 	show_credits = false;
 	ahead = NULL;
-	barr = new Bullet[MAX_BULLETS];
-  earr = new Enemy[MAX_ENEMIES];
+	barr = new Bullet[MAX_ARRAY];
+  earr = new Enemy[MAX_ARRAY];
+  sarr = new Squadron[MAX_ARRAY];
 	nasteroids = 0;
   nenemies = 0;
 	nbullets = 0;
+  nsquadrons = 0;
 	mouseThrustOn = false;
 	mtext = 0;
   difficulty = 1.0;
@@ -326,4 +328,5 @@ Game::Game(int xWindowSize, int yWindowSize, const Ship& ship, const Object& obj
 	}
   */
 	clock_gettime(CLOCK_REALTIME, &bulletTimer);
+  clock_gettime(CLOCK_REALTIME, &difficultyTimer);
 }

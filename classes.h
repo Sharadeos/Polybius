@@ -55,8 +55,7 @@ const float PITCH = .6;
 const float TURN = .6;
 const int KEYS = 100;
 const int MAX_THRUST = 1;
-const int MAX_BULLETS = 11;
-const int MAX_ENEMIES = 11;
+const int MAX_ARRAY = 999;
 const int RANGE = 1000;
 
 
@@ -155,6 +154,7 @@ public:
 	int numVertices;
 	int enemyType;
 	int size;
+	bool squadron;
 
 
 };
@@ -165,6 +165,15 @@ public:
 	struct timespec time;
 
 	Bullet();
+};
+
+
+class Squadron {
+public:
+	int size;
+	Vec formation;
+	Enemy *squadVec;
+
 };
 
 
@@ -200,20 +209,24 @@ public:
 	Ship ship;
 	Asteroid *ahead;
 	Bullet *barr;
-
 	Enemy *earr;
+	Squadron *sarr;
 	int nasteroids;
 	int nenemies;
 	int nbullets;
+	int nsquadrons;
 	Object object;
 
 	struct timespec bulletTimer;
-	struct timespec mouseThrustTimer;
+	struct timespec difficultyTimer;
 	bool mouseThrustOn;
 	bool show_credits;
 	float mtext;
+
   float difficulty;
 	int level;
+
+
 	Game(int xWindowSize, int yWindowSize, const Ship & ship, const Object & object);
 
 	int num_stars;
