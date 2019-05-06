@@ -7,7 +7,7 @@
 #include <string>
 
 void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad);
-
+void score(Game *g, int i);
 
 void DrawCircle(float cx, float cy, float r, int num_segments)
 {
@@ -202,6 +202,7 @@ switch((*g).level)
 						if((*g).earr[i].currentHealth <= 0) {
 							memcpy(&(*g).earr[i], &(*g).earr[(*g).nenemies-1], sizeof(Enemy));
 							(*g).nenemies--;
+							 score(g,i);
 
 							continue;
 

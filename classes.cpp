@@ -84,8 +84,11 @@ void Base::drawBase(Game * g, Global gl) {
   e[1] -= low;
 
   if (e[1] > 360) {
-    e[1] = e[1] - 360;
-  }
+    e[1] -= 360;
+   }
+   if (e[1] < 0) {
+     e[1] += 360;
+   }
 
   projection[0] = ((high - e[1])/120)*gl.xres;
   projection[1] = ((s[1] + 45 - e[2])/90)*gl.yres;
@@ -113,23 +116,25 @@ void Base::drawBase(Game * g, Global gl) {
 
   float distanceScale = 12/polar[0];
 
-  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-  glBegin(GL_POLYGON);
+
+
+  float Yellow[3] = {1,1,0};
+glColor3fv(Yellow);
+glPushMatrix();
+glBegin(GL_TRIANGLE_STRIP);
 
   //Override to different Vertices for different classes?
   glVertex2i(x-(radius*xScale*distanceScale),y-(radius*yScale*distanceScale));
   glVertex2i(x-(radius*xScale*distanceScale),y+(radius*yScale*distanceScale));
+  glVertex2i(x,y);
   glVertex2i(x+(radius*xScale*distanceScale),y-(radius*yScale*distanceScale));
   glVertex2i(x+(radius*xScale*distanceScale),y+(radius*yScale*distanceScale));
 
-  glEnd();
-  glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-  glColor3f(1.0f, 0.0f, 0.0f);
-  glBegin(GL_POINTS);
 
 
-  glEnd();
-
+  glVertex2i(x,y);
+glEnd();
+glPopMatrix();
 
   float cx = gl.xres/2;
   //float cy = gl.yres/2;
@@ -152,9 +157,12 @@ void Base::drawBullet(Game * g, Global gl) {
 	e[1] = polar[1];
 	e[2] = polar[2];
 
-	 if (e[1] < 0) {
-	      e[1] = 360 + e[1];
-	  }
+  if (e[1] > 360) {
+  	    e[1] -= 360;
+  	}
+  	if (e[1] < 0) {
+  	    e[1] += 360;
+  	}
 
 	float s[2];
 	s[0] = (*g).ship.angle[0];
@@ -173,7 +181,8 @@ void Base::drawBullet(Game * g, Global gl) {
 	y = ((s[1] + 45 - e[2])/90)*gl.yres;
 
   float distanceScale = 48/polar[0];
-
+  //glColor3fv(color);
+  //float Green[3] = {0,1,0};
 	glColor3fv(color);
 	glPushMatrix();
 	glBegin(GL_POLYGON);
@@ -251,6 +260,7 @@ Ship::Ship(int x, int y, int z) {
   currentHealth = maxHealth;
   powerLevel = 1;
   maxBullets = MAX;
+  weaponType = 1;
 }
 
 Object::Object(int x, int y, int z) {
@@ -290,7 +300,7 @@ Game::Game(int xWindowSize, int yWindowSize, const Ship& ship, const Object& obj
 	mtext = 0;
   difficulty = 1.0;
   level = 1;
-
+score = 0;
 
 
   num_stars = 32000;

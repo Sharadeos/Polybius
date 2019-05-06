@@ -142,7 +142,7 @@ class Ship: public Base {
 public:
 	int number;
 	bool invert;
-
+	int weaponType;
 	Ship(int x, int y, int z);
 
 };
@@ -224,6 +224,7 @@ public:
 
   float difficulty;
 	int level;
+	int score;
 
 
 	Game(int xWindowSize, int yWindowSize, const Ship & ship, const Object & object);

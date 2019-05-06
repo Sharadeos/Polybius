@@ -20,12 +20,15 @@ void AdolfoValenciaPicture(int x, int y, GLuint textid);
 void andrewH(int x, int y, GLuint textid, float i);
 void creditsLuis(int x, int y, GLuint textid);
 void showChrisRamirez(int x, int y, GLuint textid);
+
+//joseph extern functions
 void josephG(int x, int y, GLuint textid);
-void fighterPF(float* a, float* b, int x, int y);
-void frigatePF(float* a, float* b, int x);
-void squadronPF(float* a, float* b, int x, int y);
-void missilePF(float* a, float* b, int x, int y);
-void carrierPF(float* a, float* b, int x, int y);
+void pathFindingTest2(Game *g,Global gl);
+void fighterPF(Game *g, int x);
+void frigatePF(Game *g, int x);
+void carrierPF(Game*g, int x);
+void score(Game *g,int i);
+void scoreBoard(Game *g, Global gl);
 //luis extern functions
 //void createAsteroid(Game *g, Global gl);
 //void createBullet(Game *g, Global gl, Object object);
@@ -383,39 +386,97 @@ void check_mouse(XEvent *e)
 	}
 	if (e->type == ButtonPress) {
 		if (e->xbutton.button==1) {
-	    	//a little time between each bullet
-        	struct timespec bt;
-        	clock_gettime(CLOCK_REALTIME, &bt);
-        	double ts = timeDiff(&(*g).bulletTimer, &bt);
-        	if (ts > 0.1) {
-            	timeCopy(&(*g).bulletTimer, &bt);
-            	if ((*g).nbullets < MAX_ARRAY) {
-                	//shoot a bullet...
-	                //Bullet *b = new Bullet;
-    	            Bullet *b = &(*g).barr[(*g).nbullets];
-        	        timeCopy(&b->time, &bt);
-            	    b->pos[0] = (*g).ship.pos[0];
-                	b->pos[1] = (*g).ship.pos[1];
-	                b->pos[2] = (*g).ship.pos[2];
-#ifdef USE_OPENAL_SOUND
-			pewPew();
-#endif
-			//b->vel = (*g).ship.vel + 25;
-        	        b->vel = (*g).ship.vel + 25;
-            	    //convert ship angle to radians
-                	b->angle[0] = (*g).ship.angle[0];
-	                b->angle[1] = (*g).ship.angle[1];
-    	            b->color[0] = 0.0f;
-        	        b->color[1] = 1.0f;
-                	b->color[2] = 0.0f;
-                	(*g).nbullets++;
-            	}
+			if ((*g).ship.weaponType == 1) {
+	    		//a little time between each bullet
+	        	struct timespec bt;
+    	    	clock_gettime(CLOCK_REALTIME, &bt);
+        		double ts = timeDiff(&(*g).bulletTimer, &bt);
+        		if (ts > 0.1) {
+            		timeCopy(&(*g).bulletTimer, &bt);
+	            	if ((*g).nbullets < MAX_ARRAY) {
+    	            	//shoot a bullet...
+	    	            //Bullet *b = new Bullet;
+    	    	        Bullet *b = &(*g).barr[(*g).nbullets];
+        	    	    timeCopy(&b->time, &bt);
+            	    	b->pos[0] = (*g).ship.pos[0];
+	                	b->pos[1] = (*g).ship.pos[1];
+		                b->pos[2] = (*g).ship.pos[2];
+    		            //b->vel = (*g).ship.vel + 25;
+										#ifdef USE_OPENAL_SOUND
+													pewPew();
+										#endif
+        		        b->vel = (*g).ship.vel + 25;
+            		    //convert ship angle to radians
+                		b->angle[0] = (*g).ship.angle[0];
+		                b->angle[1] = (*g).ship.angle[1];
+    		            b->color[0] = 0.0f;
+        		        b->color[1] = 1.0f;
+            	    	b->color[2] = 0.0f;
+                		(*g).nbullets++;
+            		}
+				}
 			}
+			if ((*g).ship.weaponType == 2) {
+	    		//a little time between each bullet
+	        	struct timespec bt;
+    	    	clock_gettime(CLOCK_REALTIME, &bt);
+        		double ts = timeDiff(&(*g).bulletTimer, &bt);
+        		if (ts > 0.1) {
+            		timeCopy(&(*g).bulletTimer, &bt);
+	            	if ((*g).nbullets < MAX_ARRAY - 1) {
+						float a1, a2, a3;
+						a1 = (*g).ship.angle[0] + 90;
+						a2 = (*g).ship.angle[0] - 90;
+						a3 = (*g).ship.angle[1];
+						a1 *= PI/180;
+						a2 *= PI/180;
+						a3 *= PI/180;
+						float xo,yo;
+						xo = 8*cos(a1)*sin(a3);
+						yo = 8*sin(a1)*sin(a3);
+    	            	//shoot a bullet...
+	    	            //Bullet *b = new Bullet;
+    	    	        Bullet *b = &(*g).barr[(*g).nbullets];
+        	    	    timeCopy(&b->time, &bt);
+            	    	b->pos[0] = (*g).ship.pos[0] + xo;
+	                	b->pos[1] = (*g).ship.pos[1] + yo;
+		                b->pos[2] = (*g).ship.pos[2];
+    		            //b->vel = (*g).ship.vel + 25;
+        		        b->vel = (*g).ship.vel + 25;
+            		    //convert ship angle to radians
+                		b->angle[0] = (*g).ship.angle[0];
+		                b->angle[1] = (*g).ship.angle[1];
+    		            b->color[0] = 0.0f;
+        		        b->color[1] = 1.0f;
+            	    	b->color[2] = 0.0f;
+                		(*g).nbullets++;
+    	            	//shoot a bullet...
+	    	            //Bullet *b = new Bullet;
+						xo = 8*cos(a2)*sin(a3);
+						yo = 8*sin(a2)*sin(a3);
+						Bullet *c = &(*g).barr[(*g).nbullets];
+        	    	    timeCopy(&c->time, &bt);
+            	    	c->pos[0] = (*g).ship.pos[0] + xo;
+	                	c->pos[1] = (*g).ship.pos[1] + yo;
+		                c->pos[2] = (*g).ship.pos[2];
+    		            //b->vel = (*g).ship.vel + 25;
+        		        c->vel = (*g).ship.vel + 25;
+            		    //convert ship angle to radians
+                		c->angle[0] = (*g).ship.angle[0];
+		                c->angle[1] = (*g).ship.angle[1];
+    		            c->color[0] = 0.0f;
+        		        c->color[1] = 0.0f;
+            	    	c->color[2] = 1.0f;
+                		(*g).nbullets++;
+            		}
+				}
         }
 	}
 	if (e->xbutton.button==3) {
 		//Right button is down
 	}
+
+}
 	if (savex != e->xbutton.x || savey != e->xbutton.y) {
 		//Mouse moved
 
@@ -440,23 +501,22 @@ void check_mouse(XEvent *e)
 		}
 		if (ydiff >= 0) {
 			(*g).ship.angle[1] -= .1*PITCH*ydiff;
-			if ((*g).ship.angle[1] < 0.0f)
-				(*g).ship.angle[1] = 0.0f;
+			if ((*g).ship.angle[1] < 0.1f)
+				(*g).ship.angle[1] = 0.1f;
 		}
 		else if (ydiff <= 0) {
 			//std::cout << "xdiff: " << xdiff << std::endl << std::flush;
 			(*g).ship.angle[1] -= .1*PITCH*ydiff;
-			if ((*g).ship.angle[1] > 180.0f)
-				(*g).ship.angle[1] = 180.0f;
+			if ((*g).ship.angle[1] > 179.9f)
+				(*g).ship.angle[1] = 179.9f;
 		}
 		x11.set_mouse_position(100,100);
 		savex=100;
 		savey=100;
 	}
 
+
 }
-
-
 int check_keys(XEvent *e)
 {
 	int key = XLookupKeysym(&e->xkey, 0);
@@ -532,6 +592,7 @@ void physics()
 
 	joeyPhysics(g, gl);
 	difficultyScaling(g, gl);
+	pathFindingTest2(g,gl);
 
 
 }
@@ -591,6 +652,7 @@ void render()
 		*/
 		joeyRender(g, gl);
 		luisRender(g, gl);
+			scoreBoard(g,gl);
 		//ggprint8b(&r, 16, 0x00ffff00, "(object render x=%.1f,object render y=%.1f)", (((*g).ship.angle[0] + 60 - object.polar[1])/120)*gl.xres,  (((*g).ship.angle[1] + 45 - object.polar[2])/90)*gl.yres);
 }
 

@@ -223,6 +223,21 @@ if (a == NULL)
 //---------------------------------------------------
 //check keys pressed now
 
+// 1
+if (gl.keyhits[49]) {
+    (*g).ship.weaponType = 1;
+}
+
+// 2
+if (gl.keyhits[50]) {
+    (*g).ship.weaponType = 2;
+}
+
+// 3
+if (gl.keyhits[51]) {
+    (*g).ship.weaponType = 3;
+}
+
 // q
 
 if (gl.keyhits[13]) {
@@ -447,38 +462,88 @@ void joeyRender(Game *g, Global gl)
     chs[0][0] = gl.yres*0.04;
     chs[0][1] = gl.yres*0.01;
 
-    //crosshair 1
-    glColor3fv((*g).ship.color);
-    glPushMatrix();
-    glBegin(GL_LINES);
-    glVertex2f(cx - chs[0][0], cy);
-    glVertex2f(cx - chs[0][1], cy);
-    glEnd();
-    glPopMatrix();
+    if ((*g).ship.weaponType == 1) {
+      	glColor3fv((*g).ship.color);
+      	glPushMatrix();
+  	    glBegin(GL_LINE_LOOP);
+      	for (int i = 0; i < 8; i++) {
+  			float x = cx + 6*cos(i*(PI/4));
+  			float y = cy + 6*sin(i*(PI/4));
+  			glVertex2f(x,y);
+  		}
+  		glEnd();
+  	    glPopMatrix();
+  	}
+  	if ((*g).ship.weaponType == 2) {
+      	glColor3fv((*g).ship.color);
+      	glPushMatrix();
+  	    glBegin(GL_LINES);
+      	glVertex2f(cx - chs[0][0], cy);
+  	    glVertex2f(cx - chs[0][1], cy);
+      	glEnd();
+  	    glPopMatrix();
 
-    glColor3fv((*g).ship.color);
-    glPushMatrix();
-    glBegin(GL_LINES);
-    glVertex2f(cx + chs[0][0], cy);
-    glVertex2f(cx + chs[0][1], cy);
-    glEnd();
-    glPopMatrix();
+  	    glColor3fv((*g).ship.color);
+      	glPushMatrix();
+  	    glBegin(GL_LINES);
+      	glVertex2f(cx + chs[0][0], cy);
+  	    glVertex2f(cx + chs[0][1], cy);
+      	glEnd();
+  	    glPopMatrix();
 
-    glColor3fv((*g).ship.color);
-    glPushMatrix();
-    glBegin(GL_LINES);
-    glVertex2f(cx, cy - chs[0][0]);
-    glVertex2f(cx, cy - chs[0][1]);
-    glEnd();
-    glPopMatrix();
+      	glColor3fv((*g).ship.color);
+  	    glPushMatrix();
+  	    glBegin(GL_LINES);
+      	glVertex2f(cx, cy - chs[0][0]);
+  	    glVertex2f(cx, cy - chs[0][1]);
+      	glEnd();
+  	    glPopMatrix();
 
-    glColor3fv((*g).ship.color);
-    glPushMatrix();
-    glBegin(GL_LINES);
-    glVertex2f(cx, cy + chs[0][0]);
-    glVertex2f(cx, cy + chs[0][1]);
-    glEnd();
-    glPopMatrix();
+      	glColor3fv((*g).ship.color);
+  	    glPushMatrix();
+  	    glBegin(GL_LINES);
+  	    glVertex2f(cx, cy + chs[0][0]);
+  	    glVertex2f(cx, cy + chs[0][1]);
+  		glEnd();
+  	    glPopMatrix();
+  	}
+  	if ((*g).ship.weaponType == 3) {
+      	glColor3fv((*g).ship.color);
+      	glPushMatrix();
+  	    glBegin(GL_LINE_LOOP);
+      	glVertex2f(cx - 6, cy);
+  	    glVertex2f(cx - 18, cy + 6);
+  	    glVertex2f(cx - 18, cy - 6);
+      	glEnd();
+  	    glPopMatrix();
+
+  	    glColor3fv((*g).ship.color);
+      	glPushMatrix();
+  	    glBegin(GL_LINE_LOOP);
+      	glVertex2f(cx, cy + 6);
+      	glVertex2f(cx - 6, cy + 18);
+      	glVertex2f(cx + 6, cy + 18);
+      	glEnd();
+  	    glPopMatrix();
+
+      	glColor3fv((*g).ship.color);
+      	glPushMatrix();
+  	    glBegin(GL_LINE_LOOP);
+      	glVertex2f(cx + 6, cy);
+  	    glVertex2f(cx + 18, cy + 6);
+  	    glVertex2f(cx + 18, cy - 6);
+      	glEnd();
+  	    glPopMatrix();
+
+  	    glColor3fv((*g).ship.color);
+      	glPushMatrix();
+  	    glBegin(GL_LINE_LOOP);
+      	glVertex2f(cx, cy - 6);
+      	glVertex2f(cx - 6, cy - 18);
+      	glVertex2f(cx + 6, cy - 18);
+      	glEnd();
+  	    glPopMatrix();
+  	}
 
     //inner octagon
     for (int i = 0; i < 8; i++) {
@@ -750,6 +815,24 @@ void joeyRender(Game *g, Global gl)
             glPopMatrix();
         }
     }
+    // 2nd radar
+     //float radar[3]; // 0,1 = x,y of center of radar, 2 = + radius
+     radar[0] = gl.xres*.90;
+     radar[1] = radar[2] = 100;
+     glEnable(GL_BLEND);
+     glBlendFunc( GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+     glColor4fv(blue);
+     glPushMatrix();
+     glBegin(GL_POLYGON);
+     p = 50;
+     for (int i = 0; i < p; i++) {
+         float x = radar[0] + radar[2]*cos(i*2*PI/p);
+         float y = radar[1] + radar[2]*sin(i*2*PI/p);
+         glVertex2f(x,y);
+     }
+     glEnd();
+     glPopMatrix();
+
     // Gyroscope
     float sd = 40;
     float cen = 80;
