@@ -171,7 +171,6 @@ public:
 class Squadron {
 public:
 	int size;
-	Vec formation;
 	Enemy *squadVec;
 
 };

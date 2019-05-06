@@ -8,7 +8,7 @@
 
 void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad);
 
-/*
+
 void DrawCircle(float cx, float cy, float r, int num_segments)
 {
 	float theta = 2 * 3.1415926 / float(num_segments);
@@ -28,7 +28,7 @@ void DrawCircle(float cx, float cy, float r, int num_segments)
 	}
 	glEnd();
 }
-
+/*
 class Scrap {
 public:
 	Vec dir;
@@ -125,6 +125,18 @@ bool collisionDetection(Base object1, Base object2)
 
 }
 
+
+
+int even_random_number() {
+    return 2 * ( rand() % 5 + 1 );
+}
+
+
+// 3, 5, 7
+int odd_random_number() {
+    return (1 + even_random_number()) % 8;
+}
+
 void difficultyScaling(Game *g, Global gl)
 {
 
@@ -153,7 +165,7 @@ switch((*g).level)
 	break;
 }
 
-
+	int decrement = 0;
 	// Enemy Loop
 	for (int i =0; i < (*g).nenemies; i++) {
 
@@ -175,20 +187,25 @@ switch((*g).level)
 						//time to delete the bullet.
 
 						memcpy(&(*g).barr[j], &(*g).barr[(*g).nbullets-1], sizeof(Bullet));
-						(*g).nbullets--;
+
 						(*g).earr[i].currentHealth--;
+						decrement++;
 
 						if((*g).earr[i].currentHealth <= 0) {
 							memcpy(&(*g).earr[i], &(*g).earr[(*g).nenemies-1], sizeof(Enemy));
 							(*g).nenemies--;
+							continue;
 						}
 					//do not increment i.
-					continue;
+
 						}
+
 				}
+				(*g).nbullets-=decrement;
 
 
 
+		if(e->squadron == false) {
 		float a_xy, a_z;
 		a_xy = e->angle[0];
 		a_xy *= PI/180;
@@ -199,7 +216,7 @@ switch((*g).level)
 		e->pos[1] += e->vel*sin(a_xy)*sin(a_z);
 		e->pos[2] += e->vel*cos(a_z);
 		e->updatePolar((*g).ship.pos);
-
+		}
 
 	}
 
@@ -218,7 +235,67 @@ if (gl.keyhits[98]) {
 				spawnEnemy(g, gl, location, false);
 			}
 }
+// f key squadron test
 
+if (gl.keyhits[2]) {
+	struct timespec bt;
+
+	clock_gettime(CLOCK_REALTIME, &bt);
+	double ts = timeDiff(&(*g).bulletTimer, &bt);
+
+		if (ts > 0.5) {
+			timeCopy(&(*g).bulletTimer, &bt);
+
+			Squadron *s= &(*g).sarr[(*g).nsquadrons];
+			s->size = 3;// odd_random_number();
+
+			// setting up squadron and placing the enemies on them
+
+				Vec squadronLocation;
+				squadronLocation[0] = rand() % 500 - 250;
+				squadronLocation[1] = rand() % 500 - 250;
+				squadronLocation[2] = rand() % 500 - 250;
+
+				// spawns at the center 1 [2] 3
+				spawnEnemy(g, gl, squadronLocation, true);
+				float lowx = 25;
+				float lowy = 25;
+
+				for(int i = (s->size/2) - 1; i >= 0; i--) {
+
+					squadronLocation[0] += lowx;
+					squadronLocation[1] += lowy;
+
+
+					spawnEnemy(g, gl, squadronLocation, true);
+
+					lowx+=lowx;
+					lowy+=lowy;
+
+				}
+
+				lowx = -25;
+				lowy = 25;
+
+
+				for(int i = (s->size/2) + 1; i < s->size; i++) {
+
+
+					squadronLocation[0] += lowx;
+					squadronLocation[1] += lowy;
+
+
+					spawnEnemy(g, gl, squadronLocation, true);
+
+					lowx+=lowx;
+					lowy+=lowy;
+
+				}
+
+
+				(*g).nsquadrons++;
+		}
+	}
 }
 
 void luisRender(Game *g, Global gl)
