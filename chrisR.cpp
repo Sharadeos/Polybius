@@ -37,7 +37,6 @@ public:
 			"./audio/737engine.wav", "./audio/MilkyWayBATTLE.wav",
 			"./audio/MilkyWayEXPLORE.wav"
 	};
-    bool actionDetected = false;
 public:
 	OPENAL_SOUND_ENGINE() {
 		alutInit(0, NULL);
@@ -49,7 +48,7 @@ public:
 		alGetError();
 		//Setup Listener
 		//Forward and Upward vectors are used
-		float vec[6] = {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f};
+		float vec[6] = {0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f};
 		alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
 		alListener3f(AL_VELOCITY, 0.0f, 0.0f, 0.0f);
 		alListenerfv(AL_ORIENTATION, vec);
@@ -91,13 +90,6 @@ public:
 				exit(EXIT_FAILURE); //0;
 			}
 		}
-		/*alSourcef(alSource[0], AL_GAIN, 0.1f);
-		alSourcef(alSource[0], AL_PITCH, 1.0f);
-		alSourcei(alSource[0], AL_LOOPING, AL_FALSE);
-		if (alGetError() != AL_NO_ERROR) {
-			printf("ERROR: setting source\n");
-			exit(EXIT_FAILURE);//0;
-		}*/
 	}
 	~OPENAL_SOUND_ENGINE() {
 		//Cleanup: delete Sources then Buffers
@@ -120,15 +112,27 @@ public:
 } audiothing;
 #endif
 void pewPew() {
-	//float output=0.0, //min=0.9, max=1.1;
     float output = rand() % 12 + 4;//min + (rand() % static_cast<float>(max - min + 1));
     alSourcei(audiothing.alSource[0], AL_PITCH, output);
     alSourcePlay(audiothing.alSource[0]);
 }
 void playMusic() {
 	alSourcePlay(audiothing.alSource[4]);
+	alSourcei(audiothing.alSource[4], AL_SOURCE_RELATIVE, AL_TRUE);
 	alSourcePlay(audiothing.alSource[3]);
+	alSourcei(audiothing.alSource[3], AL_SOURCE_RELATIVE, AL_TRUE);
 	alSourcef(audiothing.alSource[3], AL_GAIN, 0.0f);
+}
+void playEngine() {
+	alSourcei(audiothing.alSource[2], AL_SOURCE_RELATIVE, AL_FALSE);
+	alSource3f(audiothing.alSource[2], AL_DIRECTION, 0.0f, 0.0f, 0.0f);
+	alSourcePlay(audiothing.alSource[2]);
+}
+void pauseEngine() {
+    alSourcePause(audiothing.alSource[2]);
+}
+void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3) {
+	alSource3f(audiothing.alSource[2], param, v1, v2, v3);
 }
 /*bool checkActivity(int &init, int &num, bool &flag) {
     if(init != num) {
@@ -137,51 +141,58 @@ void playMusic() {
     }
     if(
 }*/
+void checkActivity(Game *g, Global gl) {
+	
+}
 float tincrement = 0.01;
-bool actionFlag = false;
+bool actionFlag = false, actionFlag2 = false;
 double tdif = 0.0;
 struct timespec at;
 bool setActionFlag() {
-	if(actionFlag == true) {
+	actionFlag2 = true;
+	if(actionFlag == false) {
+		actionFlag = true;
+	}else {
 		actionFlag = false;
-		//tincrement = 0.01;
-		//clock_gettime(CLOCK_REALTIME, &at);
-		//tdif = 0.0;
-		return -1;
 	}
-	actionFlag = true;
 	clock_gettime(CLOCK_REALTIME, &at);
 }
 void checkAction(struct timespec *t) {
 	if(actionFlag == true) {
 		tdif = timeDiff(&at, t);
-		if(tdif <=  5.0) {
-        	tincrement += 0.01;
+		if(tdif <= 3.0) {
+			tincrement += 0.01;
 			alSourcef(audiothing.alSource[3], AL_GAIN, tincrement);
-            alSourcef(audiothing.alSource[4], AL_GAIN, fabs(tincrement - 1.0));
+			alSourcef(audiothing.alSource[4], AL_GAIN, fabs(tincrement - 1.0));
 		}
 	}
-	if(actionFlag == false) {
-	    tdif = timeDiff(&at, t);
-	    //if(tdif <= 5.0) {
-	    if(tincrement==0) {
-
-		tincrement -= 0.01;
-		alSourcef(audiothing.alSource[3], AL_GAIN, fabs(tincrement - 1.0));
-		alSourcef(audiothing.alSource[4], AL_GAIN, tincrement);
-	    //}
-	    }
-	//alSourcef(audiothing.alSource[3], AL_GAIN, tincrement);
-	//alSourcef(audiothing.alSource[4], AL_GAIN, fabs(tincrement - 1.0));
-	//tincrement+=0.05;
+	if((actionFlag == false) && (actionFlag2 == true)) {
+	    	tdif = timeDiff(&at, t);
+		if(tdif <= 3.0) {
+			tincrement -= 0.01;
+			alSourcef(audiothing.alSource[3], AL_GAIN, tincrement);
+			alSourcef(audiothing.alSource[4], AL_GAIN, fabs(tincrement - 1.0));
+		}
+	}
 }
-}
-
 //void ALExplodeUpdate(ALenum param, float x, float y //ALfloat *z//) {
 //	alSource3f(audiothing.alSource[1], param, x, y, -2.0);
 //}
 //EX: ALPlayerUpdate(AL_VELOCITY,
-//void ALPlayerUpdate(ALenum param, ALfloat v1, ALfloat v2, ALvloat v3) {
-//	alListener3f(param, v1, v2, v3);
-//}
+void ALPlayerUpdate(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3) {
+	alListener3f(param, v1, v2, v3);
+}
+void ALPlayerVel(ALenum param, ALfloat v1) {
+    alListeneri(param, v1);
+}
+void orientationVec(ALfloat v1, ALfloat v2, ALfloat v3, ALfloat v4, ALfloat v5,
+	ALfloat v6) {
+    audiothing.vec[0] = v1;
+    audiothing.vec[1] = v2;
+    audiothing.vec[2] = v3;
+    audiothing.vec[3] = v4; //0.0f;
+    audiothing.vec[4] = v5; //1.0f;
+    audiothing.vec[5] = v6; //0.0f;
+    alListenerfv(AL_ORIENTATION, audiothing.vec);
+}
 //void ALSource

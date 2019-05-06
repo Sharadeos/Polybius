@@ -37,6 +37,8 @@ void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad);
 //chris extern functions
 void ALExplodeUpdate(ALenum param, float x, float y/*, ALfloat *z*/);
 void playMusic();
+void playEngine();
+void pewPew();
 //joey extern functions
 void joeyPhysics(Game *g, Global gl);
 void joeyRender(Game *g, Global gl);
@@ -223,8 +225,10 @@ int main()
 	int done=0;
 
 // MOVE
-
+#ifdef USE_OPENAL_SOUND
 	playMusic();
+	playEngine();
+#endif
 
 	for (int i = 0; i < (*g).num_stars; i++) {
 			(*g).stars[i][0] = (rand() % 359999)*.001; // maps to degrees
@@ -393,7 +397,10 @@ void check_mouse(XEvent *e)
             	    b->pos[0] = (*g).ship.pos[0];
                 	b->pos[1] = (*g).ship.pos[1];
 	                b->pos[2] = (*g).ship.pos[2];
-    	            //b->vel = (*g).ship.vel + 25;
+#ifdef USE_OPENAL_SOUND
+			pewPew();
+#endif
+			//b->vel = (*g).ship.vel + 25;
         	        b->vel = (*g).ship.vel + 25;
             	    //convert ship angle to radians
                 	b->angle[0] = (*g).ship.angle[0];

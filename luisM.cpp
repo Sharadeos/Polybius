@@ -127,6 +127,7 @@ bool collisionDetection(Base object1, Base object2)
 
 
 
+
 int even_random_number() {
     return 2 * ( rand() % 5 + 1 );
 }
@@ -137,9 +138,13 @@ int odd_random_number() {
     return (1 + even_random_number()) % 8;
 }
 
+
+extern void playEngine();
+extern void pauseEngine();
+extern void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3);
+
 void difficultyScaling(Game *g, Global gl)
 {
-
 
 
 //difficulty handler
@@ -158,6 +163,9 @@ switch((*g).level)
 			location[1] = rand() % 500 - 250;
 			location[2] = rand() % 500 - 250;
 			spawnEnemy(g, gl, location, false);
+#ifdef USE_OPENAL_SOUND
+			playEngine();
+#endif
 			clock_gettime(CLOCK_REALTIME, &(*g).difficultyTimer);
 			}
 		}
@@ -194,7 +202,13 @@ switch((*g).level)
 						if((*g).earr[i].currentHealth <= 0) {
 							memcpy(&(*g).earr[i], &(*g).earr[(*g).nenemies-1], sizeof(Enemy));
 							(*g).nenemies--;
+
 							continue;
+
+#ifdef USE_OPENAL_SOUND
+							pauseEngine();
+#endif
+
 						}
 					//do not increment i.
 
@@ -216,7 +230,14 @@ switch((*g).level)
 		e->pos[1] += e->vel*sin(a_xy)*sin(a_z);
 		e->pos[2] += e->vel*cos(a_z);
 		e->updatePolar((*g).ship.pos);
+
 		}
+
+#ifdef USE_OPENAL_SOUND
+		//playEngine();
+		//alShipLocation(AL_POSITION, e->pos[0], e->pos[1], e->pos[2]);
+#endif
+
 
 	}
 
@@ -332,7 +353,7 @@ void luisRender(Game *g, Global gl)
 
 }
 
-
+extern void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3);
 void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad)
 {
   Enemy *e = &(*g).earr[(*g).nenemies];
@@ -342,6 +363,9 @@ void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad)
   e->vel = 0;
 	e->currentHealth = 3;
 	e->squadron = squad;
+#ifdef USE_OPENAL_SOUND
+	alShipLocation(AL_POSITION, e->pos[0], e->pos[1], e->pos[2]);
+#endif
   //convert ship angle to radians
   e->angle[0] = (*g).ship.angle[0];
   e->angle[1] = (*g).ship.angle[1];

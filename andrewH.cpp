@@ -52,6 +52,16 @@ void credit(Game *g, Global gl) {
         gl.keyhits[99] = 0;
     }
 }
+#ifdef USE_OPENAL_SOUND
+extern void setActionFlag();
+extern void checkAction(timespec *t);
+extern void pewPew();
+extern void ALPlayerUpdate(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3);
+extern void ALPlayerVel(ALenum param, ALfloat v1);
+extern void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3);
+extern void orientationVec(ALfloat v1, ALfloat v2, ALfloat v3, ALfloat v4,
+	ALfloat v5, ALfloat v6);
+#endif
 void joeyPhysics(Game *g, Global gl)
 {
 
@@ -63,7 +73,29 @@ void joeyPhysics(Game *g, Global gl)
     (*g).ship.pos[0] += (*g).ship.vel*cos(a_xy)*sin(a_z);
     (*g).ship.pos[1] += (*g).ship.vel*sin(a_xy)*sin(a_z);
     (*g).ship.pos[2] += (*g).ship.vel*cos(a_z);
+    alShipLocation(AL_POSITION, (*g).object.pos[0], (*g).object.pos[1],
+	    (*g).object.pos[2]);
     (*g).object.updatePolar((*g).ship.pos);
+#ifdef USE_OPENAL_SOUND
+    checkAction(&timeCurrent);
+    /*alShipLocation(AL_POSITION, (*g).earr->pos[0], (*g).earr->pos[1],
+	    (*g).earr->pos[2]);*/
+    ALPlayerUpdate(AL_POSITION, (*g).object.pos[0], (*g).ship.pos[1],
+	    (*g).ship.pos[2]);
+    ALPlayerVel(AL_VELOCITY, (*g).ship.vel);
+    float v_xy, v_z;
+    float abc[6];
+    v_xy = ((*g).ship.angle[0] * (PI/180));
+    v_z = ((*g).ship.angle[1] * (PI/180));
+    abc[0] = cos(v_xy)*sin(v_z);
+    abc[1] = sin(v_xy)*sin(v_z);
+    abc[2] = cos(v_z);
+    v_z = ((*g).ship.angle[1] - 90) * (PI/180);
+    abc[3] = cos(v_xy)*sin(v_z);
+    abc[4] = cos(v_xy)*sin(v_z);
+    abc[5] = cos(v_z);
+    orientationVec(abc[0], abc[1], abc[2], abc[3], abc[4], abc[5]);
+#endif
     //Update bullet positions
     struct timespec bt;
     clock_gettime(CLOCK_REALTIME, &bt);
@@ -244,6 +276,9 @@ if (gl.keyhits[0]) {
 //left
 if (gl.keyhits[61]) {
     //(*g).ship.pos[0] -= 5;
+#ifdef USE_OPENAL_SOUND
+    setActionFlag();
+#endif
 }
 
 if (gl.keyhits[62]) {
@@ -272,7 +307,10 @@ if (gl.keyhits[32]) {
             b->pos[0] = (*g).ship.pos[0];
             b->pos[1] = (*g).ship.pos[1];
             b->pos[2] = (*g).ship.pos[2];
-            b->vel = (*g).ship.vel + 25;
+#ifdef USE_OPENAL_SOUND
+	    pewPew();
+#endif
+	    b->vel = (*g).ship.vel + 25;
             //convert ship angle to radians
             b->angle[0] = (*g).ship.angle[0];
             b->angle[1] = (*g).ship.angle[1];
