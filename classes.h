@@ -54,7 +54,7 @@ const Flt MINIMUM_ASTEROID_SIZE = 60.0;
 const float PITCH = .6;
 const float TURN = .6;
 const int KEYS = 100;
-const int MAX_THRUST = 1;
+const int MAX_THRUST = 25;
 const int MAX_ARRAY = 999;
 const int RANGE = 1000;
 
@@ -115,9 +115,12 @@ public:
 
 	int maxHealth;
 	int currentHealth;
+	int maxShield;
+	int currentShield;
 	int maxBullets;
 	int powerLevel;
-
+	float boost;
+	float maxBoost;
 	int radius;
 
 

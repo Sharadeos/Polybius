@@ -33,6 +33,7 @@ Base::Base() {
   radius = 50;
   currentHealth = 3;
   maxHealth = 3;
+
 }
 
 void Base::updatePolar(Vec ship) {
@@ -46,10 +47,13 @@ void Base::updatePolar(Vec ship) {
   xyz[2] = pos[2] - ship[2];
   xyz2[2] = xyz[2]*xyz[2];
 
+  // r, distance
   polar[0] = sqrt(xyz2[0] + xyz2[1] + xyz2[2]);
-  //polar[1] = acos(xyz[2]/(sqrt(xyz2[0] + xyz2[1] + xyz2[2])));
+  // theta, z angle
   polar[2] = acos(xyz[2]/polar[0]);
   polar[2] *= 180/PI;
+  
+  // xy angle
   if (xyz[0]) {
     polar[1] = atan2(xyz[1],xyz[0]);
     polar[1] *= 180/PI;
@@ -256,11 +260,14 @@ Ship::Ship(int x, int y, int z) {
   invert = false;
 
   color[0] = color[1] = color[2] = 1.0;
-  maxHealth = 5;
+  maxHealth = maxShield = maxBoost = 100;
   currentHealth = maxHealth;
+  currentShield = maxShield;
+  boost = maxBoost;
   powerLevel = 1;
   maxBullets = MAX;
   weaponType = 1;
+  boost = 100;
 }
 
 Object::Object(int x, int y, int z) {
