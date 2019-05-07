@@ -104,7 +104,7 @@ void joeyPhysics(Game *g, Global gl)
         Bullet *b = &(*g).barr[i];
         //How long has bullet been alive?
         double ts = timeDiff(&b->time, &bt);
-        if (ts > 2.5) {
+        if (ts > 5) {
             //time to delete the bullet.
             memcpy(&(*g).barr[i], &(*g).barr[(*g).nbullets-1],
                     sizeof(Bullet));
@@ -365,11 +365,14 @@ void joeyRender(Game *g, Global gl)
     //stars
     float cx = gl.xres/2;
     float cy = gl.yres/2;
-    float stars[4] = {1,1,1,.9};
-    glColor4fv(stars);
+    float stars[4] = {1,1,1,1};
+
     glPushMatrix();
     glBegin(GL_POINTS);
     for (int i = 0; i < (*g).num_stars; i++) {
+        stars[3] = (*g).stars[i][2];
+        glColor4fv(stars);
+
         //float s = (*g).ship.angle[2];
         //s *= PI/180;
         //s = sin(s);
@@ -403,6 +406,7 @@ void joeyRender(Game *g, Global gl)
     }
     glEnd();
     glPopMatrix();
+
 
     /*debris
       float tan[3];

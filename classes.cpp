@@ -30,9 +30,11 @@ Base::Base() {
   xScale = 0.0;
   yScale = 0.0;
 
-  radius = 50;
+  radius = 100;
+
   currentHealth = 3;
   maxHealth = 3;
+  boost = 100.0;
 }
 
 void Base::updatePolar(Vec ship) {
@@ -96,6 +98,7 @@ void Base::drawBase(Game * g, Global gl) {
   float y = projection[1];
   float tempValue = 0;
 
+
   //Scale max at the right edge of the setup_screen
 
   xScale = ((high - e[1])/60);
@@ -119,9 +122,9 @@ void Base::drawBase(Game * g, Global gl) {
 
 
   float Yellow[3] = {1,1,0};
-glColor3fv(Yellow);
-glPushMatrix();
-glBegin(GL_TRIANGLE_STRIP);
+  glColor3fv(Yellow);
+  glPushMatrix();
+  glBegin(GL_TRIANGLE_STRIP);
 
   //Override to different Vertices for different classes?
   glVertex2i(x-(radius*xScale*distanceScale),y-(radius*yScale*distanceScale));
@@ -145,8 +148,6 @@ glPopMatrix();
   r.center = 0;
   //ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
   ggprint8b(&r, 16, 0x00ffff00, "%.1i",currentHealth);
-
-
 
 
 }
@@ -271,7 +272,7 @@ Object::Object(int x, int y, int z) {
 
 Bullet::Bullet()
 {
-  radius = 5;
+  radius = 15;
 }
 
 
@@ -300,7 +301,7 @@ Game::Game(int xWindowSize, int yWindowSize, const Ship& ship, const Object& obj
 	mtext = 0;
   difficulty = 1.0;
   level = 1;
-score = 0;
+  score = 0;
 
 
   num_stars = 32000;

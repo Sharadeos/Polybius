@@ -120,7 +120,7 @@ public:
 
 	int radius;
 
-
+	float boost;
 	float xScale;
 	float yScale;
 
@@ -154,7 +154,7 @@ public:
 	int numVertices;
 	int enemyType;
 	int size;
-	bool squadron;
+	int squadNumber;
 
 
 };
@@ -170,8 +170,11 @@ public:
 
 class Squadron {
 public:
+	int number;
 	int size;
 	Enemy *squadVec;
+	Vec offsetX;
+	Vec offsetY;
 
 };
 
@@ -224,18 +227,23 @@ public:
 
   float difficulty;
 	int level;
+
+
+
 	int score;
 
 
 	Game(int xWindowSize, int yWindowSize, const Ship & ship, const Object & object);
 
 	int num_stars;
-	float stars[32000][2];
+	float stars[32000][3];
 	float debris[500][3];
 
 	static Game* getInstance();
 	~Game() {
 		delete [] barr;
+		delete [] earr;
+		delete [] sarr;
 	}
 
 };

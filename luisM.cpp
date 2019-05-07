@@ -6,7 +6,7 @@
 #include "classes.h"
 #include <string>
 
-void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad);
+Enemy spawnEnemy(Game *g, Global gl, Vec pos, int squadNumber, int enemyType);
 void score(Game *g, int i);
 
 void DrawCircle(float cx, float cy, float r, int num_segments)
@@ -121,7 +121,7 @@ bool collisionDetection(Base object1, Base object2)
   float distance = sqrt((object1.pos[0] - object2.pos[0]) * (object1.pos[0] - object2.pos[0]) +
                            (object1.pos[1] - object2.pos[1]) * (object1.pos[1] - object2.pos[1]) +
                            (object1.pos[2] - object2.pos[2]) * (object1.pos[2] - object2.pos[2]));
-  return distance  < (object1.radius/4 + object2.radius/4);
+  return distance  < (object1.radius/20 + object2.radius/20);
 
 }
 
@@ -148,6 +148,8 @@ void difficultyScaling(Game *g, Global gl)
 
 
 //difficulty handler
+
+
 switch((*g).level)
 {
 	// level 1
@@ -162,7 +164,7 @@ switch((*g).level)
 			location[0] = rand() % 500 - 250;
 			location[1] = rand() % 500 - 250;
 			location[2] = rand() % 500 - 250;
-			spawnEnemy(g, gl, location, false);
+			spawnEnemy(g, gl, location, false, 0);
 #ifdef USE_OPENAL_SOUND
 			playEngine();
 #endif
@@ -206,9 +208,9 @@ switch((*g).level)
 
 							continue;
 
-#ifdef USE_OPENAL_SOUND
+						#ifdef USE_OPENAL_SOUND
 							pauseEngine();
-#endif
+						#endif
 
 						}
 					//do not increment i.
@@ -219,18 +221,32 @@ switch((*g).level)
 				(*g).nbullets-=decrement;
 
 
+		// if it not a squadron
+		if(e->squadNumber == 0) {
+			float a_xy, a_z;
+			a_xy = e->angle[0];
+			a_xy *= PI/180;
+			a_z = e->angle[1];
+			a_z *= PI/180;
 
-		if(e->squadron == false) {
-		float a_xy, a_z;
-		a_xy = e->angle[0];
-		a_xy *= PI/180;
-		a_z = e->angle[1];
-		a_z *= PI/180;
+			e->pos[0] += e->vel*cos(a_xy)*sin(a_z);
+			e->pos[1] += e->vel*sin(a_xy)*sin(a_z);
+			e->pos[2] += e->vel*cos(a_z);
+			e->updatePolar((*g).ship.pos);
 
-		e->pos[0] += e->vel*cos(a_xy)*sin(a_z);
-		e->pos[1] += e->vel*sin(a_xy)*sin(a_z);
-		e->pos[2] += e->vel*cos(a_z);
-		e->updatePolar((*g).ship.pos);
+		}
+
+		if(e->squadNumber > 0) {
+			float a_xy, a_z;
+			a_xy = e->angle[0];
+			a_xy *= PI/180;
+			a_z = e->angle[1];
+			a_z *= PI/180;
+
+			e->pos[0] += e->vel*cos(a_xy)*sin(a_z);
+			e->pos[1] += e->vel*sin(a_xy)*sin(a_z);
+			e->pos[2] += e->vel*cos(a_z);
+			e->updatePolar((*g).ship.pos);
 
 		}
 
@@ -241,6 +257,26 @@ switch((*g).level)
 
 
 	}
+
+struct timespec thrust;
+double thrustCounter;
+// h key thrust
+if (gl.keyhits[4]) {
+
+	clock_gettime(CLOCK_REALTIME, &thrust);
+	thrustCounter = timeDiff(&(*g).difficultyTimer, &thrust);
+	(*g).ship.boost -= 0.1;
+	(*g).ship.vel = 2;
+}
+
+// resets the thrust
+if (thrustCounter > 5.0 && 	(*g).ship.boost <= 100.0) {
+
+	(*g).ship.boost += 0.1;
+		timeCopy(&(*g).bulletTimer, &thrust);
+
+}
+
 
 // b key
 if (gl.keyhits[98]) {
@@ -254,7 +290,7 @@ if (gl.keyhits[98]) {
 				location[0] = rand() % 500 - 250;
 				location[1] = rand() % 500 - 250;
 				location[2] = rand() % 500 - 250;
-				spawnEnemy(g, gl, location, false);
+				spawnEnemy(g, gl, location, 0, 0);
 			}
 }
 // f key squadron test
@@ -268,7 +304,9 @@ if (gl.keyhits[2]) {
 		if (ts > 0.5) {
 			timeCopy(&(*g).bulletTimer, &bt);
 
+
 			Squadron *s= &(*g).sarr[(*g).nsquadrons];
+			(*g).nsquadrons++;
 			s->size = 3;// odd_random_number();
 
 			// setting up squadron and placing the enemies on them
@@ -277,53 +315,72 @@ if (gl.keyhits[2]) {
 				squadronLocation[0] = rand() % 500 - 250;
 				squadronLocation[1] = rand() % 500 - 250;
 				squadronLocation[2] = rand() % 500 - 250;
-
 				// spawns at the center 1 [2] 3
-				spawnEnemy(g, gl, squadronLocation, true);
+				spawnEnemy(g, gl, squadronLocation, (*g).nsquadrons, 0);
+
+
+
 				float lowx = 25;
 				float lowy = 25;
-
 				for(int i = (s->size/2) - 1; i >= 0; i--) {
-
+					//printf("lowbar ran %i\n", i);
 					squadronLocation[0] += lowx;
 					squadronLocation[1] += lowy;
-
-
-					spawnEnemy(g, gl, squadronLocation, true);
-
+					spawnEnemy(g, gl, squadronLocation, (*g).nsquadrons, 0);
 					lowx+=lowx;
 					lowy+=lowy;
-
 				}
-
 				lowx = -25;
 				lowy = 25;
-
-
 				for(int i = (s->size/2) + 1; i < s->size; i++) {
-
-
+					//printf("highbar ran %i\n", i);
 					squadronLocation[0] += lowx;
 					squadronLocation[1] += lowy;
-
-
-					spawnEnemy(g, gl, squadronLocation, true);
-
+					spawnEnemy(g, gl, squadronLocation, (*g).nsquadrons, 0);
 					lowx+=lowx;
 					lowy+=lowy;
-
 				}
 
-
-				(*g).nsquadrons++;
 		}
+	}
+
+	// g key
+	// make object fire a bullet
+	if (gl.keyhits[3]) {
+
+		struct timespec bt;
+		 clock_gettime(CLOCK_REALTIME, &bt);
+		 double ts = timeDiff(&(*g).bulletTimer, &bt);
+		 if (ts > 0.1) {
+				 timeCopy(&(*g).bulletTimer, &bt);
+				 if ((*g).nbullets < MAX_ARRAY) {
+						 //shoot a bullet...
+						 //Bullet *b = new Bullet;
+						 Bullet *b = &(*g).barr[(*g).nbullets];
+						 timeCopy(&b->time, &bt);
+						 b->pos[0] = (*g).object.pos[0];
+						 b->pos[1] = (*g).object.pos[1];
+						 b->pos[2] = (*g).object.pos[2];
+						 //b->vel = (*g).ship.vel + 25;
+						 b->vel = (*g).ship.vel + 25;
+						 //convert ship angle to radians
+						 b->angle[0] = (*g).object.angle[0];
+						 b->angle[1] = (*g).object.angle[1];
+						 b->color[0] = 0.0f;
+						 b->color[1] = 1.0f;
+						 b->color[2] = 0.0f;
+						 (*g).nbullets++;
+				 }
+
+
+
+	}
 	}
 }
 
+
 void luisRender(Game *g, Global gl)
 {
-
-
 	/*
 	Rect r;
 	unsigned int c = 0x00ffff44;
@@ -351,11 +408,16 @@ void luisRender(Game *g, Global gl)
 	ggprint8b(&r, 16, 0x00ffff00, "ship velocity = %.1f",(*g).ship.vel);
 	ggprint8b(&r, 16, 0x00ffff00, "level= %.1i",(*g).level);
 	ggprint8b(&r, 16, 0x00ffff00, "difficulty= %.1f",(*g).difficulty);
+	ggprint8b(&r, 16, 0x00ffff00, "object xy angle= %.1f",(*g).object.angle[0]);
+	ggprint8b(&r, 16, 0x00ffff00, "object z angle= %.1f",(*g).object.angle[1]);
+	ggprint8b(&r, 16, 0x00ffff00, "ship thrust = %.1f",(*g).ship.boost);
 
 }
 
 extern void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3);
-void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad)
+
+
+Enemy spawnEnemy(Game *g, Global gl, Vec pos, int squadNumber, int enemyType)
 {
   Enemy *e = &(*g).earr[(*g).nenemies];
   e->pos[0] = (*g).ship.pos[0] + pos[0];
@@ -363,7 +425,8 @@ void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad)
   e->pos[2] = (*g).ship.pos[2] + pos[2];
   e->vel = 0;
 	e->currentHealth = 3;
-	e->squadron = squad;
+	e->enemyType = enemyType;
+	e->squadNumber = squadNumber;
 #ifdef USE_OPENAL_SOUND
 	alShipLocation(AL_POSITION, e->pos[0], e->pos[1], e->pos[2]);
 #endif
@@ -374,5 +437,36 @@ void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad)
   e->color[1] = 1.0f;
   e->color[2] = 0.0f;
   (*g).nenemies++;
+
+	return *e;
+
+}
+
+//object test function
+void enemyTargeting(Game *g, Global gl)
+{
+
+	if ((*g).object.angle[0] < 0.0f) {
+		(*g).object.angle[0] += 360.0f;
+}
+		if ((*g).object.angle[0] > 360.0f) {
+			(*g).object.angle[0] -= 360.0f;
+	}
+
+		if ((*g).object.angle[1] < 0.1f) {
+			(*g).object.angle[1] = 0.1f;
+	}
+
+		if ((*g).object.angle[1] > 179.9f) {
+			(*g).object.angle[1] = 179.9f;
+	}
+
+// change it based on the ships position not its angle
+
+
+	(*g).object.angle[0] = (*g).object.polar[1] + 180;
+
+
+	(*g).object.angle[1] = 180 - (*g).object.polar[2];
 
 }
