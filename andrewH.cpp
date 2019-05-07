@@ -259,10 +259,15 @@ if (gl.keyhits[1]) {
 }
 // r
 if (gl.keyhits[14]) {
-    (*g).ship.vel = MAX_THRUST*2;
-    (*g).ship.boost -= .2;
+   	if ( (*g).ship.boost > 0) {
+	   	(*g).ship.vel = MAX_THRUST*2;
+    	(*g).ship.boost -= .2;
+	}
     if( (*g).ship.boost <= 0) {
-	(*g).ship.boost = 0;
+		(*g).ship.boost = 0;
+		if ((*g).ship.vel > MAX_THRUST) {
+			(*g).ship.vel = MAX_THRUST;
+		}
     }
 } else {
 	if ((*g).ship.vel > MAX_THRUST) {
@@ -651,8 +656,15 @@ void joeyRender(Game *g, Global gl)
     float thrust = a + (*g).ship.vel;
     if (thrust > a + MAX_THRUST) {
 		thrust = a + MAX_THRUST;
-		vel[0] = vel[3] = 1;
-	    vel[1] = vel[2] = 0;
+		if ((*g).ship.boost > 0) {
+			vel[0] = vel[3] = 1;
+		    vel[1] = vel[2] = 0;
+		} else {
+    		vel[0] = .3;
+		    vel[1] = .9;
+		    vel[2] = .3;
+		    vel[3] = (*g).ship.vel/MAX_THRUST;
+		}
 	}
 	while (a < thrust) {
         glColor4fv(vel);
@@ -749,29 +761,32 @@ void joeyRender(Game *g, Global gl)
     }
 
   	// boost indicator
-    for (int i = 0; i < 8; i++) {
-        float theta = ((2.0*PI)/8.0)*i + (PI/8);
-        float vx1, vy1, vx2, vy2;
-		// boost percent of full
-		float bp = (*g).ship.boost/(*g).ship.maxBoost;
-		if (bp <= 0)
-	    	bp = 0;
-		vx1 = cx + (bp*rad[2])*cos(theta-tribase);
-    	vy1 = cy + (bp*rad[2])*sin(theta-tribase);
-	    vx2 = cx + (bp*rad[2])*cos(theta+tribase);
-    	vy2 = cy + (bp*rad[2])*sin(theta+tribase);
-	    glEnable(GL_BLEND);
-    	glBlendFunc( GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-		float boost[4] = {1,1,0,1};
-        glColor4fv(boost);
-        glPushMatrix();
-        glBegin(GL_TRIANGLES);
-        glVertex2f(v8_1[i][0], v8_1[i][1]);
-        glVertex2f(vx1,vy1);
-        glVertex2f(vx2,vy2);
-        glEnd();
-        glPopMatrix();
-    }
+	float bp = (*g).ship.boost/(*g).ship.maxBoost;
+	if (bp <= 0) {
+	   	bp = 0;
+	}
+	else {
+		for (int i = 0; i < 8; i++) {
+        	float theta = ((2.0*PI)/8.0)*i + (PI/8);
+	        float vx1, vy1, vx2, vy2;
+			// boost percent of full
+			vx1 = cx + (bp*rad[2])*cos(theta-tribase);
+	    	vy1 = cy + (bp*rad[2])*sin(theta-tribase);
+		    vx2 = cx + (bp*rad[2])*cos(theta+tribase);
+    		vy2 = cy + (bp*rad[2])*sin(theta+tribase);
+		    glEnable(GL_BLEND);
+    		glBlendFunc( GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+			float boost[4] = {1,1,0,1};
+	        glColor4fv(boost);
+    	    glPushMatrix();
+        	glBegin(GL_TRIANGLES);
+	        glVertex2f(v8_1[i][0], v8_1[i][1]);
+    	    glVertex2f(vx1,vy1);
+        	glVertex2f(vx2,vy2);
+	        glEnd();
+    	    glPopMatrix();
+    	}
+	}
     
     // fill octagon ring
     for (int i = 0; i < 8; i++) {
@@ -809,6 +824,46 @@ void joeyRender(Game *g, Global gl)
     for (int i = 0; i < p; i++) {
         float x = radar[0] + radar[2]*cos(i*2*PI/p);
         float y = radar[1] + radar[2]*sin(i*2*PI/p);
+        glVertex2f(x,y);
+    }
+    glEnd();
+    glPopMatrix();
+    
+	blue[3]=1;
+	glEnable(GL_BLEND);
+    glBlendFunc( GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glColor4fv(blue);
+    glPushMatrix();
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < p; i++) {
+        float x = radar[0] + .25*radar[2]*cos(i*2*PI/p);
+        float y = radar[1] + .25*radar[2]*sin(i*2*PI/p);
+        glVertex2f(x,y);
+    }
+    glEnd();
+    glPopMatrix();
+    
+	glEnable(GL_BLEND);
+    glBlendFunc( GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glColor4fv(blue);
+    glPushMatrix();
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < p; i++) {
+        float x = radar[0] + .5*radar[2]*cos(i*2*PI/p);
+        float y = radar[1] + .5*radar[2]*sin(i*2*PI/p);
+        glVertex2f(x,y);
+    }
+    glEnd();
+    glPopMatrix();
+    
+	glEnable(GL_BLEND);
+    glBlendFunc( GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    glColor4fv(blue);
+    glPushMatrix();
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i < p; i++) {
+        float x = radar[0] + .75*radar[2]*cos(i*2*PI/p);
+        float y = radar[1] + .75*radar[2]*sin(i*2*PI/p);
         glVertex2f(x,y);
     }
     glEnd();
