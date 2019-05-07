@@ -47,6 +47,10 @@ void joeyPhysics(Game *g, Global gl);
 void joeyRender(Game *g, Global gl);
 void credit(Game *g, Global gl);
 
+//Adolfo External Functions
+void AdolfoRender(Game *g, Global gl);
+
+
 // add png files name and create array based on # of pngs
 //Image img("./images/bigfoot.png");
 Image img[6] = {
@@ -616,13 +620,6 @@ void render()
 
 	    }
 
-		for (int i=0; i< (*g).nenemies; i++) {
-			//Enemy *e = & (*g).earr[i];
-
-		   (*g).earr[i].drawBase(g, gl);
-			 //enemies dont appear unless they move or ship moves (minor issue)
-	    }
-
 				//Draw the asteroids
 				/*
 				{
@@ -652,6 +649,7 @@ void render()
 					}
 				}
 		*/
+		AdolfoRender(g, gl);
 		joeyRender(g, gl);
 		luisRender(g, gl);
 		scoreBoard(g,gl);
