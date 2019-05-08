@@ -24,9 +24,9 @@ void showChrisRamirez(int x, int y, GLuint textid);
 //joseph extern functions
 void josephG(int x, int y, GLuint textid);
 void pathFindingTest2(Game *g,Global gl);
-void fighterPF(Game *g, int x);
-void frigatePF(Game *g, int x);
-void carrierPF(Game*g, int x);
+void fighterPF(Game *g, Global gl,int x);
+void frigatePF(Game *g, Global gl,int x);
+void carrierPF(Game*g,Global gl, int x);
 void score(Game *g,int i);
 void scoreBoard(Game *g, Global gl);
 //luis extern functions
@@ -573,8 +573,8 @@ void physics()
 
 	joeyPhysics(g, gl);
 	difficultyScaling(g, gl);
-	//pathFindingTest2(g,gl);
-	enemyTargeting(g, gl);
+	pathFindingTest2(g,gl);
+	//enemyTargeting(g, gl);
 
 
 }
