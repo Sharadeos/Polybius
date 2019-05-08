@@ -124,10 +124,11 @@ void Base::drawBase(Game * g, Global gl) {
     yScale = 1.0;
     yScale = yScale - tempValue;
   }
-
-
-  float distanceScale = 12/polar[0];
-
+  float distanceScale;
+  if (polar[0])
+     distanceScale = 12/polar[0];
+  else
+     distanceScale = 12;
 
 
   float Yellow[3] = {1,1,0};
@@ -411,9 +412,7 @@ Object::Object(int x, int y, int z) {
   pos[0] = x;
   pos[1] = y;
   pos[2] = z;
-}
-
-
+} 
 
 Bullet::Bullet()
 {
