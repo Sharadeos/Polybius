@@ -88,6 +88,7 @@ class Global {
 	  GLuint chrisTexture;
       GLuint josephTexture;
       GLuint blackholeTexture;
+	  int mousecode;
 };
 
 class Image {
@@ -122,7 +123,7 @@ public:
 	float boost;
 	float maxBoost;
 	int radius;
-
+	int type;
 
 	float xScale;
 	float yScale;

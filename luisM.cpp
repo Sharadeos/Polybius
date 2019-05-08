@@ -355,6 +355,7 @@ void luisRender(Game *g, Global gl)
 	ggprint8b(&r, 16, 0x00ffff00, "level= %.1i",(*g).level);
 	ggprint8b(&r, 16, 0x00ffff00, "difficulty= %.1f",(*g).difficulty);
 	ggprint8b(&r, 16, 0x00ffff00, "boost= %.1f",(*g).ship.boost);
+	ggprint8b(&r, 16, 0x00ffff00, "mouse =  %d",gl.mousecode);
 
 }
 

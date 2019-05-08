@@ -1,11 +1,11 @@
 //
 //program: andrewH.cpp
 //author: Andrew (Joey) Hubbard
-//Last Modified: 2-18-2019 10:45am
+//Last Modified: 5-7-2019
 //
-#include <GL/glx.h>
-#include "fonts.h"
-#include <math.h>
+//#include <GL/glx.h>
+//#include "fonts.h"
+//#include <math.h>
 #include "classes.h"
 static float spin = 20;
 void andrewH(int x, int y, GLuint textid, float move)
@@ -122,104 +122,8 @@ void joeyPhysics(Game *g, Global gl)
         b->pos[1] += b->vel*sin(a_xy)*sin(a_z);
         b->pos[2] += b->vel*cos(a_z);
         b->updatePolar((*g).ship.pos);
-        /*Check for collision with window edges
-          if (b->pos[0] < 0.0) {
-          b->pos[0] += (float)gl.xres;
-          }
-          else if (b->pos[0] > (float)gl.xres) {
-          b->pos[0] -= (float)gl.xres;
-          }
-          else if (b->pos[1] < 0.0) {
-          b->pos[1] += (float)gl.yres;
-          }
-          else if (b->pos[1] > (float)gl.yres) {
-          b->pos[1] -= (float)gl.yres;
-          }
-         */
         i++;
     }
-    //object updating position
-
-    /*
-    //Check for collision with window edges
-    object.drawSize[0] -= ((*g).ship.vel*cos(a_xy)*sin(a_z));
-    object.drawSize[1] -=  (*g).ship.vel*cos(a_z);
-    object.pos[0] += ((*g).ship.vel*cos(a_xy)*sin(a_z));
-    object.pos[1] += ((*g).ship.vel*sin(a_xy)*sin(a_z));
-
-    (*g).ship.pos[0] += (*g).ship.vel*cos(a_xy)*sin(a_z);
-    (*g).ship.pos[1] += (*g).ship.vel*sin(a_xy)*sin(a_z);
-    (*g).ship.pos[2] += (*g).ship.vel*cos(a_z);
-    if ((*g).ship.pos[0] < 0.0) {
-    (*g).ship.pos[0] += (float)gl.xres;
-    }
-    else if ((*g).ship.pos[0] > (float)gl.xres) {
-    (*g).ship.pos[0] -= (float)gl.xres;
-    }
-    else if ((*g).ship.pos[1] < 0.0) {
-    (*g).ship.pos[1] += (float)gl.yres;
-    }
-    else if ((*g).ship.pos[1] > (float)gl.yres) {
-    (*g).ship.pos[1] -= (float)gl.yres;
-    }
-
-    //Asteroid collision with bullets?
-    //If collision detected:
-    //     1. delete the bullet
-    //     2. break the asteroid into pieces
-    //        if asteroid small, delete it
-    a = (*g).ahead;
-    while (a) {
-    //is there a bullet within its radius?
-    int i=0;
-    while (i < (*g).nbullets) {
-    Bullet *b = &(*g).barr[i];
-    d0 = b->pos[0] - a->pos[0];
-    d1 = b->pos[1] - a->pos[1];
-    dist = (d0*d0 + d1*d1);
-    if (dist < (a->radius*a->radius)) {
-    //std::cout << "asteroid hit." << std::endl;
-    //this asteroid is hit.
-    if (a->radius > MINIMUM_ASTEROID_SIZE) {
-    //break it into pieces.
-    Asteroid *ta = a;
-    buildAsteroidFragment(ta, a);
-    int r = rand()%10+5;
-    for (int k=0; k<r; k++) {
-    //get the next asteroid position in the array
-    Asteroid *ta = new Asteroid;
-    buildAsteroidFragment(ta, a);
-    //add to front of asteroid linked list
-    ta->next = (*g).ahead;
-    if ((*g).ahead != NULL)
-    (*g).ahead->prev = ta;
-    (*g).ahead = ta;
-    (*g).nasteroids++;
-    }
-    } else {
-    a->color[0] = 1.0;
-    a->color[1] = 0.1;
-    a->color[2] = 0.1;
-    //asteroid is too small to break up
-    //delete the asteroid and bullet
-    Asteroid *savea = a->next;
-    deleteAsteroid(&g, a);
-    a = savea;
-    (*g).nasteroids--;
-    }
-    //delete the bullet...
-    memcpy(&(*g).barr[i], &(*g).barr[(*g).nbullets-1], sizeof(Bullet));
-    (*g).nbullets--;
-    if (a == NULL)
-    break;
-}
-i++;
-}
-if (a == NULL)
-    break;
-    a = a->next;
-    }
-*/
 //---------------------------------------------------
 //check keys pressed now
 
@@ -357,28 +261,6 @@ if (gl.keyhits[32]) {
         }
     }
 }
-/*
-   if (gl.keys[XK_Up]) {
-//apply thrust
-//convert ship angle to radians
-Flt rad = (((*g).ship.angle+90.0) / 360.0f) * PI * 2.0;
-//convert angle to a vector
-Flt xdir = cos(rad);
-Flt ydir = sin(rad);
-(*g).ship.vel[0] += xdir*0.02f;
-(*g).ship.vel[1] += ydir*0.02f;
-Flt speed = sqrt((*g).ship.vel[0]*(*g).ship.vel[0]+
-(*g).ship.vel[1]*(*g).ship.vel[1]);
-if (speed > 10.0f) {
-speed = 10.0f;
-normalize2d((*g).ship.vel);
-(*g).ship.vel[0] *= speed;
-(*g).ship.vel[1] *= speed;
-}
-}
-
-
- */
 }
 
 void joeyRender(Game *g, Global gl)
@@ -391,12 +273,6 @@ void joeyRender(Game *g, Global gl)
     glPushMatrix();
     glBegin(GL_POINTS);
     for (int i = 0; i < (*g).num_stars; i++) {
-        //float s = (*g).ship.angle[2];
-        //s *= PI/180;
-        //s = sin(s);
-        //float c = (*g).ship.angle[2];
-        //c *= PI/180;
-        //c = cos(c);
         float x = (*g).ship.angle[0];
         float y = (*g).ship.angle[1];
         // converts to a x and y coordinate
@@ -412,61 +288,10 @@ void joeyRender(Game *g, Global gl)
         if (y <= 0)
             y += 180.0f;
         y = (y/90)*gl.yres;
-        /*
-           x -= cx;
-           y -= cy;
-           float xnew = x * c - y * s;
-           float ynew = x * s + y * c;
-           x = xnew + cx;
-           y = ynew + cy;
-         */
         glVertex2f(x,y);
     }
     glEnd();
     glPopMatrix();
-
-    /*debris
-      float tan[3];
-      tan[0] = .8;
-      tan[1] = .7;
-      tan[2] = .55;
-      for (int i = 0; i < 500; i++) {
-      float dx = (*g).debris[i][0];
-      float dy = (*g).debris[i][1];
-      float z = (*g).debris[i][2]-((*g).thrust/10);
-      if (z < 1) {
-      (*g).debris[i][0] = rand() % gl.xres + 1;
-      (*g).debris[i][1] = rand() % gl.yres + 1;
-      (*g).debris[i][2] = rand() % gl.xres + 1;
-      dx = (*g).debris[i][0];
-      dy = (*g).debris[i][1];
-      z = (*g).debris[i][2];
-      }
-      float rad = 50/z;
-    //map from -1 to 1
-    dx = ((dx - .5*cx)/(.5*cx));
-    dy = ((dy - .5*cy)/(.5*cy));
-    z = ((z - .5*cx)/(.5*cx));
-
-    float cdx = ((*g).thrust/25)*(dx/z);
-    float cdy = ((*g).thrust/25)*(dy/z);
-    (*g).debris[i][0] = (cdx+1)*(cx);
-    (*g).debris[i][1] = (cdy+1)*(cy);
-    (*g).debris[i][2] = z;
-    glColor3fv(tan);
-    glPushMatrix();
-    glBegin(GL_POLYGON);
-    for (int j = 0; j < 5; j++) {
-    float a = 2*PI/5;
-    dx = (*g).debris[i][0] + rad*cos(j*a);
-    dy = (*g).debris[i][1] + rad*sin(j*a);
-    glVertex2f(dx,dy);
-    }
-    glEnd();
-    glPopMatrix();
-    }
-     */
-
 
     // setup variables for cockpit
     float rad[4];           // radius
@@ -618,7 +443,6 @@ void joeyRender(Game *g, Global gl)
     glEnd();
     glPopMatrix();
 
-
     //bottom
     glColor3fv(HUD);
     glPushMatrix();
@@ -631,7 +455,6 @@ void joeyRender(Game *g, Global gl)
     glPopMatrix();
 
     //ring
-    //float thickness = 25;
     int pts = 48;
     float a = rad[2];
     float vel[4];
@@ -692,15 +515,8 @@ void joeyRender(Game *g, Global gl)
     tri[1][1] = cy + a*sin(angle+.02);
     tri[2][0] = cx + a*cos(angle-.02);
     tri[2][1] = cy + a*sin(angle-.02);
-    /*
-    tri[0][0] = cx + (rad[2] + 15)*cos(angle);
-    tri[0][1] = cy + (rad[2] + 15)*sin(angle);
-    tri[1][0] = cx + rad[2]*cos(angle+.02);
-    tri[1][1] = cy + rad[2]*sin(angle+.02);
-    tri[2][0] = cx + rad[2]*cos(angle-.02);
-    tri[2][1] = cy + rad[2]*sin(angle-.02);
-*/
-    glColor4fv(Red);
+    
+	glColor4fv(Red);
     glPushMatrix();
     glBegin(GL_TRIANGLE_STRIP);
     for (int i = 0; i < 3; i++) {
@@ -718,15 +534,8 @@ void joeyRender(Game *g, Global gl)
         tri[1][1] = cy + a*sin(angle+.02);
         tri[2][0] = cx + a*cos(angle-.02);
         tri[2][1] = cy + a*sin(angle-.02);
-	/*
-	tri[0][0] = cx + (rad[2] + 15)*cos(angle);
-        tri[0][1] = cy + (rad[2] + 15)*sin(angle);
-        tri[1][0] = cx + rad[2]*cos(angle+.02);
-        tri[1][1] = cy + rad[2]*sin(angle+.02);
-        tri[2][0] = cx + rad[2]*cos(angle-.02);
-        tri[2][1] = cy + rad[2]*sin(angle-.02);
-        */
-	Red[3] = (RANGE - (*g).earr[i].polar[0])/RANGE;
+	
+		Red[3] = (RANGE - (*g).earr[i].polar[0])/RANGE;
         glColor4fv(Red);
         glPushMatrix();
         glBegin(GL_TRIANGLE_STRIP);
@@ -971,74 +780,4 @@ void joeyRender(Game *g, Global gl)
 	glEnd();
 	glPopMatrix();
     }
-
-
-/*
-    // 2nd radar
-     //float radar[3]; // 0,1 = x,y of center of radar, 2 = + radius
-     radar[0] = gl.xres*.90;
-     radar[1] = radar[2] = 100;
-     glEnable(GL_BLEND);
-     glBlendFunc( GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-     glColor4fv(blue);
-     glPushMatrix();
-     glBegin(GL_POLYGON);
-     p = 50;
-     for (int i = 0; i < p; i++) {
-         float x = radar[0] + radar[2]*cos(i*2*PI/p);
-         float y = radar[1] + radar[2]*sin(i*2*PI/p);
-         glVertex2f(x,y);
-     }
-     glEnd();
-     glPopMatrix();
-
-    // Gyroscope
-    float sd = 40;
-    float cen = 80;
-    //float lft,rt;
-    float vertices[5][3];
-    vertices[0][0] = cx-sd;
-    vertices[0][1] = cen-sd;
-    vertices[1][0] = cx-sd;
-    vertices[1][1] = cen+sd;
-    vertices[2][0] = cx+sd;
-    vertices[2][1] = cen+sd;
-    vertices[3][0] = cx+sd;
-    vertices[3][1] = cen-sd;
-    vertices[4][0] = cx;
-    vertices[4][1] = cen;
-    glColor4fv(blue);
-    glPushMatrix();
-    glBegin(GL_POLYGON);
-    vertices[4][0] = cx;
-    vertices[4][1] = cen;
-    for (int i = 0; i < 5; i++) {
-        glVertex2f(vertices[i][0],vertices[i][1]);
-    }
-    glEnd();
-    glPopMatrix();
-
-    Rect r;
-    //
-    r.bot = 100;
-    r.left = cx-34;
-    r.center = 0;
-    //ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
-    ggprint8b(&r, 16, 0x00ffff00, "xScale = %.1f, yScale = %.1f",(*g).object.xScale, (*g).object.yScale);
-    ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", (*g).nbullets);
-    ggprint8b(&r, 16, 0x00ffff00, "%.1f : %.1f ", (*g).ship.angle[0], (*g).ship.angle[1]);
-    //ggprint8b(&r, 16, 0x00ffff00, "%.1f:%.1f,roll=%.1f)", (*g).ship.angle[0], (*g).ship.angle[1], (*g).ship.angle[2]);
-    //ggprint8b(&r, 16, 0x00ffff00, "(x=%.1f,y=%.1f)", (*g).ship.pos[0], (*g).ship.pos[1]);
-    ggprint8b(&r, 16, 0x00ffff00, "(x=%.1f,y=%.1f,z=%.1f)", (*g).ship.pos[0], (*g).ship.pos[1], (*g).ship.pos[2]);
-
-    ggprint8b(&r, 16, 0x00ffff00, "(object x=%.1f,object y=%.1f,object z=%.1f)", (*g).object.pos[0], (*g).object.pos[1], (*g).object.pos[2]);
-
-    //ggprint8b(&r, 16, 0x00ffff00, "(distance x=%.1f)", sqrt((pow((*g).ship.pos[0] - object.pos[0],2)) + (pow((*g).ship.pos[1] - object.pos[1],2))) );
-
-    //ggprint8b(&r, 16, 0x00ffff00, "(object render x=%.1f,object render y=%.1f)", object.polar[1],object.polar[2]);
-
-    ggprint8b(&r, 16, 0x00ffff00, "distance p0 = %.1f",(*g).object.polar[0]);
-    ggprint8b(&r, 16, 0x00ffff00, "p1:xy = %.1f, fov calc = %.1f",(*g).object.polar[1], (*g).ship.angle[0] + 60 - (*g).object.polar[1]);
-    ggprint8b(&r, 16, 0x00ffff00, "p2:z = %.1f",(*g).object.polar[2]);
-    */
 }
