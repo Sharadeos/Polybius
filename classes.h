@@ -225,6 +225,7 @@ public:
 
 	struct timespec bulletTimer;
 	struct timespec difficultyTimer;
+	struct timespec thrustTimer;
 	bool mouseThrustOn;
 	bool show_credits;
 	float mtext;

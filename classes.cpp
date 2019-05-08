@@ -56,7 +56,7 @@ void Base::updatePolar(Vec ship) {
   // theta, z angle
   polar[2] = acos(xyz[2]/polar[0]);
   polar[2] *= 180/PI;
-  
+
   // xy angle
   if (xyz[0]) {
     polar[1] = atan2(xyz[1],xyz[0]);
@@ -164,14 +164,14 @@ void Base::drawBullet(Game * g, Global gl) {
  	   	e[0] = 0;
  	   	e[1] = polar[1];
  	   	e[2] = polar[2];
- 
+
    	 	if (e[1] > 360) {
    	 	    e[1] -= 360;
    	 	}
    	 	if (e[1] < 0) {
    	 	    e[1] += 360;
    	 	}
- 
+
  	   	float s[2];
  	   	s[0] = (*g).ship.angle[0];
  	   	s[1] = (*g).ship.angle[1];
@@ -184,22 +184,22 @@ void Base::drawBullet(Game * g, Global gl) {
  	       	e[1] = e[1] - 360;
  	   	}
  	   	float x, y;
- 
+
  	   	x = ((high - e[1])/120)*gl.xres;
  	   	y = ((s[1] + 45 - e[2])/90)*gl.yres;
- 
+
    	 	float distanceScale = 48/polar[0];
    	 	//glColor3fv(color);
    	 	//float Green[3] = {0,1,0};
  	   	glColor3fv(color);
  	   	glPushMatrix();
  	   	glBegin(GL_POLYGON);
- 
+
  	   	glVertex2i(x-radius*distanceScale,y);
  	   	glVertex2i(x,y+radius*distanceScale);
  	   	glVertex2i(x+radius*distanceScale,y);
  	   	glVertex2i(x,y-radius*distanceScale);
- 
+
  	   	glEnd();
  	   	glPopMatrix();
 	}
@@ -208,14 +208,14 @@ void Base::drawBullet(Game * g, Global gl) {
  	   	e[0] = 0;
  	   	e[1] = polar[1];
  	   	e[2] = polar[2];
- 
+
    	 	if (e[1] > 360) {
    	 	    e[1] -= 360;
    	 	}
    	 	if (e[1] < 0) {
    	 	    e[1] += 360;
    	 	}
- 
+
  	   	float s[2];
  	   	s[0] = (*g).ship.angle[0];
  	   	s[1] = (*g).ship.angle[1];
@@ -228,14 +228,14 @@ void Base::drawBullet(Game * g, Global gl) {
  	       	e[1] = e[1] - 360;
  	   	}
  	   	float x, y;
- 
+
  	   	x = ((high - e[1])/120)*gl.xres;
  	   	y = ((s[1] + 45 - e[2])/90)*gl.yres;
- 
+
    	 	float distanceScale = 48/polar[0];
    	 	//glColor3fv(color);
    	 	//float Green[3] = {0,1,0};
- 	   	
+
 		float capsule[3] = {0,1,0};
 		glColor3fv(capsule);
  	   	glPushMatrix();
@@ -268,7 +268,7 @@ void Base::drawBullet(Game * g, Global gl) {
 	 	glVertex2i(x + cos((11*PI)/6)*radius*3*distanceScale,y + sin((11*PI)/6)*radius*3*distanceScale);
 		glEnd();
  	   	glPopMatrix();
-		
+
 		float flame[3] = {1,.6,0};
  	   	glColor3fv(flame);
  	   	glPushMatrix();
@@ -397,4 +397,5 @@ Game::Game(int xWindowSize, int yWindowSize, const Ship& ship, const Object& obj
 
 	clock_gettime(CLOCK_REALTIME, &bulletTimer);
   	clock_gettime(CLOCK_REALTIME, &difficultyTimer);
+    	clock_gettime(CLOCK_REALTIME, &thrustTimer);
 }
