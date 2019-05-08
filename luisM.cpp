@@ -9,27 +9,6 @@
 Enemy spawnEnemy(Game *g, Global gl, Vec pos, int squadNumber, int enemyType);
 void score(Game *g, int i);
 
-void DrawCircle(float cx, float cy, float r, int num_segments)
-{
-	float theta = 2 * 3.1415926 / float(num_segments);
-	float c = cosf(theta);//precalculate the sine and cosine
-	float s = sinf(theta);
-	float t;
-	float x = r;//we start at angle = 0
-	float y = 0;
-	glBegin(GL_LINE_LOOP);
-	for(int ii = 0; ii < num_segments; ii++)
-	{
-		glVertex2f(x + cx, y + cy);//output vertex
-		//apply the rotation matrix
-		t = x;
-		x = c * x - s * y;
-		y = s * t + c * y;
-	}
-	glEnd();
-}
-
-
 void creditsLuis(int x, int y, GLuint luisTexture)
 {
 	Rect r;
@@ -283,6 +262,10 @@ if (gl.keyhits[2]) {
 	// make object fire a bullet
 	if (gl.keyhits[3]) {
 
+	}
+
+	if((*g).ship.currentShield <= 0) {
+		//exit(0);
 
 	}
 }
