@@ -3,7 +3,6 @@
 Global::Global() {
   xres = 1920;
   yres = 1080;
-  mousecode = 0;
   //memset(keys, 0, 65536);
 }
 
@@ -35,9 +34,7 @@ Base::Base() {
 
   currentHealth = 3;
   maxHealth = 3;
-
   boost = 100.0;
-
 }
 
 void Base::updatePolar(Vec ship) {
@@ -51,13 +48,10 @@ void Base::updatePolar(Vec ship) {
   xyz[2] = pos[2] - ship[2];
   xyz2[2] = xyz[2]*xyz[2];
 
-  // r, distance
   polar[0] = sqrt(xyz2[0] + xyz2[1] + xyz2[2]);
-  // theta, z angle
+  //polar[1] = acos(xyz[2]/(sqrt(xyz2[0] + xyz2[1] + xyz2[2])));
   polar[2] = acos(xyz[2]/polar[0]);
   polar[2] *= 180/PI;
-
-  // xy angle
   if (xyz[0]) {
     polar[1] = atan2(xyz[1],xyz[0]);
     polar[1] *= 180/PI;
@@ -159,127 +153,49 @@ glPopMatrix();
 }
 void Base::drawBullet(Game * g, Global gl) {
 
-	if (type == 1) {
-   		float e[3];
- 	   	e[0] = 0;
- 	   	e[1] = polar[1];
- 	   	e[2] = polar[2];
+  float e[3];
+	e[0] = 0;
+	e[1] = polar[1];
+	e[2] = polar[2];
 
-   	 	if (e[1] > 360) {
-   	 	    e[1] -= 360;
-   	 	}
-   	 	if (e[1] < 0) {
-   	 	    e[1] += 360;
-   	 	}
+  if (e[1] > 360) {
+  	    e[1] -= 360;
+  	}
+  	if (e[1] < 0) {
+  	    e[1] += 360;
+  	}
 
- 	   	float s[2];
- 	   	s[0] = (*g).ship.angle[0];
- 	   	s[1] = (*g).ship.angle[1];
- 	   	float low, high;
- 	  	low = s[0] - 60;
- 	   	high = s[0] + 60;
- 	   	high -= low;
- 	   	e[1] -= low;
- 	   	if (e[1] > 360) {
- 	       	e[1] = e[1] - 360;
- 	   	}
- 	   	float x, y;
-
- 	   	x = ((high - e[1])/120)*gl.xres;
- 	   	y = ((s[1] + 45 - e[2])/90)*gl.yres;
-
-   	 	float distanceScale = 48/polar[0];
-   	 	//glColor3fv(color);
-   	 	//float Green[3] = {0,1,0};
- 	   	glColor3fv(color);
- 	   	glPushMatrix();
- 	   	glBegin(GL_POLYGON);
-
- 	   	glVertex2i(x-radius*distanceScale,y);
- 	   	glVertex2i(x,y+radius*distanceScale);
- 	   	glVertex2i(x+radius*distanceScale,y);
- 	   	glVertex2i(x,y-radius*distanceScale);
-
- 	   	glEnd();
- 	   	glPopMatrix();
+	float s[2];
+	s[0] = (*g).ship.angle[0];
+	s[1] = (*g).ship.angle[1];
+	float low, high;
+	low = s[0] - 60;
+	high = s[0] + 60;
+	high -= low;
+	e[1] -= low;
+	if (e[1] > 360) {
+	    e[1] = e[1] - 360;
 	}
-	if (type == 3) {
-   		float e[3];
- 	   	e[0] = 0;
- 	   	e[1] = polar[1];
- 	   	e[2] = polar[2];
+	float x, y;
 
-   	 	if (e[1] > 360) {
-   	 	    e[1] -= 360;
-   	 	}
-   	 	if (e[1] < 0) {
-   	 	    e[1] += 360;
-   	 	}
+	x = ((high - e[1])/120)*gl.xres;
+	y = ((s[1] + 45 - e[2])/90)*gl.yres;
 
- 	   	float s[2];
- 	   	s[0] = (*g).ship.angle[0];
- 	   	s[1] = (*g).ship.angle[1];
- 	   	float low, high;
- 	  	low = s[0] - 60;
- 	   	high = s[0] + 60;
- 	   	high -= low;
- 	   	e[1] -= low;
- 	   	if (e[1] > 360) {
- 	       	e[1] = e[1] - 360;
- 	   	}
- 	   	float x, y;
+  float distanceScale = 48/polar[0];
+  //glColor3fv(color);
+  //float Green[3] = {0,1,0};
+	glColor3fv(color);
+	glPushMatrix();
+	glBegin(GL_POLYGON);
 
- 	   	x = ((high - e[1])/120)*gl.xres;
- 	   	y = ((s[1] + 45 - e[2])/90)*gl.yres;
+	glVertex2i(x-radius*distanceScale,y);
+	glVertex2i(x,y+radius*distanceScale);
+	glVertex2i(x+radius*distanceScale,y);
+	glVertex2i(x,y-radius*distanceScale);
 
-   	 	float distanceScale = 48/polar[0];
-   	 	//glColor3fv(color);
-   	 	//float Green[3] = {0,1,0};
+	glEnd();
+	glPopMatrix();
 
-		float capsule[3] = {0,1,0};
-		glColor3fv(capsule);
- 	   	glPushMatrix();
- 	    glBegin(GL_LINE_LOOP);
- 		for (int i = 0; i < 6; i++) {
-	 	   	glVertex2i(x + cos((i*2*PI)/6)*radius*2*distanceScale,y + sin((i*2*PI)/6)*radius*2*distanceScale);
-		}
- 	   	glEnd();
- 	   	glPopMatrix();
- 	   	glPushMatrix();
- 	    glBegin(GL_LINE_LOOP);
-	 	glVertex2i(x + cos((1*2*PI)/6)*radius*2*distanceScale,y + sin((1*2*PI)/6)*radius*2*distanceScale);
-	 	glVertex2i(x + cos((2*2*PI)/6)*radius*2*distanceScale,y + sin((2*2*PI)/6)*radius*2*distanceScale);
-	 	glVertex2i(x, y + radius*3*distanceScale);
- 	   	glEnd();
- 	   	glPopMatrix();
-
- 	   	glPushMatrix();
- 	    glBegin(GL_LINE_LOOP);
-	 	glVertex2i(x + cos((3*2*PI)/6)*radius*2*distanceScale,y + sin((3*2*PI)/6)*radius*2*distanceScale);
-	 	glVertex2i(x + cos((4*2*PI)/6)*radius*2*distanceScale,y + sin((4*2*PI)/6)*radius*2*distanceScale);
-	 	glVertex2i(x + cos((7*PI)/6)*radius*3*distanceScale,y + sin((7*PI)/6)*radius*3*distanceScale);
- 	   	glEnd();
- 	   	glPopMatrix();
-
- 	   	glPushMatrix();
- 	    glBegin(GL_LINE_LOOP);
-	 	glVertex2i(x + cos((5*2*PI)/6)*radius*2*distanceScale,y + sin((5*2*PI)/6)*radius*2*distanceScale);
-	 	glVertex2i(x + cos((6*2*PI)/6)*radius*2*distanceScale,y + sin((6*2*PI)/6)*radius*2*distanceScale);
-	 	glVertex2i(x + cos((11*PI)/6)*radius*3*distanceScale,y + sin((11*PI)/6)*radius*3*distanceScale);
-		glEnd();
- 	   	glPopMatrix();
-
-		float flame[3] = {1,.6,0};
- 	   	glColor3fv(flame);
- 	   	glPushMatrix();
- 	    glBegin(GL_POLYGON);
- 		for (int i = 0; i < 16; i++) {
-	 	   	glVertex2i(x + cos(i*PI/8)*radius*distanceScale,y + sin(i*PI/8)*radius*distanceScale);
-		}
- 	   	glEnd();
- 	   	glPopMatrix();
-
-	}
 }
 
 
@@ -341,14 +257,11 @@ Ship::Ship(int x, int y, int z) {
   invert = false;
 
   color[0] = color[1] = color[2] = 1.0;
-  maxHealth = maxShield = maxBoost = 100;
+  maxHealth = 5;
   currentHealth = maxHealth;
-  currentShield = maxShield;
-  boost = maxBoost;
   powerLevel = 1;
   maxBullets = MAX;
   weaponType = 1;
-  boost = 100;
 }
 
 Object::Object(int x, int y, int z) {
@@ -359,17 +272,13 @@ Object::Object(int x, int y, int z) {
 
 Bullet::Bullet()
 {
-
-	type = 1;
-
   radius = 15;
-
 }
 
 
 Asteroid::Asteroid() {
-	prev = NULL;
-	next = NULL;
+		prev = NULL;
+		next = NULL;
     shipClass  = rand()%5;
     maxHealth = 3;
     currentHealth = maxHealth;
@@ -377,25 +286,59 @@ Asteroid::Asteroid() {
 
 
 Game::Game(int xWindowSize, int yWindowSize, const Ship& ship, const Object& object) : ship(ship), object(object)
-{
-	show_credits = false;
+ {
+
+	gameState = GameState::GS_Menu;
+     	show_credits = false;
 	ahead = NULL;
 	barr = new Bullet[MAX_ARRAY];
-  	earr = new Enemy[MAX_ARRAY];
-  	sarr = new Squadron[MAX_ARRAY];
+  earr = new Enemy[MAX_ARRAY];
+  sarr = new Squadron[MAX_ARRAY];
 	nasteroids = 0;
-  	nenemies = 0;
+  nenemies = 0;
 	nbullets = 0;
-  	nsquadrons = 0;
+  nsquadrons = 0;
 	mouseThrustOn = false;
 	mtext = 0;
-
   difficulty = 1.0;
   level = 1;
   score = 0;
-  num_stars = 32000;
 
+
+  num_stars = 32000;
+  /*
+	//build 1 asteroids...
+	for (int j=0; j<1; j++) {
+		Asteroid *a = new Asteroid;
+		a->nverts = 8;
+		a->radius = rnd()*80.0 + 40.0;
+		Flt r2 = a->radius / 2.0;
+		Flt angle = 0.0f;
+		Flt inc = (PI * 2.0) / (Flt)a->nverts;
+		for (int i=0; i<a->nverts; i++) {
+			a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
+			a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
+			angle += inc;
+		}
+		a->pos[0] = (Flt)(rand() % xWindowSize);
+		a->pos[1] = (Flt)(rand() % yWindowSize);
+		a->pos[2] = 0.0f;
+		a->angle = 0.0;
+		a->rotate = rnd() * 4.0 - 2.0;
+		a->color[0] = 0.8;
+		a->color[1] = 0.8;
+		a->color[2] = 0.7;
+		a->vel[0] = (Flt)(rnd()*2.0-1.0);
+		a->vel[1] = (Flt)(rnd()*2.0-1.0);
+		//std::cout << "asteroid" << std::endl;
+		//add to front of linked list
+		a->next = ahead;
+		if (ahead != NULL)
+			ahead->prev = a;
+		ahead = a;
+		++nasteroids;
+	}
+  */
 	clock_gettime(CLOCK_REALTIME, &bulletTimer);
-  	clock_gettime(CLOCK_REALTIME, &difficultyTimer);
-    	clock_gettime(CLOCK_REALTIME, &thrustTimer);
+  clock_gettime(CLOCK_REALTIME, &difficultyTimer);
 }

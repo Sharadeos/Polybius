@@ -54,7 +54,7 @@ const Flt MINIMUM_ASTEROID_SIZE = 60.0;
 const float PITCH = .6;
 const float TURN = .6;
 const int KEYS = 100;
-const int MAX_THRUST = 25;
+const int MAX_THRUST = 1;
 const int MAX_ARRAY = 999;
 const int RANGE = 1000;
 
@@ -72,7 +72,13 @@ extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
 class Game;
-
+enum GameState {
+    GS_Menu,
+    GS_Play,
+    GS_Controls,
+    GS_Credits,
+    GS_Exit
+};
 
 class Global {
   public:
@@ -88,7 +94,15 @@ class Global {
 	  GLuint chrisTexture;
       GLuint josephTexture;
       GLuint blackholeTexture;
-	  int mousecode;
+        GLuint titleTexture;
+        GLuint playTexture;
+        GLuint controlsTexture;
+        GLuint creditsTexture;
+        GLuint exitTexture;
+	GLuint playwTexture;
+	GLuint controlswTexture;
+	GLuint creditswTexture;
+	GLuint exitwTexture;
 };
 
 class Image {
@@ -116,15 +130,12 @@ public:
 
 	int maxHealth;
 	int currentHealth;
-	int maxShield;
-	int currentShield;
 	int maxBullets;
 	int powerLevel;
-	float boost;
-	float maxBoost;
+
 	int radius;
 
-	int type;
+	float boost;
 	float xScale;
 	float yScale;
 
@@ -225,10 +236,11 @@ public:
 
 	struct timespec bulletTimer;
 	struct timespec difficultyTimer;
-	struct timespec thrustTimer;
 	bool mouseThrustOn;
 	bool show_credits;
 	float mtext;
+	GameState gameState;
+	int menuitemarr[4];
 
   float difficulty;
 	int level;

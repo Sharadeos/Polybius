@@ -28,6 +28,65 @@ void DrawCircle(float cx, float cy, float r, int num_segments)
 	}
 	glEnd();
 }
+/*
+class Scrap {
+public:
+	Vec dir;
+  Vec pos;
+  Vec vel;
+	Scrap();
+
+	} *scraps = new Scrap[MAX];
+
+Scrap::Scrap() {
+	VecZero(dir);
+	VecZero(pos);
+	VecZero(vel);
+
+}
+
+
+
+class Blackhole {
+public:
+	Vec dir;
+	Vec pos;
+	Vec vel;
+	float angle;
+	float color[3];
+	float gravity;
+	float size;
+	Blackhole();
+	void physics();
+	void render();
+} blackhole;
+
+Blackhole::Blackhole() {
+  VecZero(dir);
+  pos[0] = 0;
+  pos[1] = 0;
+  pos[2] = 0.0f;
+  VecZero(vel);
+  angle = 0.0;
+  color[0] = color[1] = color[2] = 1.0;
+	size = 100;
+	void physics();
+	void render();
+
+};
+
+
+void Blackhole::physics()
+{
+
+}
+
+void Blackhole::render()
+{
+	DrawCircle(pos[0]/2, pos[1]/2, size, 100);
+}
+
+*/
 
 
 void creditsLuis(int x, int y, GLuint luisTexture)
@@ -123,9 +182,6 @@ switch((*g).level)
 			Enemy *e= &(*g).earr[i];
 			//(*g).earr[i].updatePolar((*g).ship.pos);
 			if (collisionDetection(*e, (*g).ship)) {
-			    if ((*g).ship.currentShield > 15) {
-				(*g).ship.currentShield -= 15;
-			    }
 					//time to delete the bullet.
 				memcpy(&(*g).earr[i], &(*g).earr[(*g).nenemies-1], sizeof(Enemy));
 				(*g).nenemies--;
@@ -204,24 +260,20 @@ switch((*g).level)
 
 struct timespec thrust;
 double thrustCounter;
-clock_gettime(CLOCK_REALTIME, &thrust);
-thrustCounter = timeDiff(&(*g).thrustTimer, &thrust);
 // h key thrust
 if (gl.keyhits[4]) {
 
-
-	clock_gettime(CLOCK_REALTIME, &(*g).thrustTimer);
-	if(	(*g).ship.boost >= 0.0) {
-	(*g).ship.boost -= 0.5;
-	(*g).ship.vel *= 2;
-}
+	clock_gettime(CLOCK_REALTIME, &thrust);
+	thrustCounter = timeDiff(&(*g).difficultyTimer, &thrust);
+	(*g).ship.boost -= 0.1;
+	(*g).ship.vel = 2;
 }
 
 // resets the thrust
 if (thrustCounter > 5.0 && 	(*g).ship.boost <= 100.0) {
 
-	(*g).ship.boost += 0.5;
-
+	(*g).ship.boost += 0.1;
+		timeCopy(&(*g).bulletTimer, &thrust);
 
 }
 
@@ -329,6 +381,20 @@ if (gl.keyhits[2]) {
 
 void luisRender(Game *g, Global gl)
 {
+	/*
+	Rect r;
+	unsigned int c = 0x00ffff44;
+	r.bot = (*g).ship.pos[1];
+	r.left = (*g).ship.pos[0];
+	r.center = -50;
+	(*g).difficulty += 0.001;
+	ggprint8b(&r, 16, c, "%f", (*g).difficulty);
+
+	blackhole.pos[0] = gl.xres;
+	blackhole.pos[1] = gl.yres;
+	blackhole.render();
+*/
+
 
 	float cx = gl.xres/2;
 	//float cy = gl.yres/2;
@@ -342,14 +408,9 @@ void luisRender(Game *g, Global gl)
 	ggprint8b(&r, 16, 0x00ffff00, "ship velocity = %.1f",(*g).ship.vel);
 	ggprint8b(&r, 16, 0x00ffff00, "level= %.1i",(*g).level);
 	ggprint8b(&r, 16, 0x00ffff00, "difficulty= %.1f",(*g).difficulty);
-
-	ggprint8b(&r, 16, 0x00ffff00, "boost= %.1f",(*g).ship.boost);
-	ggprint8b(&r, 16, 0x00ffff00, "mouse =  %d",gl.mousecode);
-
 	ggprint8b(&r, 16, 0x00ffff00, "object xy angle= %.1f",(*g).object.angle[0]);
 	ggprint8b(&r, 16, 0x00ffff00, "object z angle= %.1f",(*g).object.angle[1]);
 	ggprint8b(&r, 16, 0x00ffff00, "ship thrust = %.1f",(*g).ship.boost);
-
 
 }
 

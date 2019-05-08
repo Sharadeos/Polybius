@@ -11,7 +11,7 @@ void showChrisRamirez(int x, int y, GLuint textid)
 	r.left = x;
 	r.center = 0;
 	ggprint8b(&r, 16, c, "Chris Ramirez");
-	static int wid = 70;
+	static int wid = 120;
 	glPushMatrix();
 	glTranslatef(x+250, y, 0);
 	glBindTexture(GL_TEXTURE_2D, textid);
@@ -25,6 +25,113 @@ void showChrisRamirez(int x, int y, GLuint textid)
 	glEnd();
 	glPopMatrix();
 }
+//Credit to Gordon's Lab2 rainforrest.cpp
+//Enables .png transparency
+unsigned char *buildAlphaData(Image *img)
+{
+    //add 4th component to RGB stream...
+    int i;
+    int a,b,c;
+    unsigned char *newdata, *ptr;
+    unsigned char *data = (unsigned char *)img->data;
+    newdata = (unsigned char *)malloc(img->width * img->height * 4);
+    ptr = newdata;
+    for (i=0; i<img->width * img->height * 3; i+=3) {
+        a = *(data+0);
+        b = *(data+1);
+        c = *(data+2);
+        *(ptr+0) = a;
+        *(ptr+1) = b;
+        *(ptr+2) = c;
+        *(ptr+3) = (a|b|c);
+        ptr += 4;
+        data += 3;
+    }
+    return newdata;
+}
+
+//Menu Textures
+void mainMenuTitle(int x, int y, GLuint textid) {
+	static int wid = 120;
+	glPushMatrix();
+	glTranslatef(x-360, y, 0);
+	glBindTexture(GL_TEXTURE_2D, textid);
+	glEnable(GL_ALPHA_TEST);
+	glColor3ub(255, 255, 255);
+	glBegin(GL_QUADS);
+		//UPLeft, DOWNL, DRight, UR | (x, y)ish
+		glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid); //x = wid-480?
+                glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+                glTexCoord2f(1.0f, 0.0f); glVertex2i( wid+720, wid);
+                glTexCoord2f(1.0f, 1.0f); glVertex2i( wid+720,-wid);
+	glEnd();
+	glPopMatrix();
+}
+void mainMenuPlay(int x, int y, GLuint textid) {
+        static int wid = 40;
+        glPushMatrix();
+        glTranslatef(x-120, y, 0);
+        glBindTexture(GL_TEXTURE_2D, textid);
+        glEnable(GL_ALPHA_TEST);
+        glColor3ub(255, 255, 255);
+        glBegin(GL_QUADS);
+                //UPLeft, DOWNL, DRight, UR | (x, y)ish
+                glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid); //x = wid-480?
+                glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+                glTexCoord2f(1.0f, 0.0f); glVertex2i( wid+240, wid);
+                glTexCoord2f(1.0f, 1.0f); glVertex2i( wid+240,-wid);
+        glEnd();
+        glPopMatrix();
+}
+void mainMenuControls(int x, int y, GLuint textid) {
+        static int wid = 40;
+        glPushMatrix();
+        glTranslatef(x-240, y, 0);
+        glBindTexture(GL_TEXTURE_2D, textid);
+        glEnable(GL_ALPHA_TEST);
+        glColor3ub(255, 255, 255);
+        glBegin(GL_QUADS);
+                //UPLeft, DOWNL, DRight, UR | (x, y)ish
+                glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid); //x = wid-480?
+                glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+                glTexCoord2f(1.0f, 0.0f); glVertex2i( wid+480, wid);
+                glTexCoord2f(1.0f, 1.0f); glVertex2i( wid+480,-wid);
+        glEnd();
+        glPopMatrix();
+}
+void mainMenuCredits(int x, int y, GLuint textid) {
+        static int wid = 40;
+        glPushMatrix();
+        glTranslatef(x-180, y, 0);
+        glBindTexture(GL_TEXTURE_2D, textid);
+        glEnable(GL_ALPHA_TEST);
+        glColor3ub(255, 255, 255);
+        glBegin(GL_QUADS);
+                //UPLeft, DOWNL, DRight, UR | (x, y)ish
+                glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid); //x = wid-480?
+                glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+                glTexCoord2f(1.0f, 0.0f); glVertex2i( wid+360, wid);
+                glTexCoord2f(1.0f, 1.0f); glVertex2i( wid+360,-wid);
+        glEnd();
+        glPopMatrix();
+}
+void mainMenuExit(int x, int y, GLuint textid) {
+        static int wid = 40;
+        glPushMatrix();
+        glTranslatef(x-120, y, 0);
+        glBindTexture(GL_TEXTURE_2D, textid);
+        glEnable(GL_ALPHA_TEST);
+        glColor3ub(255, 255, 255);
+        glBegin(GL_QUADS);
+                //UPLeft, DOWNL, DRight, UR | (x, y)ish
+                glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
+                glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+                glTexCoord2f(1.0f, 0.0f); glVertex2i( wid+240, wid);
+                glTexCoord2f(1.0f, 1.0f); glVertex2i( wid+240,-wid);
+        glEnd();
+        glPopMatrix();
+}
+
 //Organized OPENAL_SOUND_ENGINE class Lab-8
 #ifdef USE_OPENAL_SOUND
 #define FILENUM 5
@@ -161,6 +268,9 @@ void checkAction(struct timespec *t) {
 	if(actionFlag == true) {
 		tdif = timeDiff(&at, t);
 		if(tdif <= 3.0) {
+			if(tdif == 3.0) {
+				timeCopy(t, &at);
+			}
 			tincrement += 0.01;
 			alSourcef(audiothing.alSource[3], AL_GAIN, tincrement);
 			alSourcef(audiothing.alSource[4], AL_GAIN, fabs(tincrement - 1.0));
