@@ -38,6 +38,9 @@ Base::Base() {
 
   boost = 100.0;
 
+  clock_gettime(CLOCK_REALTIME, &bulletTimer);
+  clock_gettime(CLOCK_REALTIME, &thrustTimer);
+  clock_gettime(CLOCK_REALTIME, &shieldTimer);
 }
 
 void Base::updatePolar(Vec ship) {
@@ -142,8 +145,8 @@ void Base::drawBase(Game * g, Global gl) {
 
 
   glVertex2i(x,y);
-glEnd();
-glPopMatrix();
+  glEnd();
+  glPopMatrix();
 
   float cx = gl.xres/2;
   //float cy = gl.yres/2;
@@ -282,53 +285,104 @@ void Base::drawBullet(Game * g, Global gl) {
 	}
 }
 
+void Enemy::targeting(Game * g, Global gl) {
+
+
+	if (angle[0] < 0.0f) {
+		angle[0] += 360.0f;
+  }
+		if (angle[0] > 360.0f) {
+			angle[0] -= 360.0f;
+	}
+		if (angle[1] < 0.1f) {
+			angle[1] = 0.1f;
+	}
+		if (angle[1] > 179.9f) {
+			angle[1] = 179.9f;
+	}
+
+// change it based on the ships position not its angle
+	angle[0] = polar[1] + 180;
+	angle[1] = 180 - polar[2];
+
+  struct timespec bt;
+   clock_gettime(CLOCK_REALTIME, &bt);
+   double ts = timeDiff(&bulletTimer, &bt);
+   if (ts > 0.5) {
+       timeCopy(&bulletTimer, &bt);
+       if ((*g).nbullets < MAX_ARRAY) {
+           //shoot a bullet...
+           //Bullet *b = new Bullet;
+           Bullet *b = &(*g).barr[(*g).nbullets];
+           timeCopy(&b->time, &bt);
+           b->pos[0] = pos[0];
+           b->pos[1] = pos[1];
+           b->pos[2] = pos[2];
+           //b->vel = (*g).ship.vel + 25;
+           b->vel = (*g).ship.vel + 25;
+           //convert ship angle to radians
+           b->angle[0] = angle[0];
+           b->angle[1] = angle[1];
+           b->color[0] = 0.0f;
+           b->color[1] = 1.0f;
+           b->color[2] = 0.0f;
+           b->enemyBullet = true;
+           (*g).nbullets++;
+       }
+
+
+
+}
+
+}
+
 
 Image::Image(const char *fname) {
-        if (fname[0] == '\0')
-                return;
-        //printf("fname **%s**\n", fname);
-        int ppmFlag = 0;
-        char name[40];
-        strcpy(name, fname);
-        int slen = strlen(name);
-        char ppmname[80];
-        if (strncmp(name+(slen-4), ".ppm", 4) == 0)
-                ppmFlag = 1;
-        if (ppmFlag) {
-                strcpy(ppmname, name);
-        } else {
-                name[slen-4] = '\0';
-                //printf("name **%s**\n", name);
-                sprintf(ppmname,"%s.ppm", name);
-                //printf("ppmname **%s**\n", ppmname);
-                char ts[100];
-                //system("convert eball.jpg eball.ppm");
-                sprintf(ts, "convert %s %s", fname, ppmname);
-                system(ts);
-        }
-        //sprintf(ts, "%s", name);
-        FILE *fpi = fopen(ppmname, "r");
-        if (fpi) {
-                char line[200];
-                fgets(line, 200, fpi);
-                fgets(line, 200, fpi);
-                //skip comments and blank lines
-                while (line[0] == '#' || strlen(line) < 2)
-                        fgets(line, 200, fpi);
-                sscanf(line, "%i %i", &width, &height);
-                fgets(line, 200, fpi);
-                //get pixel data
-                int n = width * height * 3;
-                data = new unsigned char[n];
-                for (int i=0; i<n; i++)
-                        data[i] = fgetc(fpi);
-                fclose(fpi);
-        } else {
-        printf("ERROR opening image: %s\n",ppmname);
-                exit(0);
-        }
-        if (!ppmFlag)
-unlink(ppmname);
+  if (fname[0] == '\0')
+    return;
+  //printf("fname **%s**\n", fname);
+  int ppmFlag = 0;
+  char name[40];
+  strcpy(name, fname);
+  int slen = strlen(name);
+  char ppmname[80];
+  if (strncmp(name+(slen-4), ".ppm", 4) == 0)
+    ppmFlag = 1;
+  if (ppmFlag) {
+    strcpy(ppmname, name);
+  } else {
+    name[slen-4] = '\0';
+    //printf("name **%s**\n", name);
+    sprintf(ppmname,"%s.ppm", name);
+    //printf("ppmname **%s**\n", ppmname);
+    char ts[100];
+    //system("convert eball.jpg eball.ppm");
+    sprintf(ts, "convert %s %s", fname, ppmname);
+    system(ts);
+  }
+  //sprintf(ts, "%s", name);
+  FILE *fpi = fopen(ppmname, "r");
+  if (fpi) {
+    char line[200];
+    fgets(line, 200, fpi);
+    fgets(line, 200, fpi);
+  //skip comments and blank lines
+    while (line[0] == '#' || strlen(line) < 2)
+      fgets(line, 200, fpi);
+      sscanf(line, "%i %i", &width, &height);
+      fgets(line, 200, fpi);
+      //get pixel data
+      int n = width * height * 3;
+      data = new unsigned char[n];
+      for (int i=0; i<n; i++)
+        data[i] = fgetc(fpi);
+      fclose(fpi);
+  } else {
+    printf("ERROR opening image: %s\n",ppmname);
+    exit(0);
+  }
+  if (!ppmFlag)
+    unlink(ppmname);
 }
 
 Ship::Ship(int x, int y, int z) {
@@ -349,6 +403,8 @@ Ship::Ship(int x, int y, int z) {
   maxBullets = MAX;
   weaponType = 1;
   boost = 100;
+
+  clock_gettime(CLOCK_REALTIME, &bulletTimer);
 }
 
 Object::Object(int x, int y, int z) {
@@ -357,22 +413,22 @@ Object::Object(int x, int y, int z) {
   pos[2] = z;
 }
 
+
+
 Bullet::Bullet()
 {
-
 	type = 1;
-
   radius = 15;
-
+  enemyBullet = false;
 }
 
 
 Asteroid::Asteroid() {
 	prev = NULL;
 	next = NULL;
-    shipClass  = rand()%5;
-    maxHealth = 3;
-    currentHealth = maxHealth;
+  shipClass  = rand()%5;
+  maxHealth = 3;
+  currentHealth = maxHealth;
 }
 
 
@@ -381,21 +437,20 @@ Game::Game(int xWindowSize, int yWindowSize, const Ship& ship, const Object& obj
 	show_credits = false;
 	ahead = NULL;
 	barr = new Bullet[MAX_ARRAY];
-  	earr = new Enemy[MAX_ARRAY];
-  	sarr = new Squadron[MAX_ARRAY];
+  earr = new Enemy[MAX_ARRAY];
+  sarr = new Squadron[MAX_ARRAY];
 	nasteroids = 0;
-  	nenemies = 0;
+  nenemies = 0;
 	nbullets = 0;
-  	nsquadrons = 0;
+  nsquadrons = 0;
 	mouseThrustOn = false;
 	mtext = 0;
-
   difficulty = 1.0;
   level = 1;
   score = 0;
   num_stars = 32000;
 
-	clock_gettime(CLOCK_REALTIME, &bulletTimer);
-  	clock_gettime(CLOCK_REALTIME, &difficultyTimer);
-    	clock_gettime(CLOCK_REALTIME, &thrustTimer);
+
+  clock_gettime(CLOCK_REALTIME, &difficultyTimer);
+
 }

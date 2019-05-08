@@ -178,8 +178,8 @@ if (gl.keyhits[14]) {
 		(*g).ship.vel = MAX_THRUST;
 	}
 }
-	
-	
+
+
 
 
 // w
@@ -236,9 +236,9 @@ if (gl.keyhits[32]) {
     //a little time between each bullet
     struct timespec bt;
     clock_gettime(CLOCK_REALTIME, &bt);
-    double ts = timeDiff(&(*g).bulletTimer, &bt);
+    double ts = timeDiff(&(*g).ship.bulletTimer, &bt);
     if (ts > 0.1) {
-        timeCopy(&(*g).bulletTimer, &bt);
+        timeCopy(&(*g).ship.bulletTimer, &bt);
         if ((*g).nbullets < MAX_ARRAY) {
             //shoot a bullet...
             //Bullet *b = new Bullet;
@@ -519,7 +519,7 @@ void joeyRender(Game *g, Global gl)
     tri[1][1] = cy + a*sin(angle+.02);
     tri[2][0] = cx + a*cos(angle-.02);
     tri[2][1] = cy + a*sin(angle-.02);
-    
+
 	glColor4fv(Red);
     glPushMatrix();
     glBegin(GL_TRIANGLE_STRIP);
@@ -538,7 +538,7 @@ void joeyRender(Game *g, Global gl)
         tri[1][1] = cy + a*sin(angle+.02);
         tri[2][0] = cx + a*cos(angle-.02);
         tri[2][1] = cy + a*sin(angle-.02);
-	
+
 		Red[3] = (RANGE - (*g).earr[i].polar[0])/RANGE;
         glColor4fv(Red);
         glPushMatrix();
@@ -600,7 +600,7 @@ void joeyRender(Game *g, Global gl)
     	    glPopMatrix();
     	}
 	}
-    
+
     // fill octagon ring
     for (int i = 0; i < 8; i++) {
         int j = (i + 1) % 8;
@@ -641,7 +641,7 @@ void joeyRender(Game *g, Global gl)
     }
     glEnd();
     glPopMatrix();
-    
+
 	blue[3]=1;
 	glEnable(GL_BLEND);
     glBlendFunc( GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -655,7 +655,7 @@ void joeyRender(Game *g, Global gl)
     }
     glEnd();
     glPopMatrix();
-    
+
 	glEnable(GL_BLEND);
     glBlendFunc( GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     glColor4fv(blue);
@@ -668,7 +668,7 @@ void joeyRender(Game *g, Global gl)
     }
     glEnd();
     glPopMatrix();
-    
+
 	glEnable(GL_BLEND);
     glBlendFunc( GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     glColor4fv(blue);
@@ -761,9 +761,9 @@ void joeyRender(Game *g, Global gl)
 	    break;
 	}
 	bar += 10;
-	
+
     }
-    
+
     //health
     lt_edge = cx*.94;
     rt_edge = cx*.99;

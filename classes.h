@@ -131,6 +131,9 @@ public:
 	void updatePolar(Vec);
 	void drawBase(Game *, Global);
 	void drawBullet(Game *, Global);
+	struct timespec bulletTimer;
+	struct timespec thrustTimer;
+	struct timespec shieldTimer;
 	Base();
 };
 
@@ -147,6 +150,7 @@ public:
 	int number;
 	bool invert;
 	int weaponType;
+
 	Ship(int x, int y, int z);
 
 };
@@ -159,7 +163,8 @@ public:
 	int enemyType;
 	int size;
 	int squadNumber;
-
+	struct timespec enemyBulletTimer;
+	void targeting(Game *, Global);
 
 };
 
@@ -167,7 +172,7 @@ public:
 class Bullet: public Base {
 public:
 	struct timespec time;
-
+	bool enemyBullet;
 	Bullet();
 };
 
@@ -223,9 +228,9 @@ public:
 	int nsquadrons;
 	Object object;
 
-	struct timespec bulletTimer;
+
 	struct timespec difficultyTimer;
-	struct timespec thrustTimer;
+
 	bool mouseThrustOn;
 	bool show_credits;
 	float mtext;

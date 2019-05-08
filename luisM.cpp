@@ -66,19 +66,13 @@ bool collisionDetection(Base object1, Base object2)
 
 }
 
-
-
-
 int even_random_number() {
     return 2 * ( rand() % 5 + 1 );
 }
-
-
 // 3, 5, 7
 int odd_random_number() {
     return (1 + even_random_number()) % 8;
 }
-
 
 extern void playEngine();
 extern void pauseEngine();
@@ -87,10 +81,7 @@ extern void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3);
 void difficultyScaling(Game *g, Global gl)
 {
 
-
 //difficulty handler
-
-
 switch((*g).level)
 {
 	// level 1
@@ -157,9 +148,15 @@ switch((*g).level)
 						#endif
 
 						}
-					//do not increment i.
 
 						}
+				//bullet hitting player ship
+				if (collisionDetection(*b, (*g).ship) && b->enemyBullet == true) {
+
+					memcpy(&(*g).barr[j], &(*g).barr[(*g).nbullets-1], sizeof(Bullet));
+					(*g).ship.currentShield--;
+
+				}
 
 				}
 				(*g).nbullets-=decrement;
@@ -205,41 +202,33 @@ switch((*g).level)
 struct timespec thrust;
 double thrustCounter;
 clock_gettime(CLOCK_REALTIME, &thrust);
-thrustCounter = timeDiff(&(*g).thrustTimer, &thrust);
+thrustCounter = timeDiff(&(*g).ship.thrustTimer, &thrust);
 // h key thrust
 if (gl.keyhits[4]) {
 
 
-	clock_gettime(CLOCK_REALTIME, &(*g).thrustTimer);
+	clock_gettime(CLOCK_REALTIME, &(*g).ship.thrustTimer);
 	if(	(*g).ship.boost >= 0.0) {
 	(*g).ship.boost -= 0.5;
 	(*g).ship.vel *= 2;
 }
 }
-
 // resets the thrust
 if (thrustCounter > 5.0 && 	(*g).ship.boost <= 100.0) {
-
 	(*g).ship.boost += 0.5;
-
-
 }
 
 
 // b key
 if (gl.keyhits[98]) {
-	struct timespec bt;
-		clock_gettime(CLOCK_REALTIME, &bt);
-		double ts = timeDiff(&(*g).bulletTimer, &bt);
-		if (ts > 0.5) {
-			timeCopy(&(*g).bulletTimer, &bt);
+
 				Vec location;
 
 				location[0] = rand() % 500 - 250;
 				location[1] = rand() % 500 - 250;
 				location[2] = rand() % 500 - 250;
 				spawnEnemy(g, gl, location, 0, 0);
-			}
+
 }
 // f key squadron test
 
@@ -247,10 +236,10 @@ if (gl.keyhits[2]) {
 	struct timespec bt;
 
 	clock_gettime(CLOCK_REALTIME, &bt);
-	double ts = timeDiff(&(*g).bulletTimer, &bt);
+	double ts = timeDiff(&(*g).ship.bulletTimer, &bt);
 
 		if (ts > 0.5) {
-			timeCopy(&(*g).bulletTimer, &bt);
+			timeCopy(&(*g).ship.bulletTimer, &bt);
 
 
 			Squadron *s= &(*g).sarr[(*g).nsquadrons];
@@ -265,8 +254,6 @@ if (gl.keyhits[2]) {
 				squadronLocation[2] = rand() % 500 - 250;
 				// spawns at the center 1 [2] 3
 				spawnEnemy(g, gl, squadronLocation, (*g).nsquadrons, 0);
-
-
 
 				float lowx = 25;
 				float lowy = 25;
@@ -296,33 +283,7 @@ if (gl.keyhits[2]) {
 	// make object fire a bullet
 	if (gl.keyhits[3]) {
 
-		struct timespec bt;
-		 clock_gettime(CLOCK_REALTIME, &bt);
-		 double ts = timeDiff(&(*g).bulletTimer, &bt);
-		 if (ts > 0.1) {
-				 timeCopy(&(*g).bulletTimer, &bt);
-				 if ((*g).nbullets < MAX_ARRAY) {
-						 //shoot a bullet...
-						 //Bullet *b = new Bullet;
-						 Bullet *b = &(*g).barr[(*g).nbullets];
-						 timeCopy(&b->time, &bt);
-						 b->pos[0] = (*g).object.pos[0];
-						 b->pos[1] = (*g).object.pos[1];
-						 b->pos[2] = (*g).object.pos[2];
-						 //b->vel = (*g).ship.vel + 25;
-						 b->vel = (*g).ship.vel + 25;
-						 //convert ship angle to radians
-						 b->angle[0] = (*g).object.angle[0];
-						 b->angle[1] = (*g).object.angle[1];
-						 b->color[0] = 0.0f;
-						 b->color[1] = 1.0f;
-						 b->color[2] = 0.0f;
-						 (*g).nbullets++;
-				 }
 
-
-
-	}
 	}
 }
 
@@ -382,30 +343,16 @@ Enemy spawnEnemy(Game *g, Global gl, Vec pos, int squadNumber, int enemyType)
 }
 
 //object test function
-void enemyTargeting(Game *g, Global gl)
-{
+void enemyTargeting(Game *g, Global gl) {
 
-	if ((*g).object.angle[0] < 0.0f) {
-		(*g).object.angle[0] += 360.0f;
-}
-		if ((*g).object.angle[0] > 360.0f) {
-			(*g).object.angle[0] -= 360.0f;
+
+for (int i =0; i < (*g).nenemies; i++) {
+
+		Enemy *e= &(*g).earr[i];
+
+		e->targeting(g, gl);
+
 	}
 
-		if ((*g).object.angle[1] < 0.1f) {
-			(*g).object.angle[1] = 0.1f;
-	}
-
-		if ((*g).object.angle[1] > 179.9f) {
-			(*g).object.angle[1] = 179.9f;
-	}
-
-// change it based on the ships position not its angle
-
-
-	(*g).object.angle[0] = (*g).object.polar[1] + 180;
-
-
-	(*g).object.angle[1] = 180 - (*g).object.polar[2];
 
 }

@@ -398,9 +398,9 @@ void check_mouse(XEvent *e)
 	    		//a little time between each bullet
 	        	struct timespec bt;
     	    	clock_gettime(CLOCK_REALTIME, &bt);
-        		double ts = timeDiff(&(*g).bulletTimer, &bt);
+        		double ts = timeDiff(&(*g).ship.bulletTimer, &bt);
         		if (ts > 0.1) {
-            		timeCopy(&(*g).bulletTimer, &bt);
+            		timeCopy(&(*g).ship.bulletTimer, &bt);
 	            	if ((*g).nbullets < MAX_ARRAY) {
     	            	//shoot a bullet...
 	    	            //Bullet *b = new Bullet;
@@ -428,9 +428,9 @@ void check_mouse(XEvent *e)
 	    		//a little time between each bullet
 	        	struct timespec bt;
     	    	clock_gettime(CLOCK_REALTIME, &bt);
-        		double ts = timeDiff(&(*g).bulletTimer, &bt);
+        		double ts = timeDiff(&(*g).ship.bulletTimer, &bt);
         		if (ts > 0.1) {
-            		timeCopy(&(*g).bulletTimer, &bt);
+            		timeCopy(&(*g).ship.bulletTimer, &bt);
 	            	if ((*g).nbullets < MAX_ARRAY - 1) {
 						float a1, a2, a3;
 						a1 = (*g).ship.angle[0] + 90;
@@ -566,34 +566,7 @@ void deleteAsteroid(Game *g, Asteroid *node)
 	delete node;
 	node = NULL;
 }
-/*
-void buildAsteroidFragment(Asteroid *ta, Asteroid *a)
-{
-	//build ta from a
-	ta->nverts = 8;
-	ta->radius = a->radius / 2.0;
-	Flt r2 = ta->radius / 2.0;
-	Flt angle = 0.0f;
-	Flt inc = (PI * 2.0) / (Flt)ta->nverts;
-	for (int i=0; i<ta->nverts; i++) {
-		ta->vert[i][0] = sin(angle) * (r2 + rnd() * ta->radius);
-		ta->vert[i][1] = cos(angle) * (r2 + rnd() * ta->radius);
-		angle += inc;
-	}
-	ta->pos[0] = a->pos[0] + rnd()*10.0-5.0;
-	ta->pos[1] = a->pos[1] + rnd()*10.0-5.0;
-	ta->pos[2] = 0.0f;
-	ta->angle = 0.0;
-	ta->rotate = a->rotate + (rnd() * 4.0 - 2.0);
-	ta->color[0] = 0.8;
-	ta->color[1] = 0.8;
-	ta->color[2] = 0.7;
-	ta->vel[0] = a->vel[0] + (rnd()*2.0-1.0);
-	ta->vel[1] = a->vel[1] + (rnd()*2.0-1.0);
-	ta->currentHealth = a->maxHealth;
-	//std::cout << "frag" << std::endl;
-}
-*/
+
 void physics()
 {
 	//Update ship position
@@ -623,35 +596,6 @@ void render()
 
 	    }
 
-				//Draw the asteroids
-				/*
-				{
-					Asteroid *a =  (*g).ahead;
-					while (a) {
-						//Log("draw asteroid...\n");
-						glColor3fv(a->color);
-						glPushMatrix();
-						glTranslatef(a->pos[0], a->pos[1], a->pos[2]);
-						glRotatef(a->angle, 0.0f, 0.0f, 1.0f);
-						glBegin(GL_LINE_LOOP);
-						//Log("%i verts\n",a->nverts);
-						for (int j=0; j<a->nverts; j++) {
-							glVertex2f(a->vert[j][0], a->vert[j][1]);
-						}
-						glEnd();
-						//glBegin(GL_LINES);
-						//	glVertex2f(0,   0);
-						//	glVertex2f(a->radius, 0);
-						//glEnd();
-						glPopMatrix();
-						glColor3f(1.0f, 0.0f, 0.0f);
-						glBegin(GL_POINTS);
-						glVertex2f(a->pos[0], a->pos[1]);
-						glEnd();
-						a = a->next;
-					}
-				}
-		*/
 		AdolfoRender(g, gl);
 		joeyRender(g, gl);
 		luisRender(g, gl);
