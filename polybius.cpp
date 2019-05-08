@@ -35,8 +35,8 @@ void scoreBoard(Game *g, Global gl);
 void luisRender(Game *g, Global gl);
 void difficultyScaling(Game *g, Global gl);
 bool collisionDetection(Base object1, Base object2);
-void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad);
-
+void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad, int enemyType);
+void enemyTargeting(Game *g, Global gl);
 //chris extern functions
 void ALExplodeUpdate(ALenum param, float x, float y/*, ALfloat *z*/);
 void playMusic();
@@ -47,6 +47,10 @@ void joeyPhysics(Game *g, Global gl);
 void joeyRender(Game *g, Global gl);
 void credit(Game *g, Global gl);
 
+//Adolfo External Functions
+void AdolfoRender(Game *g, Global gl);
+
+
 // add png files name and create array based on # of pngs
 //Image img("./images/bigfoot.png");
 Image img[6] = {
@@ -56,6 +60,7 @@ Image img[6] = {
 "./images/chris_ramirez.png",
 "./images/josephG.png",
 "./images/blackhole.jpg"//macros
+};
 #define rnd() (((Flt)rand())/(Flt)RAND_MAX)
 #define random(a) (rand()%a)
 #define VecZero(v) (v)[0]=0.0,(v)[1]=0.0,(v)[2]=0.0
@@ -65,7 +70,7 @@ Image img[6] = {
 #define VecSub(a,b,c) (c)[0]=(a)[0]-(b)[0]; \
 						(c)[1]=(a)[1]-(b)[1]; \
 						(c)[2]=(a)[2]-(b)[2]
-};
+
 
 //
 Global gl;
@@ -236,10 +241,13 @@ int main()
 	for (int i = 0; i < (*g).num_stars; i++) {
 			(*g).stars[i][0] = (rand() % 359999)*.001; // maps to degrees
 			(*g).stars[i][1] = (rand() % 179999)*.001;
+			(*g).stars[i][2] = ((rand() % 10) + 1)*.1;
 			//(*g).stars[i][0] = i; // maps to degrees
 			//(*g).stars[i][1] = i;
 	}
 // MOVE
+
+
 
 	while (!done) {
 		while (x11.getXPending()) {
@@ -252,7 +260,7 @@ int main()
 		timeSpan = timeDiff(&timeStart, &timeCurrent);
 		timeCopy(&timeStart, &timeCurrent);
 
-
+	render();
 		//functions before render will not render on the setup_screen_res
 		credit(g,gl);
 		if (!(*g).show_credits) {
@@ -263,7 +271,7 @@ int main()
 			}
 
 		}
-	render();
+
 
 		x11.swapBuffers();
 	}
@@ -592,7 +600,8 @@ void physics()
 
 	joeyPhysics(g, gl);
 	difficultyScaling(g, gl);
-	pathFindingTest2(g,gl);
+	//pathFindingTest2(g,gl);
+	enemyTargeting(g, gl);
 
 
 }
@@ -612,13 +621,6 @@ void render()
 
 		   (*g).barr[i].drawBullet(g, gl);
 
-	    }
-
-		for (int i=0; i< (*g).nenemies; i++) {
-			//Enemy *e = & (*g).earr[i];
-
-		   (*g).earr[i].drawBase(g, gl);
-			 //enemies dont appear unless they move or ship moves (minor issue)
 	    }
 
 				//Draw the asteroids
@@ -650,9 +652,10 @@ void render()
 					}
 				}
 		*/
+		AdolfoRender(g, gl);
 		joeyRender(g, gl);
 		luisRender(g, gl);
-			scoreBoard(g,gl);
+		scoreBoard(g,gl);
 		//ggprint8b(&r, 16, 0x00ffff00, "(object render x=%.1f,object render y=%.1f)", (((*g).ship.angle[0] + 60 - object.polar[1])/120)*gl.xres,  (((*g).ship.angle[1] + 45 - object.polar[2])/90)*gl.yres);
 }
 
@@ -660,7 +663,7 @@ void render()
 	if ((*g).show_credits) {
 	    (*g).mtext -= .02;
 	    andrewH(.5*gl.xres, .9*gl.yres, gl.bigfootTexture,(*g).mtext);
-  	  	creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
+  	  creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
 	    AdolfoValenciaPicture(.5*gl.xres, .5*gl.yres, gl.AdolfoTexture);
     	showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
 	   	josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
