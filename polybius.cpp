@@ -247,6 +247,8 @@ int main()
 	}
 // MOVE
 
+
+
 	while (!done) {
 		while (x11.getXPending()) {
 			XEvent e = x11.getXNextEvent();
