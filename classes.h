@@ -125,7 +125,6 @@ public:
 	int radius;
 
 	int type;
-	float boost;
 	float xScale;
 	float yScale;
 
