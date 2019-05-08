@@ -182,6 +182,9 @@ switch((*g).level)
 			Enemy *e= &(*g).earr[i];
 			//(*g).earr[i].updatePolar((*g).ship.pos);
 			if (collisionDetection(*e, (*g).ship)) {
+			    if ((*g).ship.currentShield > 15) {
+				(*g).ship.currentShield -= 15;
+			    }
 					//time to delete the bullet.
 				memcpy(&(*g).earr[i], &(*g).earr[(*g).nenemies-1], sizeof(Enemy));
 				(*g).nenemies--;
@@ -408,9 +411,14 @@ void luisRender(Game *g, Global gl)
 	ggprint8b(&r, 16, 0x00ffff00, "ship velocity = %.1f",(*g).ship.vel);
 	ggprint8b(&r, 16, 0x00ffff00, "level= %.1i",(*g).level);
 	ggprint8b(&r, 16, 0x00ffff00, "difficulty= %.1f",(*g).difficulty);
+
+	ggprint8b(&r, 16, 0x00ffff00, "boost= %.1f",(*g).ship.boost);
+	ggprint8b(&r, 16, 0x00ffff00, "mouse =  %d",gl.mousecode);
+
 	ggprint8b(&r, 16, 0x00ffff00, "object xy angle= %.1f",(*g).object.angle[0]);
 	ggprint8b(&r, 16, 0x00ffff00, "object z angle= %.1f",(*g).object.angle[1]);
 	ggprint8b(&r, 16, 0x00ffff00, "ship thrust = %.1f",(*g).ship.boost);
+
 
 }
 
