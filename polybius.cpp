@@ -1,8 +1,7 @@
 //
-//program: polybius.cpp
-//x11/opengl:  Gordon Griesel
-//Game Portion: Joey, Luis, Chris, Joseph, Adolfo
-//date:    2019
+//program: asteroids.cpp
+//author:  Gordon Griesel
+//date:    2014 - 2018
 //mod spring 2015: added constructors
 //This program is a game starting point for a 3350 project.
 //
@@ -31,6 +30,8 @@ void carrierPF(Game*g, int x);
 void score(Game *g,int i);
 void scoreBoard(Game *g, Global gl);
 //luis extern functions
+//void createAsteroid(Game *g, Global gl);
+//void createBullet(Game *g, Global gl, Object object);
 void luisRender(Game *g, Global gl);
 void difficultyScaling(Game *g, Global gl);
 bool collisionDetection(Base object1, Base object2);
@@ -138,7 +139,7 @@ class X11_wrapper {
 		void set_title() {
 			//Set the window title bar.
 			XMapWindow(dpy, win);
-			XStoreName(dpy, win, "Polybius");
+			XStoreName(dpy, win, "Asteroids template");
 		}
 		void check_resize(XEvent *e) {
 			//The ConfigureNotify is sent by the
@@ -231,7 +232,6 @@ int main()
 	x11.set_mouse_position(0,0);
 	int done=0;
 
-	// MOVE
 #ifdef USE_OPENAL_SOUND
 	playMusic();
 	playEngine();
@@ -241,13 +241,7 @@ int main()
 		(*g).stars[i][0] = (rand() % 359999)*.001; // maps to degrees
 		(*g).stars[i][1] = (rand() % 179999)*.001;
 		(*g).stars[i][2] = ((rand() % 10) + 1)*.1;
-		//(*g).stars[i][0] = i; // maps to degrees
-		//(*g).stars[i][1] = i;
 	}
-	// MOVE
-
-
-
 	while (!done) {
 		while (x11.getXPending()) {
 			XEvent e = x11.getXNextEvent();
@@ -268,10 +262,7 @@ int main()
 				physics();
 				physicsCountdown -= physicsRate;
 			}
-
 		}
-
-
 		x11.swapBuffers();
 	}
 	cleanup_fonts();
@@ -363,9 +354,6 @@ void init_opengl(void)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
 			GL_RGB, GL_UNSIGNED_BYTE, img[5].data);
-
-
-
 }
 
 void normalize2d(Vec v)
@@ -383,7 +371,6 @@ void normalize2d(Vec v)
 
 void check_mouse(XEvent *e)
 {
-
 	static int savex = 0;
 	static int savey = 0;
 	static int ct=0;
@@ -402,13 +389,11 @@ void check_mouse(XEvent *e)
 					timeCopy(&(*g).ship.bulletTimer, &bt);
 					if ((*g).nbullets < MAX_ARRAY) {
 						//shoot a bullet...
-						//Bullet *b = new Bullet;
 						Bullet *b = &(*g).barr[(*g).nbullets];
 						timeCopy(&b->time, &bt);
 						b->pos[0] = (*g).ship.pos[0];
 						b->pos[1] = (*g).ship.pos[1];
 						b->pos[2] = (*g).ship.pos[2];
-						//b->vel = (*g).ship.vel + 25;
 						#ifdef USE_OPENAL_SOUND
 						pewPew();
 						#endif
@@ -417,7 +402,8 @@ void check_mouse(XEvent *e)
 						b->angle[0] = (*g).ship.angle[0];
 						b->angle[1] = (*g).ship.angle[1];
 						b->type = 1;
-						(*g).nbullets++;
+						b->radius = 15;
+                        (*g).nbullets++;
 					}
 				}
 			}
@@ -449,6 +435,7 @@ void check_mouse(XEvent *e)
 						b->angle[0] = (*g).ship.angle[0];
 						b->angle[1] = (*g).ship.angle[1];
 						b->type = 1;
+						b->radius = 15;
 						(*g).nbullets++;
 						//shoot a bullet...
 						xo = 8*cos(a2)*sin(a3);
@@ -462,6 +449,7 @@ void check_mouse(XEvent *e)
 						c->angle[0] = (*g).ship.angle[0];
 						c->angle[1] = (*g).ship.angle[1];
 						c->type = 1;
+						c->radius = 15;
 						(*g).nbullets++;
 					}
 				}
@@ -480,18 +468,18 @@ void check_mouse(XEvent *e)
 						b->pos[0] = (*g).ship.pos[0];
 						b->pos[1] = (*g).ship.pos[1];
 						b->pos[2] = (*g).ship.pos[2];
-						//b->vel = (*g).ship.vel + 25;
 						#ifdef USE_OPENAL_SOUND
 						pewPew();
 						#endif
-						b->vel = (*g).ship.vel + 25;
+						b->vel = 25;
 						b->angle[0] = (*g).ship.angle[0];
 						b->angle[1] = (*g).ship.angle[1];
 						b->type = 3;
+						b->radius = 15;
 						(*g).nbullets++;
 					}
 				}
-			}
+			}		
 		}
 		//Scroll Wheel up
 		if (e->xbutton.button==4) {
@@ -567,6 +555,32 @@ int check_keys(XEvent *e)
 	return 0;
 }
 
+void deleteAsteroid(Game *g, Asteroid *node)
+{
+	//Remove a node from doubly-linked list
+	//Must look at 4 special cases below.
+	if (node->prev == NULL) {
+		if (node->next == NULL) {
+			//only 1 item in list.
+			g->ahead = NULL;
+		} else {
+			//at beginning of list.
+			node->next->prev = NULL;
+			g->ahead = node->next;
+		}
+	} else {
+		if (node->next == NULL) {
+			//at end of list.
+			node->prev->next = NULL;
+		} else {
+			//in middle of list.
+			node->prev->next = node->next;
+			node->next->prev = node->prev;
+		}
+	}
+	delete node;
+	node = NULL;
+}
 
 void physics()
 {
@@ -574,9 +588,8 @@ void physics()
 
 	joeyPhysics(g, gl);
 	difficultyScaling(g, gl);
-	//pathFindingTest2(g,gl);
-	enemyTargeting(g, gl);
-
+	pathFindingTest2(g,gl);
+	//enemyTargeting(g, gl);
 
 }
 
@@ -586,15 +599,10 @@ void render()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 	if (!(*g).show_credits) {
-
-		(*g).object.drawBase(g, gl);
-
-
+		//(*g).object.drawBase(g, gl);
 		for (int i=0; i< (*g).nbullets; i++) {
 			//Bullet *b = & (*g).barr[i];
-
 			(*g).barr[i].drawBullet(g, gl);
-
 		}
 
 		AdolfoRender(g, gl);
@@ -602,7 +610,6 @@ void render()
 		luisRender(g, gl);
 		scoreBoard(g,gl);
 	}
-
 
 	if ((*g).show_credits) {
 		(*g).mtext -= .02;

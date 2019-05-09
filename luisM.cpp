@@ -1,5 +1,5 @@
 //author:  Luis Manahan
-//modified: 5/7/19 11:25AM
+//modified: 3/14/19 11:25AM
 //
 #include <GL/glx.h>
 #include "fonts.h"
@@ -41,18 +41,7 @@ bool collisionDetection(Base object1, Base object2)
   float distance = sqrt((object1.pos[0] - object2.pos[0]) * (object1.pos[0] - object2.pos[0]) +
                            (object1.pos[1] - object2.pos[1]) * (object1.pos[1] - object2.pos[1]) +
                            (object1.pos[2] - object2.pos[2]) * (object1.pos[2] - object2.pos[2]));
-  return distance  < (object1.radius/10 + object2.radius/10);
-
-}
-
-bool collisionDetectionShip(Base object1, Base object2)
-{
-
-  // we are using multiplications because it's faster than calling Math.pow
-  float distance = sqrt((object1.pos[0] - object2.pos[0]) * (object1.pos[0] - object2.pos[0]) +
-                           (object1.pos[1] - object2.pos[1]) * (object1.pos[1] - object2.pos[1]) +
-                           (object1.pos[2] - object2.pos[2]) * (object1.pos[2] - object2.pos[2]));
-  return distance  < (object1.radius/25 + object2.radius/25);
+  return distance  < (object1.radius/20 + object2.radius/20);
 
 }
 
@@ -71,15 +60,6 @@ extern void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3);
 void difficultyScaling(Game *g, Global gl)
 {
 
-	struct timespec shield;
-	double shieldCounter;
-	clock_gettime(CLOCK_REALTIME, &shield);
-	shieldCounter = timeDiff(&(*g).ship.shieldTimer, &shield);
-
-	if (shieldCounter > 3.0 && 	(*g).ship.currentShield <= 90.0) {
-		(*g).ship.currentShield += 5;
-	}
-
 //difficulty handler
 switch((*g).level)
 {
@@ -89,13 +69,13 @@ switch((*g).level)
 	clock_gettime(CLOCK_REALTIME, &dt);
 	double ds = timeDiff(&(*g).difficultyTimer, &dt);
 	(*g).difficulty += 0.001;
-	if((*g).nenemies <= 20) {
+	if((*g).nenemies <= 5) {
 		if (ds > 10.0) {
 			Vec location;
 			location[0] = rand() % 500 - 250;
 			location[1] = rand() % 500 - 250;
 			location[2] = rand() % 500 - 250;
-			spawnEnemy(g, gl, location, false, rand() % 3);
+			spawnEnemy(g, gl, location, false, 0);
 #ifdef USE_OPENAL_SOUND
 			playEngine();
 #endif
@@ -112,7 +92,7 @@ switch((*g).level)
 
 			Enemy *e= &(*g).earr[i];
 			//(*g).earr[i].updatePolar((*g).ship.pos);
-			if (collisionDetectionShip(*e, (*g).ship)) {
+			if (collisionDetection(*e, (*g).ship)) {
 			    if ((*g).ship.currentShield > 15) {
 				(*g).ship.currentShield -= 15;
 			    }
@@ -154,8 +134,6 @@ switch((*g).level)
 
 					memcpy(&(*g).barr[j], &(*g).barr[(*g).nbullets-1], sizeof(Bullet));
 					(*g).ship.currentShield--;
-						//clock_gettime(CLOCK_REALTIME, &shield);
-							clock_gettime(CLOCK_REALTIME, &(*g).ship.shieldTimer);
 
 				}
 
@@ -200,7 +178,6 @@ switch((*g).level)
 
 	}
 
-
 struct timespec thrust;
 double thrustCounter;
 clock_gettime(CLOCK_REALTIME, &thrust);
@@ -217,7 +194,7 @@ if (gl.keyhits[14]) {
 		if ((*g).ship.vel > MAX_THRUST) {
 			(*g).ship.vel = MAX_THRUST;
 		}
-	}
+	}	
 }
 else {
 	if ((*g).ship.vel > MAX_THRUST) {
@@ -238,7 +215,7 @@ if (gl.keyhits[98]) {
 				location[0] = rand() % 500 - 250;
 				location[1] = rand() % 500 - 250;
 				location[2] = rand() % 500 - 250;
-				spawnEnemy(g, gl, location, 0, rand() % 3);
+				spawnEnemy(g, gl, location, 0, 0);
 
 }
 // f key squadron test
@@ -335,77 +312,23 @@ extern void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3);
 Enemy spawnEnemy(Game *g, Global gl, Vec pos, int squadNumber, int enemyType)
 {
   Enemy *e = &(*g).earr[(*g).nenemies];
-
-	if(e->enemyType == 0) {
-	  e->pos[0] = (*g).ship.pos[0] + pos[0];
-	  e->pos[1] = (*g).ship.pos[1] + pos[1];
-	  e->pos[2] = (*g).ship.pos[2] + pos[2];
-	  e->vel = 0;
-		e->currentHealth = 3;
-		e->enemyType = enemyType;
-		e->squadNumber = squadNumber;
-		#ifdef USE_OPENAL_SOUND
-			alShipLocation(AL_POSITION, e->pos[0], e->pos[1], e->pos[2]);
-		#endif
-	  //convert ship angle to radians
-	  e->angle[0] = (*g).ship.angle[0];
-	  e->angle[1] = (*g).ship.angle[1];
-
-		e->bulletAngle[0] = e->angle[0];
-		e->bulletAngle[1] = e->angle[1];
-
-	  e->color[0] = 0.0f;
-	  e->color[1] = 1.0f;
-	  e->color[2] = 0.0f;
-	}
-	if(e->enemyType == 1) {
-	  e->pos[0] = (*g).ship.pos[0] + pos[0];
-	  e->pos[1] = (*g).ship.pos[1] + pos[1];
-	  e->pos[2] = (*g).ship.pos[2] + pos[2];
-	  e->vel = 0;
-		e->currentHealth = 10;
-		e->enemyType = enemyType;
-		e->squadNumber = squadNumber;
-		#ifdef USE_OPENAL_SOUND
-			alShipLocation(AL_POSITION, e->pos[0], e->pos[1], e->pos[2]);
-		#endif
-	  //convert ship angle to radians
-	  e->angle[0] = (*g).ship.angle[0];
-	  e->angle[1] = (*g).ship.angle[1];
-
-		e->bulletAngle[0] = e->angle[0];
-		e->bulletAngle[1] = e->angle[1];
-
-	  e->color[0] = 0.0f;
-	  e->color[1] = 1.0f;
-	  e->color[2] = 0.0f;
-	}
-	if(e->enemyType == 2) {
-	  e->pos[0] = (*g).ship.pos[0] + pos[0];
-	  e->pos[1] = (*g).ship.pos[1] + pos[1];
-	  e->pos[2] = (*g).ship.pos[2] + pos[2];
-	  e->vel = 0;
-		e->currentHealth = 5;
-		e->enemyType = enemyType;
-		e->squadNumber = squadNumber;
-		#ifdef USE_OPENAL_SOUND
-			alShipLocation(AL_POSITION, e->pos[0], e->pos[1], e->pos[2]);
-		#endif
-	  //convert ship angle to radians
-	  e->angle[0] = (*g).ship.angle[0];
-	  e->angle[1] = (*g).ship.angle[1];
-
-		e->bulletAngle[0] = e->angle[0];
-		e->bulletAngle[1] = e->angle[1];
-
-	  e->color[0] = 0.0f;
-	  e->color[1] = 1.0f;
-	  e->color[2] = 0.0f;
-	}
-
-
+  e->pos[0] = (*g).ship.pos[0] + pos[0];
+  e->pos[1] = (*g).ship.pos[1] + pos[1];
+  e->pos[2] = (*g).ship.pos[2] + pos[2];
+  e->vel = 0;
+	e->currentHealth = 3;
+	e->enemyType = enemyType;
+	e->squadNumber = squadNumber;
+#ifdef USE_OPENAL_SOUND
+	alShipLocation(AL_POSITION, e->pos[0], e->pos[1], e->pos[2]);
+#endif
+  //convert ship angle to radians
+  e->angle[0] = (*g).ship.angle[0];
+  e->angle[1] = (*g).ship.angle[1];
+  e->color[0] = 0.0f;
+  e->color[1] = 1.0f;
+  e->color[2] = 0.0f;
   (*g).nenemies++;
-
 
 	return *e;
 
