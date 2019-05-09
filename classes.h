@@ -244,7 +244,8 @@ public:
 	bool show_credits;
 	float mtext;
 	GameState gameState;
-	int menuarr[4];
+	bool playmusic;
+	bool playmusic2;
 	int menuitem;
         int playw;
         int controlsw;
