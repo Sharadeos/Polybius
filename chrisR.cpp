@@ -171,7 +171,7 @@ void stateKeys(Game *g, Global gl) {
 		(*g).menuitem = 0;
 	}
 }
-void checkMenuItem(Game *g, Global gl) {
+void checkMenuItem(Game *g) {
 	if ((*g).menuitem == 0) {
 		(*g).playw = 1;
 		(*g).controlsw = 0;
@@ -338,9 +338,7 @@ void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3) {
     }
     if(
 }*/
-void checkActivity(Game *g, Global gl) {
 
-}
 float tincrement = 0.01;
 bool actionFlag = false, actionFlag2 = false;
 double tdif = 0.0;
@@ -353,6 +351,7 @@ bool setActionFlag() {
 		actionFlag = false;
 	}
 	clock_gettime(CLOCK_REALTIME, &at);
+	return 0;
 }
 void checkAction(struct timespec *t) {
 	if(actionFlag == true) {

@@ -35,7 +35,7 @@ void luisRender(Game *g, Global gl);
 void difficultyScaling(Game *g, Global gl);
 bool collisionDetection(Base object1, Base object2);
 void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad, int enemyType);
-void enemyTargeting(Game *g, Global gl);
+void enemyTargeting(Game *g);
 //chris extern functions
 void ALExplodeUpdate(ALenum param, float x, float y/*, ALfloat *z*/);
 void playTitleMusic();
@@ -51,7 +51,7 @@ void mainMenuControls(int x, int y, GLuint textid);
 void mainMenuCredits(int x, int y, GLuint textid);
 void mainMenuExit(int x, int y, GLuint textid);
 void stateKeys(Game *g, Global gl);
-void checkMenuItem(Game *g, Global gl);
+void checkMenuItem(Game *g);
 //joey extern functions
 void joeyPhysics(Game *g, Global gl);
 void joeyStars(Game *g, Global gl);
@@ -231,7 +231,7 @@ Game* Game::instance = 0;
 Game* Game::getInstance()
 {
 	if (instance == 0) {
-		instance = new Game(gl.xres, gl.yres, Ship(0, 0, 0), Object(0, 100, 0));
+		instance = new Game(Ship(0, 0, 0), Object(0, 100, 0));
 	}
 	return instance;
 }
@@ -287,7 +287,7 @@ int main()
 		//functions before render will not render on the setup_screen_res
 		credit(g,gl);
 		stateKeys(g, gl);
-		checkMenuItem(g, gl);
+		checkMenuItem(g);
 		if (!(*g).show_credits) {
 			physicsCountdown += timeSpan;
 			while (physicsCountdown >= physicsRate) {
@@ -697,7 +697,7 @@ void physics()
 	joeyPhysics(g, gl);
 	difficultyScaling(g, gl);
 	pathFindingTest2(g,gl);
-	enemyTargeting(g, gl);
+	enemyTargeting(g);
 
 
 }

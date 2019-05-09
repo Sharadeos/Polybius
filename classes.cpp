@@ -136,26 +136,27 @@ void Base::drawBase(Game * g, Global gl) {
 	else
 		distanceScale = 12;
 */
-	float distanceScale = 12/polar[0];
+	//float distanceScale = 12/polar[0];
 	float Yellow[3] = {1,1,0};
 	glColor3fv(Yellow);
 	glPushMatrix();
 	glBegin(GL_TRIANGLE_STRIP);
 
 	//Override to different Vertices for different classes?
+	/*
 	glVertex2i(x-(radius*xScale*distanceScale),y-(radius*yScale*distanceScale));
 	glVertex2i(x-(radius*xScale*distanceScale),y+(radius*yScale*distanceScale));
 	glVertex2i(x,y);
 	glVertex2i(x+(radius*xScale*distanceScale),y-(radius*yScale*distanceScale));
 	glVertex2i(x+(radius*xScale*distanceScale),y+(radius*yScale*distanceScale));
 
-
+*/
 
 	glVertex2i(x,y);
 	glEnd();
 	glPopMatrix();
 
-	float cx = gl.xres/2;
+	//float cx = gl.xres/2;
 	//float cy = gl.yres/2;
 	Rect r;
 	//
@@ -163,7 +164,7 @@ void Base::drawBase(Game * g, Global gl) {
 	r.left = x;
 	r.center = 0;
 	//ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
-	ggprint8b(&r, 16, 0x00ffff00, "%.1i",currentHealth);
+	ggprint8b(&r, 16, 0x00ffff00, "",currentHealth);
 
 
 }
@@ -352,7 +353,7 @@ void Base::drawBullet(Game * g, Global gl) {
 	}
 }
 
-void Enemy::targeting(Game * g, Global gl) {
+void Enemy::targeting(Game * g) {
 
 
 	if (bulletAngle[0] < 0.0f) {
@@ -508,7 +509,7 @@ Bullet::Bullet()
 
 
 
-Game::Game(int xWindowSize, int yWindowSize, const Ship& ship, const Object& object) : ship(ship), object(object)
+Game::Game(const Ship& ship, const Object& object) : ship(ship), object(object)
 {
 	gameState = GameState::GS_Menu;
  	playmusic = false;

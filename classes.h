@@ -186,7 +186,7 @@ public:
 	int size;
 	int squadNumber;
 	struct timespec enemyBulletTimer;
-	void targeting(Game *, Global);
+	void targeting(Game *);
 
 };
 
@@ -247,7 +247,7 @@ public:
 
 
 	struct timespec difficultyTimer;
-	Game(int xWindowSize, int yWindowSize, const Ship & ship, const Object & object);
+	Game(const Ship & ship, const Object & object);
 
 	static Game* getInstance();
 	~Game() {

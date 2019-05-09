@@ -370,10 +370,10 @@ Enemy spawnEnemy(Game *g, Vec pos, int squadNumber, int enemyType)
 }
 
 //object test function
-void enemyTargeting(Game *g, Global gl) {
+void enemyTargeting(Game *g) {
 
 	for (int i =0; i < (*g).nenemies; i++) {
 		Enemy *e= &(*g).earr[i];
-		e->targeting(g, gl);
+		e->targeting(g);
 		}
 }
