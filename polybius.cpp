@@ -417,6 +417,7 @@ void check_mouse(XEvent *e)
 						b->angle[0] = (*g).ship.angle[0];
 						b->angle[1] = (*g).ship.angle[1];
 						b->type = 1;
+						b->enemyBullet = false;
 						(*g).nbullets++;
 					}
 				}
@@ -449,6 +450,7 @@ void check_mouse(XEvent *e)
 						b->angle[0] = (*g).ship.angle[0];
 						b->angle[1] = (*g).ship.angle[1];
 						b->type = 1;
+						b->enemyBullet = false;
 						(*g).nbullets++;
 						//shoot a bullet...
 						xo = 8*cos(a2)*sin(a3);
@@ -462,6 +464,7 @@ void check_mouse(XEvent *e)
 						c->angle[0] = (*g).ship.angle[0];
 						c->angle[1] = (*g).ship.angle[1];
 						c->type = 1;
+						c->enemyBullet = false;
 						(*g).nbullets++;
 					}
 				}
@@ -488,6 +491,7 @@ void check_mouse(XEvent *e)
 						b->angle[0] = (*g).ship.angle[0];
 						b->angle[1] = (*g).ship.angle[1];
 						b->type = 3;
+						b->enemyBullet = false;
 						(*g).nbullets++;
 					}
 				}
@@ -574,7 +578,7 @@ void physics()
 
 	joeyPhysics(g, gl);
 	difficultyScaling(g, gl);
-	//pathFindingTest2(g,gl);
+	pathFindingTest2(g,gl);
 	enemyTargeting(g, gl);
 
 

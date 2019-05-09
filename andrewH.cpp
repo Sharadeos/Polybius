@@ -255,6 +255,7 @@ void joeyPhysics(Game *g, Global gl)
 					b->color[1] = 1.0f;
 					b->color[2] = 0.0f;
 					b->type = 1;
+					b->enemyBullet = false;
 					(*g).nbullets++;
 				}
 			}
@@ -293,6 +294,7 @@ void joeyPhysics(Game *g, Global gl)
 					b->color[1] = 1.0f;
 					b->color[2] = 0.0f;
 					b->type = 1;
+					b->enemyBullet = false;
 					(*g).nbullets++;
 					//shoot a bullet...
 					//Bullet *b = new Bullet;
@@ -312,6 +314,7 @@ void joeyPhysics(Game *g, Global gl)
 					c->color[1] = 1.0f;
 					c->color[2] = 0.0f;
 					c->type = 1;
+					c->enemyBullet = false;
 					(*g).nbullets++;
 				}
 			}
@@ -340,6 +343,7 @@ void joeyPhysics(Game *g, Global gl)
 					b->angle[0] = (*g).ship.angle[0];
 					b->angle[1] = (*g).ship.angle[1];
 					b->type = 3;
+					b->enemyBullet = false;
 					(*g).nbullets++;
 				}
 			}
@@ -833,7 +837,7 @@ void joeyRender(Game *g, Global gl)
 		glColor4fv(shield);
 		glPushMatrix();
 		glBegin(GL_POLYGON);
-		glVertex2f( cx + rt_edge * cos(bAngle - i * sz) 		, 
+		glVertex2f( cx + rt_edge * cos(bAngle - i * sz) 		,
 				100 + rt_edge * sin(bAngle - i * sz)       	);
 		glVertex2f( cx + rt_edge * cos(bAngle - (i + 1) * sz)  	,
 				100 + rt_edge * sin(bAngle - (i + 1) * sz) 	);
@@ -871,11 +875,11 @@ void joeyRender(Game *g, Global gl)
 		glBegin(GL_POLYGON);
 		glVertex2f( cx + rt_edge * cos(bAngle + i * sz) 		,
 				100 + rt_edge*sin(bAngle + i*sz)			);
-		glVertex2f( cx + rt_edge * cos(bAngle + (i + 1) * sz) 	, 
+		glVertex2f( cx + rt_edge * cos(bAngle + (i + 1) * sz) 	,
 				100 + rt_edge * sin(bAngle + (i + 1) * sz)	);
-		glVertex2f( cx + lt_edge * cos(bAngle + (i + 1) * sz) , 
+		glVertex2f( cx + lt_edge * cos(bAngle + (i + 1) * sz) ,
 				100 + lt_edge * sin(bAngle + ( i + 1) * sz)	);
-		glVertex2f( cx + lt_edge * cos(bAngle + i * sz) 		, 
+		glVertex2f( cx + lt_edge * cos(bAngle + i * sz) 		,
 				100 + lt_edge * sin(bAngle + i * sz)		);
 
 		lt_edge += 1;
