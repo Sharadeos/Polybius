@@ -182,15 +182,24 @@ struct timespec thrust;
 double thrustCounter;
 clock_gettime(CLOCK_REALTIME, &thrust);
 thrustCounter = timeDiff(&(*g).ship.thrustTimer, &thrust);
-// h key thrust
-if (gl.keyhits[4]) {
-
-
+// r key thrust
+if (gl.keyhits[14]) {
 	clock_gettime(CLOCK_REALTIME, &(*g).ship.thrustTimer);
-	if(	(*g).ship.boost >= 0.0) {
-	(*g).ship.boost -= 0.5;
-	(*g).ship.vel *= 2;
+	if(	(*g).ship.boost > 0.0) {
+		(*g).ship.boost -= 0.2;
+		(*g).ship.vel = MAX_THRUST*2;
+	}
+	if( (*g).ship.boost <= 0) {
+		(*g).ship.boost = 0;
+		if ((*g).ship.vel > MAX_THRUST) {
+			(*g).ship.vel = MAX_THRUST;
+		}
+	}	
 }
+else {
+	if ((*g).ship.vel > MAX_THRUST) {
+		(*g).ship.vel = MAX_THRUST;
+	}
 }
 // resets the thrust
 if (thrustCounter > 5.0 && 	(*g).ship.boost <= 100.0) {
