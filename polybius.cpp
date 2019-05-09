@@ -48,6 +48,8 @@ void mainMenuPlay(int x, int y, GLuint textid);
 void mainMenuControls(int x, int y, GLuint textid);
 void mainMenuCredits(int x, int y, GLuint textid);
 void mainMenuExit(int x, int y, GLuint textid);
+void stateKeys(Game *g, Global gl);
+void checkMenuItem(Game *g, Global gl);
 //joey extern functions
 void joeyPhysics(Game *g, Global gl);
 void joeyStars(Game *g, Global gl);
@@ -277,6 +279,8 @@ int main()
 	render();
 		//functions before render will not render on the setup_screen_res
 		credit(g,gl);
+		stateKeys(g, gl);
+		checkMenuItem(g, gl);
 		if (!(*g).show_credits) {
 			physicsCountdown += timeSpan;
 			while (physicsCountdown >= physicsRate) {
@@ -741,9 +745,21 @@ void render()
 	switch ((*g).gameState) {
 		case GameState::GS_Menu:
 			mainMenuTitle(.5*gl.xres, .8*gl.yres, gl.titleTexture);
+			if((*g).playw) {
+				mainMenuPlay(.5*gl.xres, .5*gl.yres, gl.playwTexture);
+			}
 			mainMenuPlay(.5*gl.xres, .5*gl.yres, gl.playTexture);
+			if((*g).controlsw) {
+				mainMenuControls(.5*gl.xres, .4*gl.yres, gl.controlswTexture);
+			}
 			mainMenuControls(.5*gl.xres, .4*gl.yres, gl.controlsTexture);
+			if((*g).creditsw) {
+				mainMenuCredits(.5*gl.xres, .3*gl.yres, gl.creditswTexture);
+			}
 			mainMenuCredits(.5*gl.xres, .3*gl.yres, gl.creditsTexture);
+			if((*g).exitw) {
+				mainMenuExit(.5*gl.xres, .2*gl.yres, gl.exitwTexture);
+			}
 			mainMenuExit(.5*gl.xres, .2*gl.yres, gl.exitTexture);
 			break;
 		case GameState::GS_Play:
@@ -769,15 +785,15 @@ void render()
 			josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
 			break;
 		case GameState::GS_Exit:
-			//exit program
+			exit(EXIT_SUCCESS);
 			break;
 	}
-	if((*g).show_credits) {
+	/*if((*g).show_credits) {
         // function calls for everyone with parameters
 		mainMenuTitle(.5*gl.xres, .8*gl.yres, gl.titleTexture);
 		mainMenuPlay(.5*gl.xres, .6*gl.yres, gl.playTexture);
 		mainMenuControls(.5*gl.xres, .5*gl.yres, gl.controlsTexture);
 		mainMenuCredits(.5*gl.xres, .4*gl.yres, gl.creditsTexture);
 		mainMenuExit(.5*gl.xres, .3*gl.yres, gl.exitTexture);
-	}
+	}*/
 }

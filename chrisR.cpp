@@ -131,7 +131,66 @@ void mainMenuExit(int x, int y, GLuint textid) {
         glEnd();
         glPopMatrix();
 }
-
+void stateKeys(Game *g, Global gl) {
+	//Up
+	if (gl.keyhits[62]) {
+		if ((*g).menuitem > 0) {
+			(*g).menuitem--;
+		}
+	}
+	//Down
+	if (gl.keyhits[64]) {
+		if ((*g).menuitem < 3) {
+			(*g).menuitem++;
+		}
+	}
+	//Enter -> O
+	if (gl.keyhits[1]) {
+		if ((*g).menuitem == 0) {
+			(*g).gameState = GameState::GS_Play;
+		}
+		if ((*g).menuitem == 1) {
+			(*g).gameState = GameState::GS_Controls;
+		}
+		if ((*g).menuitem == 2) {
+			(*g).gameState = GameState::GS_Credits;
+		}
+		if ((*g).menuitem == 3) {
+			(*g).gameState = GameState::GS_Exit;
+		}
+	}
+	//m ...for Menu
+	/*if (gl.keyhits[109]) {
+		(*g).gameState = GameState::GS_Menu;
+		(*g).menuitem = 0;
+	}*/
+}
+void checkMenuItem(Game *g, Global gl) {
+	if ((*g).menuitem == 0) {
+		(*g).playw = 1;
+		(*g).controlsw = 0;
+		(*g).creditsw = 0;
+		(*g).exitw = 0;
+	}
+	if((*g).menuitem == 1) {
+		(*g).playw = 0;
+		(*g).controlsw = 1;
+		(*g).creditsw = 0;
+		(*g).exitw = 0;
+	}
+	if ((*g).menuitem == 2) {
+		(*g).playw = 0;
+		(*g).controlsw = 0;
+		(*g).creditsw = 1;
+		(*g).exitw = 0;
+	} 
+	if ((*g).menuitem == 3) {
+		(*g).playw = 0;
+		(*g).controlsw = 0;
+		(*g).creditsw = 0;
+		(*g).exitw = 1;
+	}
+}
 //Organized OPENAL_SOUND_ENGINE class Lab-8
 #ifdef USE_OPENAL_SOUND
 #define FILENUM 5

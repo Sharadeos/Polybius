@@ -103,6 +103,10 @@ class Global {
 	GLuint controlswTexture;
 	GLuint creditswTexture;
 	GLuint exitwTexture;
+	/*int playw;
+	int controlsw;
+	int creditsw;
+	int exitw;*/
 };
 
 class Image {
@@ -240,7 +244,12 @@ public:
 	bool show_credits;
 	float mtext;
 	GameState gameState;
-	int menuitemarr[4];
+	int menuarr[4];
+	int menuitem;
+        int playw;
+        int controlsw;
+        int creditsw;
+        int exitw;
 
   float difficulty;
 	int level;

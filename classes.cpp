@@ -4,6 +4,10 @@ Global::Global() {
   xres = 1920;
   yres = 1080;
   //memset(keys, 0, 65536);
+  /*playw = 0;
+  controlsw = 0;
+  creditsw = 0;
+  exitw = 0;*/
 }
 
 
@@ -289,7 +293,12 @@ Game::Game(int xWindowSize, int yWindowSize, const Ship& ship, const Object& obj
  {
 
 	gameState = GameState::GS_Menu;
-     	show_credits = false;
+     	menuitem = 0;
+        playw=0;
+        controlsw=0;
+        creditsw=0;
+        exitw=0;
+	show_credits = false;
 	ahead = NULL;
 	barr = new Bullet[MAX_ARRAY];
   earr = new Enemy[MAX_ARRAY];
@@ -303,7 +312,7 @@ Game::Game(int xWindowSize, int yWindowSize, const Ship& ship, const Object& obj
   difficulty = 1.0;
   level = 1;
   score = 0;
-
+	
 
   num_stars = 32000;
   /*
