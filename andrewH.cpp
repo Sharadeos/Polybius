@@ -333,8 +333,8 @@ void joeyPhysics(Game *g, Global gl)
 void joeyStars(Game *g, Global gl)
 {
     //stars
-    float cx = gl.xres/2;
-    float cy = gl.yres/2;
+//    float cx = gl.xres/2;
+//    float cy = gl.yres/2;
     float stars[4] = {1,1,1,1};
 
     glPushMatrix();
