@@ -31,6 +31,10 @@ Base::Base() {
 	xScale = 0.0;
 	yScale = 0.0;
 
+	bulletAngle[0] = 90.0;
+	bulletAngle[1] = 90.0;
+
+
 	radius = 100;
 
 	currentHealth = 3;
@@ -125,14 +129,14 @@ void Base::drawBase(Game * g, Global gl) {
 		yScale = yScale - tempValue;
 	}
 
-
+/*
 	float distanceScale;
 	if (polar[0])
 		float distanceScale = 12/polar[0];
 	else
 		distanceScale = 12;
-
-
+*/
+	float distanceScale = 12/polar[0];
 	float Yellow[3] = {1,1,0};
 	glColor3fv(Yellow);
 	glPushMatrix();
@@ -194,14 +198,14 @@ void Base::drawBullet(Game * g, Global gl) {
 		x = ((high - e[1])/120)*gl.xres;
 		y = ((s[1] + 45 - e[2])/90)*gl.yres;
 
-		
+
 		float distanceScale;
-		if (polar[0]) 
+		if (polar[0])
 			distanceScale = 48/polar[0];
 		else
 			distanceScale = 48;
-		
-		if (type == 1) { 
+
+		if (type == 1) {
 			color[0] = 0;
 			color[1] = 1;
 			color[2] = 0;
@@ -305,27 +309,27 @@ void Base::drawBullet(Game * g, Global gl) {
 void Enemy::targeting(Game * g, Global gl) {
 
 
-	if (angle[0] < 0.0f) {
-		angle[0] += 360.0f;
+	if (bulletAngle[0] < 0.0f) {
+		bulletAngle[0] += 360.0f;
 	}
-	if (angle[0] > 360.0f) {
-		angle[0] -= 360.0f;
+	if (bulletAngle[0] > 360.0f) {
+		bulletAngle[0] -= 360.0f;
 	}
-	if (angle[1] < 0.1f) {
-		angle[1] = 0.1f;
+	if (bulletAngle[1] < 0.1f) {
+		bulletAngle[1] = 0.1f;
 	}
-	if (angle[1] > 179.9f) {
-		angle[1] = 179.9f;
+	if (bulletAngle[1] > 179.9f) {
+		bulletAngle[1] = 179.9f;
 	}
 
 	// change it based on the ships position not its angle
-	angle[0] = polar[1] + 180;
-	angle[1] = 180 - polar[2];
+	bulletAngle[0] = polar[1] + 180;
+	bulletAngle[1] = 180 - polar[2];
 
 	struct timespec bt;
 	clock_gettime(CLOCK_REALTIME, &bt);
 	double ts = timeDiff(&bulletTimer, &bt);
-	if (ts > 0.5) {
+	if (ts > 3.0) {
 		timeCopy(&bulletTimer, &bt);
 		if ((*g).nbullets < MAX_ARRAY) {
 			//shoot a bullet...
@@ -338,8 +342,16 @@ void Enemy::targeting(Game * g, Global gl) {
 			//b->vel = (*g).ship.vel + 25;
 			b->vel = (*g).ship.vel + 25;
 			//convert ship angle to radians
-			b->angle[0] = angle[0];
-			b->angle[1] = angle[1];
+			int randNum = rand() % 4;
+			if(randNum == 0){
+				b->angle[0] = bulletAngle[0];
+				b->angle[1] = bulletAngle[1];
+			}
+			else {
+
+				b->angle[0] = bulletAngle[0] + (rand() % 50 - 25);
+				b->angle[1] = bulletAngle[1] + (rand() % 50 - 25);
+			}
 			b->color[0] = 0.0f;
 			b->color[1] = 1.0f;
 			b->color[2] = 0.0f;
@@ -442,23 +454,14 @@ Bullet::Bullet()
 }
 
 
-Asteroid::Asteroid() {
-	prev = NULL;
-	next = NULL;
-	shipClass  = rand()%5;
-	maxHealth = 3;
-	currentHealth = maxHealth;
-}
 
 
 Game::Game(int xWindowSize, int yWindowSize, const Ship& ship, const Object& object) : ship(ship), object(object)
 {
 	show_credits = false;
-	ahead = NULL;
 	barr = new Bullet[MAX_ARRAY];
 	earr = new Enemy[MAX_ARRAY];
 	sarr = new Squadron[MAX_ARRAY];
-	nasteroids = 0;
 	nenemies = 0;
 	nbullets = 0;
 	nsquadrons = 0;

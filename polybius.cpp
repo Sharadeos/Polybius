@@ -1,7 +1,8 @@
 //
-//program: asteroids.cpp
-//author:  Gordon Griesel
-//date:    2014 - 2018
+//program: polybius.cpp
+//x11/opengl:  Gordon Griesel
+//Game Portion: Joey, Luis, Chris, Joseph, Adolfo
+//date:    2019
 //mod spring 2015: added constructors
 //This program is a game starting point for a 3350 project.
 //
@@ -30,8 +31,6 @@ void carrierPF(Game*g, int x);
 void score(Game *g,int i);
 void scoreBoard(Game *g, Global gl);
 //luis extern functions
-//void createAsteroid(Game *g, Global gl);
-//void createBullet(Game *g, Global gl, Object object);
 void luisRender(Game *g, Global gl);
 void difficultyScaling(Game *g, Global gl);
 bool collisionDetection(Base object1, Base object2);
@@ -139,7 +138,7 @@ class X11_wrapper {
 		void set_title() {
 			//Set the window title bar.
 			XMapWindow(dpy, win);
-			XStoreName(dpy, win, "Asteroids template");
+			XStoreName(dpy, win, "Polybius");
 		}
 		void check_resize(XEvent *e) {
 			//The ConfigureNotify is sent by the
@@ -492,7 +491,7 @@ void check_mouse(XEvent *e)
 						(*g).nbullets++;
 					}
 				}
-			}		
+			}
 		}
 		//Scroll Wheel up
 		if (e->xbutton.button==4) {
@@ -568,32 +567,6 @@ int check_keys(XEvent *e)
 	return 0;
 }
 
-void deleteAsteroid(Game *g, Asteroid *node)
-{
-	//Remove a node from doubly-linked list
-	//Must look at 4 special cases below.
-	if (node->prev == NULL) {
-		if (node->next == NULL) {
-			//only 1 item in list.
-			g->ahead = NULL;
-		} else {
-			//at beginning of list.
-			node->next->prev = NULL;
-			g->ahead = node->next;
-		}
-	} else {
-		if (node->next == NULL) {
-			//at end of list.
-			node->prev->next = NULL;
-		} else {
-			//in middle of list.
-			node->prev->next = node->next;
-			node->next->prev = node->prev;
-		}
-	}
-	delete node;
-	node = NULL;
-}
 
 void physics()
 {

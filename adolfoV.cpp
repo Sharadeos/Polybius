@@ -1,21 +1,7 @@
 //Adolfo Valencia
-//2/14/19
+//5/7/19
 //CMPS 3350
-/*
-#include <iostream>
-#include <cstdlib>
-#include <cstring>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <time.h>
-#include <math.h>
-#include <X11/Xlib.h>
-#include <GL/glx.h>
-#include "log.h"
-#include "fonts.h"
-*/
+
 #include "classes.h"
 void AdolfoValenciaPicture(int x, int y, GLuint textid) {
     Rect r;
@@ -39,7 +25,137 @@ void AdolfoValenciaPicture(int x, int y, GLuint textid) {
     glPopMatrix();
 }
 
+void drawDestroyer(float cx, float cy, float radius, float xViewScale, float yViewScale) {
+    float Red[4]= {1,0,0,1};
+    float r=(radius*3.5)/10;
+    int points = radius * 5;
+    float l=(radius*7)/10;
+	  float h=(radius*8)/10;
+    float theta = (2 * PI) / (points);
+	  float colors[4] = {1,0,0,1};
+    glColor4fv(colors);
+    glPushMatrix();
+        glBegin(GL_LINE_LOOP);
+        for(int i=0; i< points; i++) {
+            glVertex2f(cx + r*cos(i*theta)*xViewScale, cy + r*sin(i*theta)*yViewScale);
+        }
+		glEnd();
+		glPopMatrix();
+    float tri[3][2];
+    tri[0][0] = cx + l*xViewScale;
+    tri[0][1] = cy;
+    tri[1][0] = cx + r*cos(.4*PI)*xViewScale;
+    tri[1][1] = cy + r*sin(.4*PI)*yViewScale;
+    tri[2][0] = cx + r*cos(1.6*PI)*xViewScale;
+    tri[2][1] = cy + r*sin(1.6*PI)*yViewScale;
+    glColor4fv(Red);
+    glPushMatrix();
+    glBegin(GL_LINE_LOOP);
+    for(int i=0; i<3; i++) {
+        glVertex2f(tri[i][0], tri[i][1]);
+    }
+    	glEnd();
+        glPopMatrix();
+	glColor4fv(Red);
+	glPushMatrix();
+	glBegin(GL_LINE_LOOP);
+    glVertex2f(tri[0][0], tri[0][1]-h*yViewScale);
+    glVertex2f(tri[0][0], tri[0][1]+h*yViewScale);
+	glEnd();
+	glPopMatrix();
 
+    tri[0][0] = cx - l*xViewScale;
+    tri[0][1] = cy;
+    tri[1][0] = cx + r*cos(.6*PI)*xViewScale;
+    tri[1][1] = cy + r*sin(.6*PI)*yViewScale;
+    tri[2][0] = cx + r*cos(1.4*PI)*xViewScale;
+    tri[2][1] = cy + r*sin(1.4*PI)*yViewScale;
+    glColor4fv(Red);
+    glPushMatrix();
+    glBegin(GL_LINE_LOOP);
+    for(int i=0; i<3; i++) {
+        glVertex2f(tri[i][0], tri[i][1]);
+    }
+    	glEnd();
+        glPopMatrix();
+
+	glColor4fv(Red);
+	glPushMatrix();
+	glBegin(GL_LINE_LOOP);
+    glVertex2f(tri[0][0], tri[0][1]-h*yViewScale);
+    glVertex2f(tri[0][0], tri[0][1]+h*yViewScale);
+	glEnd();
+	glPopMatrix();
+ }
+
+
+
+void DrawTriangle(float cx, float cy, float xViewScale, float yViewScale) {
+	float Blue[4] = {0,1,1,0};
+	float tri[3][2];
+	tri[0][0] = cx;
+	tri[0][1] = cy;
+	tri[1][0] = cx - 15;
+	tri[1][1] = cy - 15;
+	tri[2][0] = cx + 15;
+	tri[2][1] = cy - 15;
+	glColor4fv(Blue);
+	glPushMatrix();
+	glBegin(GL_TRIANGLE_STRIP);
+	for(int i=0; i<3; i++) {
+		glVertex2f(tri[i][0], tri[i][1]);
+	}
+	glEnd();
+	glPopMatrix();
+}
+
+void DrawRectangle(float cx, float cy, float x, float y, float xViewScale, float yViewScale) {
+	float orange[4] = {1,0.5,0,1};
+	float rec[4][2];
+	rec[0][0] = cx - x*xViewScale;
+	rec[0][1] = cy - y*yViewScale;
+	rec[1][0] = cx - x*xViewScale;
+	rec[1][1] = cy + y*yViewScale;
+	rec[2][0] = cx + x*xViewScale;
+	rec[2][1] = cy + y*yViewScale;
+	rec[3][0] = cx + x*xViewScale;
+	rec[3][1] = cy - y*yViewScale;
+	glColor4fv(orange);
+	glPushMatrix();
+	glBegin(GL_LINE_LOOP);
+	for(int i=0; i<4; i++) {
+	glVertex2f(rec[i][0], rec[i][1]);
+	}
+	glEnd();
+	glPopMatrix();
+
+	}
+void DrawCircle(float cx, float cy, float r, int num_segments, float xViewScale, float yViewScale) {
+	float theta = (2 * 3.1415926) / float(num_segments);
+	float s = sinf(theta);
+	float c = cosf(theta);
+	float t;
+    	float x = r;
+    	float y = 0;
+	float colors[4] = {1,0.5,0,1};
+	glColor4fv(colors);
+    	glPushMatrix();
+	glBegin(GL_LINE_LOOP);
+	for(int i=0; i< num_segments; i++) {
+	glVertex2f(cx + r*cos(i*theta)*xViewScale, cy + r*sin(i*theta)*yViewScale);
+	}
+    	glEnd();
+	glPopMatrix();
+	}
+void DrawCarrier(float cx, float cy, float r, float xViewScale, float yViewScale ) {
+	DrawCircle(cx, cy, r, 360, xViewScale, yViewScale);
+	DrawRectangle(cx+(.75*r*xViewScale), cy, r/2, r*7.5/100, xViewScale, yViewScale);
+	DrawRectangle(cx-(.75*r*xViewScale), cy, r/2, r*7.5/100, xViewScale, yViewScale);
+  DrawRectangle(cx+(.90*r*xViewScale), cy+(.10*r*yViewScale), r/4, r*7.5/100, xViewScale, yViewScale);
+  DrawRectangle(cx-(.90*r*xViewScale), cy+(.10*r*yViewScale), r/4, r*7.5/100, xViewScale, yViewScale);
+	}
+
+/*
 void DrawTriangle(float cx, float cy, Game *g) {
     float Blue[4] = {0,1,1,0};
     float angle = atan2((*g).object.projection[1]-cy, (*g).object.projection[0]-cx);
@@ -61,9 +177,7 @@ void DrawTriangle(float cx, float cy, Game *g) {
 glEnd();
 glPopMatrix();
 }
-/*void AdolfoRender(Game *g, Global gl) {
-	DrawEnemy();
-}*/
+*/
 void DrawEnemy(Game *g, Global gl) {
 for (int i=0; i<(*g).nenemies; i++) {
     Enemy *e = & (*g).earr[i];
@@ -118,24 +232,34 @@ for (int i=0; i<(*g).nenemies; i++) {
 
   float distanceScale = 12/e->polar[0];
 
+  float xViewScale = e->xScale*distanceScale;
+  float yViewScale = e->yScale*distanceScale;
 
-
-  float Yellow[3] = {1,1,0};
-  glColor3fv(Yellow);
+if(e->enemyType == 0) {
+  float Purple[4] = {1,0,1,0};
+  glColor3fv(Purple);
   glPushMatrix();
-  glBegin(GL_TRIANGLE_STRIP);
+  glBegin(GL_LINE_LOOP);
 
   //Override to different Vertices for different classes?
-  glVertex2i(x-(e->radius*e->xScale*distanceScale),y-(e->radius*e->yScale*distanceScale));
-  glVertex2i(x-(e->radius*e->xScale*distanceScale),y+(e->radius*e->yScale*distanceScale));
+  glVertex2i(x-(e->radius*xViewScale),y-(e->radius*yViewScale));
+  glVertex2i(x-(e->radius*xViewScale),y+(e->radius*yViewScale));
   glVertex2i(x,y);
-  glVertex2i(x+(e->radius*e->xScale*distanceScale),y-(e->radius*e->yScale*distanceScale));
-  glVertex2i(x+(e->radius*e->xScale*distanceScale),y+(e->radius*e->yScale*distanceScale));
-
-
+  glVertex2i(x+(e->radius*xViewScale),y-(e->radius*yViewScale));
+  glVertex2i(x+(e->radius*xViewScale),y+(e->radius*yViewScale));
   glVertex2i(x,y);
   glEnd();
   glPopMatrix();
+}
+if(e->enemyType == 1) {
+  DrawCarrier(x, y, e->radius*16, xViewScale, yViewScale);
+
+}
+
+if(e->enemyType == 2) {
+
+  drawDestroyer(x, y, e->radius*2, xViewScale, yViewScale);
+}
 
   float cx = gl.xres/2;
   //float cy = gl.yres/2;

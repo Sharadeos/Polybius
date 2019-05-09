@@ -81,13 +81,12 @@ class Global {
   	  //char keys[65536];
 	  int keyhits[KEYS];
       // declare GLuint textid for each png
-
 	  GLuint bigfootTexture;
 	  GLuint luisTexture;
 	  GLuint AdolfoTexture;
 	  GLuint chrisTexture;
-      GLuint josephTexture;
-      GLuint blackholeTexture;
+    GLuint josephTexture;
+    GLuint blackholeTexture;
 	  int mousecode;
 };
 
@@ -127,6 +126,8 @@ public:
 	int type;
 	float xScale;
 	float yScale;
+
+	float bulletAngle[2];
 
 	void updatePolar(Vec);
 	void drawBase(Game *, Global);
@@ -188,29 +189,6 @@ public:
 };
 
 
-class Asteroid {
-public:
-	Vec dir;
-	Vec pos;
-	Vec vel;
-	float angle;
-	int maxHealth;
-	int currentHealth;
-	int maxBullets;
-	int powerLevel;
-
-	int nverts;
-	Flt radius;
-	Vec vert[8];
-	float rotate;
-	float color[3];
-	struct Asteroid *prev;
-	struct Asteroid *next;
-  int shipClass;
-  Asteroid();
-
-};
-
 class Game {
 
 private:
@@ -218,36 +196,29 @@ private:
 
 public:
 	Ship ship;
-	Asteroid *ahead;
 	Bullet *barr;
 	Enemy *earr;
 	Squadron *sarr;
-	int nasteroids;
 	int nenemies;
 	int nbullets;
 	int nsquadrons;
 	Object object;
 
 
-	struct timespec difficultyTimer;
-
 	bool mouseThrustOn;
 	bool show_credits;
 	float mtext;
-
-  	float difficulty;
+  float difficulty;
 	int level;
-
-
-
 	int score;
-
-
-	Game(int xWindowSize, int yWindowSize, const Ship & ship, const Object & object);
 
 	int num_stars;
 	float stars[32000][3];
 	float debris[500][3];
+
+
+	struct timespec difficultyTimer;
+	Game(int xWindowSize, int yWindowSize, const Ship & ship, const Object & object);
 
 	static Game* getInstance();
 	~Game() {
