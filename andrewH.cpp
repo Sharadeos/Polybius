@@ -4,8 +4,6 @@
 //Last Modified: 5-7-2019
 //
 //#include <GL/glx.h>
-//#include "fonts.h"
-//#include <math.h>
 #include "classes.h"
 static float spin = 20;
 void andrewH(int x, int y, GLuint textid, float move)
@@ -45,7 +43,8 @@ void andrewH(int x, int y, GLuint textid, float move)
     if (sin(rad) > .98 || sin(rad) < -.98)
         spin *= 1.01;
 }
-void credit(Game *g, Global gl) {
+void credit(Game *g, Global gl) 
+{
     if (gl.keyhits[99]) {
         (*g).show_credits = !(*g).show_credits;
         usleep(200000);
@@ -175,11 +174,11 @@ void joeyPhysics(Game *g, Global gl)
     // w
     if (gl.keyhits[19]) {
         (*g).ship.angle[1] -= PITCH;
-
         if ((*g).ship.angle[1] < 0.0f) {
             (*g).ship.angle[1] = 0.0f;
         }
     }
+
     // s
     if (gl.keyhits[15]) {
         (*g).ship.angle[1] += PITCH;
@@ -187,35 +186,20 @@ void joeyPhysics(Game *g, Global gl)
             (*g).ship.angle[1] = 180.0f;
         }
     }
-    // a
+    
+	// a
     if (gl.keyhits[97]) {
         (*g).ship.angle[0] += TURN;
         if ((*g).ship.angle[0] >= 360.0f)
             (*g).ship.angle[0] -= 360.0f;
     }
-    // d
+    
+	// d
     if (gl.keyhits[0]) {
         (*g).ship.angle[0] -= TURN;
         if ((*g).ship.angle[0] < 0.0f)
             (*g).ship.angle[0] += 360.0f;
-
     }
-    //left
-    if (gl.keyhits[61]) {
-#ifdef USE_OPENAL_SOUND
-        setActionFlag();
-#endif
-    }
-
-    if (gl.keyhits[62]) {
-    }
-    //right
-    if (gl.keyhits[63]) {
-
-    }
-    if (gl.keyhits[64]) {
-    }
-
     // spacebar
     if (gl.keyhits[32]) {
         if ((*g).ship.weaponType == 1) {
@@ -232,15 +216,15 @@ void joeyPhysics(Game *g, Global gl)
                     b->pos[0] = (*g).ship.pos[0];
                     b->pos[1] = (*g).ship.pos[1];
                     b->pos[2] = (*g).ship.pos[2];
-#ifdef USE_OPENAL_SOUND
+					#ifdef USE_OPENAL_SOUND
                     weapon1();
-#endif
+					#endif
                     b->vel = (*g).ship.vel + 25;
                     b->angle[0] = (*g).ship.angle[0];
                     b->angle[1] = (*g).ship.angle[1];
                     b->type = 1;
                     b->radius = 15;
-										b->enemyBullet = false;
+					b->enemyBullet = false;
                     (*g).nbullets++;
                 }
             }
@@ -264,10 +248,10 @@ void joeyPhysics(Game *g, Global gl)
                     xo = 8*cos(a1)*sin(a3);
                     yo = 8*sin(a1)*sin(a3);
                     //shoot a bullet...
-#ifdef USE_OPENAL_SOUND
-		    weapon2();
-#endif
-		    Bullet *b = &(*g).barr[(*g).nbullets];
+					#ifdef USE_OPENAL_SOUND
+				    weapon2();
+					#endif
+				    Bullet *b = &(*g).barr[(*g).nbullets];
                     timeCopy(&b->time, &bt);
                     b->pos[0] = (*g).ship.pos[0] + xo;
                     b->pos[1] = (*g).ship.pos[1] + yo;
@@ -277,7 +261,7 @@ void joeyPhysics(Game *g, Global gl)
                     b->angle[1] = (*g).ship.angle[1];
                     b->type = 1;
                     b->radius = 15;
-										b->enemyBullet = false;
+					b->enemyBullet = false;
                     (*g).nbullets++;
                     //shoot a bullet...
                     xo = 8*cos(a2)*sin(a3);
@@ -287,14 +271,12 @@ void joeyPhysics(Game *g, Global gl)
                     c->pos[0] = (*g).ship.pos[0] + xo;
                     c->pos[1] = (*g).ship.pos[1] + yo;
                     c->pos[2] = (*g).ship.pos[2];
-                    //b->vel = (*g).ship.vel + 25;
                     c->vel = (*g).ship.vel + 25;
-                    //convert ship angle to radians
                     c->angle[0] = (*g).ship.angle[0];
                     c->angle[1] = (*g).ship.angle[1];
                     c->type = 1;
                     c->radius = 15;
-										c->enemyBullet = false;
+					c->enemyBullet = false;
                     (*g).nbullets++;
                 }
             }
@@ -310,10 +292,10 @@ void joeyPhysics(Game *g, Global gl)
                     //shoot a bullet...
                     Bullet *b = &(*g).barr[(*g).nbullets];
                     timeCopy(&b->time, &bt);
-#ifdef USE_OPENAL_SOUND
-		    missile();
-#endif
-		    b->pos[0] = (*g).ship.pos[0];
+					#ifdef USE_OPENAL_SOUND
+		    		missile();
+					#endif
+		    		b->pos[0] = (*g).ship.pos[0];
                     b->pos[1] = (*g).ship.pos[1];
                     b->pos[2] = (*g).ship.pos[2];
 
@@ -322,7 +304,7 @@ void joeyPhysics(Game *g, Global gl)
                     b->angle[1] = (*g).ship.angle[1];
                     b->type = 3;
                     b->radius = 15;
-										b->enemyBullet = false;
+					b->enemyBullet = false;
                     (*g).nbullets++;
                 }
             }
@@ -333,8 +315,6 @@ void joeyPhysics(Game *g, Global gl)
 void joeyStars(Game *g, Global gl)
 {
     //stars
-//    float cx = gl.xres/2;
-//    float cy = gl.yres/2;
     float stars[4] = {1,1,1,1};
 
     glPushMatrix();
@@ -342,13 +322,6 @@ void joeyStars(Game *g, Global gl)
     for (int i = 0; i < (*g).num_stars; i++) {
         stars[3] = (*g).stars[i][2];
         glColor4fv(stars);
-
-        //float s = (*g).ship.angle[2];
-        //s *= PI/180;
-        //s = sin(s);
-        //float c = (*g).ship.angle[2];
-        //c *= PI/180;
-        //c = cos(c);
         float x = (*g).ship.angle[0];
         float y = (*g).ship.angle[1];
         // converts to a x and y coordinate
@@ -364,14 +337,6 @@ void joeyStars(Game *g, Global gl)
         if (y <= 0)
             y += 180.0f;
         y = (y/90)*gl.yres;
-        /*
-           x -= cx;
-           y -= cy;
-           float xnew = x * c - y * s;
-           float ynew = x * s + y * c;
-           x = xnew + cx;
-           y = ynew + cy;
-         */
         glVertex2f(x,y);
     }
     glEnd();
@@ -383,35 +348,6 @@ void joeyRender(Game *g, Global gl)
     //stars
     float cx = gl.xres/2;
     float cy = gl.yres/2;
-//    float stars[4] = {1,1,1,1};
-/*
-    glPushMatrix();
-    glBegin(GL_POINTS);
-    for (int i = 0; i < (*g).num_stars; i++) {
-
-        stars[3] = (*g).stars[i][2];
-        glColor4fv(stars);
-
-        float x = (*g).ship.angle[0];
-        float y = (*g).ship.angle[1];
-        // converts to a x and y coordinate
-        x = (*g).stars[i][0]+x;
-        if (x >= 360.0f)
-            x -= 360.0f;
-        if (x <= 0)
-            x += 360.0f;
-        x = (x/120)*gl.xres;
- //       y = (*g).stars[i][1]+y;
-        if (y >= 180.0f)
-            y -= 180.0f;
-        if (y <= 0)
-            y += 180.0f;
-        y = (y/90)*gl.yres;
-        glVertex2f(x,y);
-    }
-    glEnd();
-    glPopMatrix();
-*/
     // setup variables for cockpit
     float rad[4];           // radius
     rad[0] = gl.yres*.1;   // inner oct
@@ -665,8 +601,6 @@ void joeyRender(Game *g, Global gl)
         glPopMatrix();
     }
 
-
-    //  (*g).object.polar[1]
     //cross beams
     float tribase = 0.02;//measured in radians
     for (int i = 0; i < 8; i++) {
