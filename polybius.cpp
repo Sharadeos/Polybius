@@ -41,6 +41,7 @@ void enemyTargeting(Game *g, Global gl);
 void playTitleMusic();
 void pauseTitleMusic();
 void playMusic();
+void onMenuButton();
 void weapon1();
 void weapon2();
 unsigned char *buildAlphaData(Image *img);
@@ -766,6 +767,11 @@ void render()
 			mainMenuExit(.5*gl.xres, .2*gl.yres, gl.exitTexture);
 			break;
 		case GameState::GS_Play:
+			if(((*g).playmusic == true) && (*g).playmusic2 == false) {
+			    playMusic();
+			    (*g).playmusic2 = true;
+			    pauseTitleMusic();
+			}
 			(*g).object.drawBase(g, gl);
 			for (int i=0; i < (*g).nbullets; i++) {
 				//Bullet *b = &(*g).barr[i];
