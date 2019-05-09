@@ -55,7 +55,8 @@ void credit(Game *g, Global gl) {
 #ifdef USE_OPENAL_SOUND
 extern void setActionFlag();
 extern void checkAction(timespec *t);
-extern void pewPew();
+extern void weapon1();
+extern void weapon2();
 extern void ALPlayerUpdate(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3);
 extern void ALPlayerVel(ALenum param, ALfloat v1);
 extern void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3);
@@ -231,7 +232,7 @@ void joeyPhysics(Game *g, Global gl)
                     b->pos[1] = (*g).ship.pos[1];
                     b->pos[2] = (*g).ship.pos[2];
 #ifdef USE_OPENAL_SOUND
-                    pewPew();
+                    weapon1();
 #endif
                     b->vel = (*g).ship.vel + 25;
                     b->angle[0] = (*g).ship.angle[0];
@@ -308,9 +309,7 @@ void joeyPhysics(Game *g, Global gl)
                     b->pos[0] = (*g).ship.pos[0];
                     b->pos[1] = (*g).ship.pos[1];
                     b->pos[2] = (*g).ship.pos[2];
-#ifdef USE_OPENAL_SOUND
-                    pewPew();
-#endif
+
                     b->vel = 25;
                     b->angle[0] = (*g).ship.angle[0];
                     b->angle[1] = (*g).ship.angle[1];
@@ -323,6 +322,55 @@ void joeyPhysics(Game *g, Global gl)
         }
     }
 }
+
+void joeyStars(Game *g, Global gl)
+{
+    //stars
+    float cx = gl.xres/2;
+    float cy = gl.yres/2;
+    float stars[4] = {1,1,1,1};
+
+    glPushMatrix();
+    glBegin(GL_POINTS);
+    for (int i = 0; i < (*g).num_stars; i++) {
+        stars[3] = (*g).stars[i][2];
+        glColor4fv(stars);
+
+        //float s = (*g).ship.angle[2];
+        //s *= PI/180;
+        //s = sin(s);
+        //float c = (*g).ship.angle[2];
+        //c *= PI/180;
+        //c = cos(c);
+        float x = (*g).ship.angle[0];
+        float y = (*g).ship.angle[1];
+        // converts to a x and y coordinate
+        x = (*g).stars[i][0]+x;
+        if (x >= 360.0f)
+            x -= 360.0f;
+        if (x <= 0)
+            x += 360.0f;
+        x = (x/120)*gl.xres;
+        y = (*g).stars[i][1]+y;
+        if (y >= 180.0f)
+            y -= 180.0f;
+        if (y <= 0)
+            y += 180.0f;
+        y = (y/90)*gl.yres;
+        /*
+           x -= cx;
+           y -= cy;
+           float xnew = x * c - y * s;
+           float ynew = x * s + y * c;
+           x = xnew + cx;
+           y = ynew + cy;
+         */
+        glVertex2f(x,y);
+    }
+    glEnd();
+    glPopMatrix();
+}
+
 void joeyRender(Game *g, Global gl)
 {
     //stars

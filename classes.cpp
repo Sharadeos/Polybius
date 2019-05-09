@@ -510,6 +510,12 @@ Bullet::Bullet()
 
 Game::Game(int xWindowSize, int yWindowSize, const Ship& ship, const Object& object) : ship(ship), object(object)
 {
+	gameState = GameState::GS_Menu;
+ 	menuitem = 0;
+  playw=0;
+  controlsw=0;
+  creditsw=0;
+  exitw=0;
 	show_credits = false;
 	barr = new Bullet[MAX_ARRAY];
 	earr = new Enemy[MAX_ARRAY];

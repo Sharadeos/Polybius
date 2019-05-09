@@ -38,11 +38,22 @@ void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad, int enemyType);
 void enemyTargeting(Game *g, Global gl);
 //chris extern functions
 void ALExplodeUpdate(ALenum param, float x, float y/*, ALfloat *z*/);
+void playTitleMusic();
+void pauseTitleMusic();
 void playMusic();
-void playEngine();
-void pewPew();
+void weapon1();
+void weapon2();
+unsigned char *buildAlphaData(Image *img);
+void mainMenuTitle(int x, int y, GLuint textid);
+void mainMenuPlay(int x, int y, GLuint textid);
+void mainMenuControls(int x, int y, GLuint textid);
+void mainMenuCredits(int x, int y, GLuint textid);
+void mainMenuExit(int x, int y, GLuint textid);
+void stateKeys(Game *g, Global gl);
+void checkMenuItem(Game *g, Global gl);
 //joey extern functions
 void joeyPhysics(Game *g, Global gl);
+void joeyStars(Game *g, Global gl);
 void joeyRender(Game *g, Global gl);
 void credit(Game *g, Global gl);
 
@@ -52,14 +63,25 @@ void AdolfoRender(Game *g, Global gl);
 
 // add png files name and create array based on # of pngs
 //Image img("./images/bigfoot.png");
-Image img[6] = {
-	"./images/bigfoot.png",
-	"./images/luis_3350.png",
-	"./images/IMG_Adolfo_Valencia.png",
-	"./images/chris_ramirez.png",
-	"./images/josephG.png",
-	"./images/blackhole.jpg"//macros
+Image img[15] = {
+"./images/bigfoot.png",
+"./images/luis_3350.png",
+"./images/IMG_Adolfo_Valencia.png",
+"./images/chris_ramirez.png",
+"./images/josephG.png",
+"./images/blackhole.jpg",
+"./images/TITLE.png",
+"./images/PLAY.png",
+"./images/CONTROLS.png",
+"./images/CREDITS.png",
+"./images/EXIT2.png",
+"./images/PLAYw.png",
+"./images/CONTROLSw.png",
+"./images/CREDITSw.png",
+"./images/EXIT2w.png"
+
 };
+//macros
 #define rnd() (((Flt)rand())/(Flt)RAND_MAX)
 #define random(a) (rand()%a)
 #define VecZero(v) (v)[0]=0.0,(v)[1]=0.0,(v)[2]=0.0
@@ -233,8 +255,9 @@ int main()
 
 	// MOVE
 #ifdef USE_OPENAL_SOUND
-	playMusic();
-	playEngine();
+	//playMusic();
+	//playEngine();
+	playTitleMusic();
 #endif
 
 	for (int i = 0; i < (*g).num_stars; i++) {
@@ -262,6 +285,8 @@ int main()
 		render();
 		//functions before render will not render on the setup_screen_res
 		credit(g,gl);
+		stateKeys(g, gl);
+		checkMenuItem(g, gl);
 		if (!(*g).show_credits) {
 			physicsCountdown += timeSpan;
 			while (physicsCountdown >= physicsRate) {
@@ -355,15 +380,108 @@ void init_opengl(void)
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
 			GL_RGB, GL_UNSIGNED_BYTE, img[4].data);
 
-	glGenTextures(1, &gl.blackholeTexture);
-	w = img[5].width;
-	h = img[5].width;
-	glBindTexture(GL_TEXTURE_2D, gl.blackholeTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-			GL_RGB, GL_UNSIGNED_BYTE, img[5].data);
 
+
+//Menu Textures
+  glGenTextures(1, &gl.titleTexture);
+  w = img[6].width;
+  h = img[6].height;
+  glBindTexture(GL_TEXTURE_2D, gl.titleTexture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  unsigned char *titleData = buildAlphaData(&img[6]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+          GL_RGBA, GL_UNSIGNED_BYTE, titleData);
+  free(titleData);
+
+  glGenTextures(1, &gl.playTexture);
+  w = img[7].width;
+  h = img[7].height;
+  glBindTexture(GL_TEXTURE_2D, gl.playTexture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  unsigned char *playData = buildAlphaData(&img[7]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+          GL_RGBA, GL_UNSIGNED_BYTE, playData);
+  free(playData);
+
+  glGenTextures(1, &gl.controlsTexture);
+  w = img[8].width;
+  h = img[8].height;
+  glBindTexture(GL_TEXTURE_2D, gl.controlsTexture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  unsigned char *controlsData = buildAlphaData(&img[8]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+          GL_RGBA, GL_UNSIGNED_BYTE, playData);
+  free(controlsData);
+
+  glGenTextures(1, &gl.creditsTexture);
+  w = img[9].width;
+  h = img[9].height;
+  glBindTexture(GL_TEXTURE_2D, gl.creditsTexture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  unsigned char *creditsData = buildAlphaData(&img[9]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+          GL_RGBA, GL_UNSIGNED_BYTE, creditsData);
+  free(creditsData);
+
+  glGenTextures(1, &gl.exitTexture);
+  w = img[10].width;
+  h = img[10].height;
+  glBindTexture(GL_TEXTURE_2D, gl.exitTexture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  unsigned char *exitData = buildAlphaData(&img[10]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+          GL_RGBA, GL_UNSIGNED_BYTE, exitData);
+  free(exitData);
+
+  //Menu Items Highlighted
+  glGenTextures(1, &gl.playwTexture);
+  w = img[11].width;
+  h = img[11].height;
+  glBindTexture(GL_TEXTURE_2D, gl.playwTexture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  unsigned char *playwData = buildAlphaData(&img[11]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+          GL_RGBA, GL_UNSIGNED_BYTE, playwData);
+  free(playwData);
+
+  glGenTextures(1, &gl.controlswTexture);
+  w = img[12].width;
+  h = img[12].height;
+  glBindTexture(GL_TEXTURE_2D, gl.controlswTexture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  unsigned char *controlswData = buildAlphaData(&img[12]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+          GL_RGBA, GL_UNSIGNED_BYTE, controlswData);
+  free(controlswData);
+
+  glGenTextures(1, &gl.creditswTexture);
+  w = img[13].width;
+  h = img[13].height;
+  glBindTexture(GL_TEXTURE_2D, gl.creditswTexture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  unsigned char *creditswData = buildAlphaData(&img[13]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+          GL_RGBA, GL_UNSIGNED_BYTE, creditswData);
+  free(creditswData);
+
+  glGenTextures(1, &gl.exitwTexture);
+  w = img[14].width;
+  h = img[14].height;
+  glBindTexture(GL_TEXTURE_2D, gl.exitwTexture);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  unsigned char *exitwData = buildAlphaData(&img[14]);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+          GL_RGBA, GL_UNSIGNED_BYTE, exitwData);
+  free(exitwData);
 
 
 }
@@ -410,7 +528,7 @@ void check_mouse(XEvent *e)
 						b->pos[2] = (*g).ship.pos[2];
 						//b->vel = (*g).ship.vel + 25;
 						#ifdef USE_OPENAL_SOUND
-						pewPew();
+						weapon1();
 						#endif
 						b->vel = (*g).ship.vel + 25;
 						//convert ship angle to radians
@@ -446,6 +564,9 @@ void check_mouse(XEvent *e)
 						b->pos[0] = (*g).ship.pos[0] + xo;
 						b->pos[1] = (*g).ship.pos[1] + yo;
 						b->pos[2] = (*g).ship.pos[2];
+						#ifdef USE_OPENAL_SOUND
+						weapon2();
+						#endif
 						b->vel = (*g).ship.vel + 25;
 						b->angle[0] = (*g).ship.angle[0];
 						b->angle[1] = (*g).ship.angle[1];
@@ -484,9 +605,7 @@ void check_mouse(XEvent *e)
 						b->pos[1] = (*g).ship.pos[1];
 						b->pos[2] = (*g).ship.pos[2];
 						//b->vel = (*g).ship.vel + 25;
-						#ifdef USE_OPENAL_SOUND
-						pewPew();
-						#endif
+
 						b->vel = (*g).ship.vel + 25;
 						b->angle[0] = (*g).ship.angle[0];
 						b->angle[1] = (*g).ship.angle[1];
@@ -589,32 +708,59 @@ void physics()
 void render()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-	if (!(*g).show_credits) {
-
-		//(*g).object.drawBase(g, gl);
-
-
-		for (int i=0; i< (*g).nbullets; i++) {
-			//Bullet *b = & (*g).barr[i];
-
-			(*g).barr[i].drawBullet(g, gl);
-
+	joeyStars(g, gl);
+	switch ((*g).gameState) {
+			case GameState::GS_Menu:
+				mainMenuTitle(.5*gl.xres, .8*gl.yres, gl.titleTexture);
+				if((*g).playw) {
+					mainMenuPlay(.5*gl.xres, .5*gl.yres, gl.playwTexture);
+				}
+				mainMenuPlay(.5*gl.xres, .5*gl.yres, gl.playTexture);
+				if((*g).controlsw) {
+					mainMenuControls(.5*gl.xres, .4*gl.yres, gl.controlswTexture);
+				}
+				mainMenuControls(.5*gl.xres, .4*gl.yres, gl.controlsTexture);
+				if((*g).creditsw) {
+					mainMenuCredits(.5*gl.xres, .3*gl.yres, gl.creditswTexture);
+				}
+				mainMenuCredits(.5*gl.xres, .3*gl.yres, gl.creditsTexture);
+				if((*g).exitw) {
+					mainMenuExit(.5*gl.xres, .2*gl.yres, gl.exitwTexture);
+				}
+				mainMenuExit(.5*gl.xres, .2*gl.yres, gl.exitTexture);
+				break;
+			case GameState::GS_Play:
+			//	(*g).object.drawBase(g, gl);
+				for (int i=0; i < (*g).nbullets; i++) {
+					//Bullet *b = &(*g).barr[i];
+					(*g).barr[i].drawBullet(g, gl);
+				}
+				AdolfoRender(g, gl);
+				joeyRender(g, gl);
+				luisRender(g, gl);
+				scoreBoard(g, gl);
+				break;
+			case GameState::GS_Controls:
+				//
+				break;
+			case GameState::GS_Credits:
+				(*g).mtext -= .02;
+		    	andrewH(.5*gl.xres, .9*gl.yres, gl.bigfootTexture,(*g).mtext);
+	  	  		creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
+		    	AdolfoValenciaPicture(.5*gl.xres, .5*gl.yres, gl.AdolfoTexture);
+	    		showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
+				josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
+				break;
+			case GameState::GS_Exit:
+				exit(EXIT_SUCCESS);
+				break;
 		}
-
-		AdolfoRender(g, gl);
-		joeyRender(g, gl);
-		luisRender(g, gl);
-		scoreBoard(g,gl);
-	}
-
-
-	if ((*g).show_credits) {
-		(*g).mtext -= .02;
-		andrewH(.5*gl.xres, .9*gl.yres, gl.bigfootTexture,(*g).mtext);
-		creditsLuis(.5*gl.xres, .7*gl.yres, gl.luisTexture);
-		AdolfoValenciaPicture(.5*gl.xres, .5*gl.yres, gl.AdolfoTexture);
-		showChrisRamirez(.5*gl.xres, .3*gl.yres, gl.chrisTexture);
-		josephG(.5*gl.xres, .1*gl.yres, gl.josephTexture);
-		// function calls for everyone with parameters
-	}
+		/*if((*g).show_credits) {
+	        // function calls for everyone with parameters
+			mainMenuTitle(.5*gl.xres, .8*gl.yres, gl.titleTexture);
+			mainMenuPlay(.5*gl.xres, .6*gl.yres, gl.playTexture);
+			mainMenuControls(.5*gl.xres, .5*gl.yres, gl.controlsTexture);
+			mainMenuCredits(.5*gl.xres, .4*gl.yres, gl.creditsTexture);
+			mainMenuExit(.5*gl.xres, .3*gl.yres, gl.exitTexture);
+		}*/
 }

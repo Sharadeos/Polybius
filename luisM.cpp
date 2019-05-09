@@ -66,8 +66,7 @@ int odd_random_number() {
     return (1 + even_random_number()) % 8;
 }
 
-extern void playEngine();
-extern void pauseEngine();
+
 extern void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3);
 
 void difficultyScaling(Game *g, Global gl)
@@ -98,7 +97,7 @@ void difficultyScaling(Game *g, Global gl)
 				location[2] = rand() % 500 - 250;
 				spawnEnemy(g, location, false, rand() % 3);
 				#ifdef USE_OPENAL_SOUND
-					playEngine();
+					//playEngine();
 				#endif
 				clock_gettime(CLOCK_REALTIME, &(*g).difficultyTimer);
 				}
@@ -139,7 +138,7 @@ void difficultyScaling(Game *g, Global gl)
 					 	score(g,i);
 						continue;
 						#ifdef USE_OPENAL_SOUND
-							pauseEngine();
+							//pauseEngine();
 						#endif
 					}
 				}

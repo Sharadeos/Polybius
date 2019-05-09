@@ -73,6 +73,14 @@ extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
 class Game;
 
+enum GameState {
+    GS_Menu,
+    GS_Play,
+    GS_Controls,
+    GS_Credits,
+    GS_Exit
+};
+
 
 class Global {
   public:
@@ -86,7 +94,19 @@ class Global {
 	  GLuint AdolfoTexture;
 	  GLuint chrisTexture;
     GLuint josephTexture;
-    GLuint blackholeTexture;
+		GLuint titleTexture;
+    GLuint playTexture;
+    GLuint controlsTexture;
+    GLuint creditsTexture;
+    GLuint exitTexture;
+		GLuint playwTexture;
+		GLuint controlswTexture;
+		GLuint creditswTexture;
+		GLuint exitwTexture;
+		/*int playw;
+		int controlsw;
+		int creditsw;
+		int exitw;*/
 	  int mousecode;
 };
 
@@ -152,7 +172,7 @@ public:
 	bool lockedOn;
 	int weaponType;
 	int missileXY[16][4];
-	int numLockedOn;	
+	int numLockedOn;
 	Ship(int x, int y, int z);
 
 };
@@ -216,6 +236,13 @@ public:
 	int num_stars;
 	float stars[32000][3];
 	float debris[500][3];
+	GameState gameState;
+	int menuarr[4];
+	int menuitem;
+        int playw;
+        int controlsw;
+        int creditsw;
+        int exitw;
 
 
 	struct timespec difficultyTimer;
