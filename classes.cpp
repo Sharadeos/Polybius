@@ -191,8 +191,11 @@ void Base::drawBullet(Game * g, Global gl) {
 
  	   	x = ((high - e[1])/120)*gl.xres;
  	   	y = ((s[1] + 45 - e[2])/90)*gl.yres;
-
-   	 	float distanceScale = 48/polar[0];
+		float distanceScale;
+		if(polar[0])
+   	           distanceScale = 48/polar[0];
+		else
+		   distanceScale = 48;
    	 	//glColor3fv(color);
    	 	//float Green[3] = {0,1,0};
  	   	glColor3fv(color);
@@ -236,8 +239,12 @@ void Base::drawBullet(Game * g, Global gl) {
  	   	x = ((high - e[1])/120)*gl.xres;
  	   	y = ((s[1] + 45 - e[2])/90)*gl.yres;
 
-   	 	float distanceScale = 48/polar[0];
-   	 	//glColor3fv(color);
+   	 	float distanceScale 
+		if(polar[0])
+		   distanceScale= 48/polar[0];
+		else
+		   distanceScale=48;
+		//glColor3fv(color);
    	 	//float Green[3] = {0,1,0};
 
 		float capsule[3] = {0,1,0};
