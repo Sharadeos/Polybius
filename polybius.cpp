@@ -591,7 +591,7 @@ void render()
 	glClear(GL_COLOR_BUFFER_BIT);
 	if (!(*g).show_credits) {
 
-		(*g).object.drawBase(g, gl);
+		//(*g).object.drawBase(g, gl);
 
 
 		for (int i=0; i< (*g).nbullets; i++) {

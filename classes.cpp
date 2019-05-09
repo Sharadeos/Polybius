@@ -169,7 +169,7 @@ void Base::drawBase(Game * g, Global gl) {
 }
 void Base::drawBullet(Game * g, Global gl) {
 
-	if (type != 3) {
+	if (type == 1 || type == 2) {
 		float e[3];
 		e[0] = 0;
 		e[1] = polar[1];
@@ -304,6 +304,52 @@ void Base::drawBullet(Game * g, Global gl) {
 		glPopMatrix();
 
 	}
+	if (type == 4) {
+		float e[3];
+		e[0] = 0;
+		e[1] = polar[1];
+		e[2] = polar[2];
+
+		if (e[1] > 360) {
+			e[1] -= 360;
+		}
+		if (e[1] < 0) {
+			e[1] += 360;
+		}
+
+		float s[2];
+		s[0] = (*g).ship.angle[0];
+		s[1] = (*g).ship.angle[1];
+		float low, high;
+		low = s[0] - 60;
+		high = s[0] + 60;
+		high -= low;
+		e[1] -= low;
+		if (e[1] > 360) {
+			e[1] = e[1] - 360;
+		}
+		float x, y;
+
+		x = ((high - e[1])/120)*gl.xres;
+		y = ((s[1] + 45 - e[2])/90)*gl.yres;
+
+		float distanceScale = 48/polar[0];
+		//glColor3fv(color);
+		//float Green[3] = {0,1,0};
+
+		float explode[4] = {1,0,0,.4};
+        glEnable(GL_BLEND);
+        glBlendFunc( GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+		glColor4fv(explode);
+		glPushMatrix();
+        int PTS = 48;
+		glBegin(GL_POLYGON);
+		for (int i = 0; i < PTS; i++) {
+			glVertex2i(x + cos((i*2*PI)/PTS)*radius*distanceScale, y + sin((i*2*PI)/PTS)*radius*distanceScale);
+		}
+		glEnd();
+		glPopMatrix();
+	}
 }
 
 void Enemy::targeting(Game * g, Global gl) {
@@ -419,11 +465,17 @@ Ship::Ship(int x, int y, int z) {
 	pos[0] = x;
 	pos[1] = y;
 	pos[2] = z;
-
+	vel = 0;
 	color[0] = color[1] = color[2] = 1.0;
 	color[3] = .1;
 	lockedOn = false;
+	numLockedOn = 0;
 
+	for (int i = 0; i < 16; i++) {
+		for (int j = 0; j < 4; j++) {
+			missileXY[i][j] = 0;
+		}
+	}
 
 	color[0] = color[1] = color[2] = 1.0;
 	maxHealth = maxShield = maxBoost = 100;

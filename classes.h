@@ -151,7 +151,8 @@ public:
 	int number;
 	bool lockedOn;
 	int weaponType;
-
+	int missileXY[16][4];
+	int numLockedOn;	
 	Ship(int x, int y, int z);
 
 };
