@@ -90,7 +90,7 @@ void drawDestroyer(float cx, float cy, float radius, float xViewScale, float yVi
 
 
 
-void DrawTriangle(float cx, float cy, float xViewScale, float yViewScale) {
+void DrawTriangle(float cx, float cy) {
 	float Blue[4] = {0,1,1,0};
 	float tri[3][2];
 	tri[0][0] = cx;
@@ -133,11 +133,6 @@ void DrawRectangle(float cx, float cy, float x, float y, float xViewScale, float
 
 void DrawCircle(float cx, float cy, float r, int num_segments, float xViewScale, float yViewScale) {
 	float theta = (2 * 3.1415926) / float(num_segments);
-	float s = sinf(theta);
-	float c = cosf(theta);
-	float t;
-  float x = r;
-  float y = 0;
 	float colors[4] = {1,0.5,0,1};
 	glColor4fv(colors);
     	glPushMatrix();
@@ -236,14 +231,12 @@ void DrawEnemy(Game *g, Global gl) {
       drawDestroyer(x, y, e->radius*2, xViewScale, yViewScale);
     }
 
-    float cx = gl.xres/2;
-    //float cy = gl.yres/2;
+    
     Rect r;
     //
     r.bot = y + 10;
     r.left = x;
     r.center = 0;
-   //ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
     ggprint8b(&r, 16, 0x00ffff00, "%.1i",e->currentHealth);
     }
 }
