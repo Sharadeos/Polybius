@@ -651,8 +651,8 @@ int check_keys(XEvent *e)
 	if (e->type == KeyPress) {
 		//std::cout << "press" << std::endl;
 		gl.keyhits[key%KEYS] = 1;
-		if (key == XK_Escape)
-			return 1; //replace with menu state
+		//if (key == XK_Escape)
+		//	return 1; //replace with menu state
 	}
 	return 0;
 }

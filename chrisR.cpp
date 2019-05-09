@@ -137,15 +137,17 @@ void stateKeys(Game *g, Global gl) {
 		if ((*g).menuitem > 0) {
 			(*g).menuitem--;
 		}
+		usleep(100000);
 	}
 	//Down
 	if (gl.keyhits[64]) {
 		if ((*g).menuitem < 3) {
 			(*g).menuitem++;
 		}
+		usleep(100000);
 	}
-	//Enter -> O
-	if (gl.keyhits[1]) {
+	//Enter
+	if (gl.keyhits[93]) {
 		if ((*g).menuitem == 0) {
 			(*g).gameState = GameState::GS_Play;
 		}
@@ -159,11 +161,11 @@ void stateKeys(Game *g, Global gl) {
 			(*g).gameState = GameState::GS_Exit;
 		}
 	}
-	//m ...for Menu
-	/*if (gl.keyhits[109]) {
+	//ESC
+	if (gl.keyhits[7]) {
 		(*g).gameState = GameState::GS_Menu;
 		(*g).menuitem = 0;
-	}*/
+	}
 }
 void checkMenuItem(Game *g, Global gl) {
 	if ((*g).menuitem == 0) {
