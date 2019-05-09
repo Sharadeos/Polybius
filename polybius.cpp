@@ -38,10 +38,11 @@ bool collisionDetection(Base object1, Base object2);
 void spawnEnemy(Game *g, Global gl, Vec pos, Bool squad, int enemyType);
 void enemyTargeting(Game *g, Global gl);
 //chris extern functions
-void ALExplodeUpdate(ALenum param, float x, float y/*, ALfloat *z*/);
+void playTitleMusic();
+void pauseTitleMusic();
 void playMusic();
-void playEngine();
-void pewPew();
+void weapon1();
+void weapon2();
 unsigned char *buildAlphaData(Image *img);
 void mainMenuTitle(int x, int y, GLuint textid);
 void mainMenuPlay(int x, int y, GLuint textid);
@@ -252,8 +253,7 @@ int main()
 
 // MOVE
 #ifdef USE_OPENAL_SOUND
-	playMusic();
-	playEngine();
+	playTitleMusic();
 #endif
 
 	for (int i = 0; i < (*g).num_stars; i++) {
@@ -527,9 +527,9 @@ void check_mouse(XEvent *e)
 	                	b->pos[1] = (*g).ship.pos[1];
 		                b->pos[2] = (*g).ship.pos[2];
     		            //b->vel = (*g).ship.vel + 25;
-										#ifdef USE_OPENAL_SOUND
-													pewPew();
-										#endif
+						#ifdef USE_OPENAL_SOUND
+							weapon1();
+						#endif
         		        b->vel = (*g).ship.vel + 25;
             		    //convert ship angle to radians
                 		b->angle[0] = (*g).ship.angle[0];
@@ -567,7 +567,10 @@ void check_mouse(XEvent *e)
 	                	b->pos[1] = (*g).ship.pos[1] + yo;
 		                b->pos[2] = (*g).ship.pos[2];
     		            //b->vel = (*g).ship.vel + 25;
-        		        b->vel = (*g).ship.vel + 25;
+#ifdef USE_OPENAL_SOUND
+						weapon2();
+#endif
+						b->vel = (*g).ship.vel + 25;
             		    //convert ship angle to radians
                 		b->angle[0] = (*g).ship.angle[0];
 		                b->angle[1] = (*g).ship.angle[1];

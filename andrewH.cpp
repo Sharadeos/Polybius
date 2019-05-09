@@ -55,7 +55,8 @@ void credit(Game *g, Global gl) {
 #ifdef USE_OPENAL_SOUND
 extern void setActionFlag();
 extern void checkAction(timespec *t);
-extern void pewPew();
+extern void weapon1();
+extern void weapon2();
 extern void ALPlayerUpdate(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3);
 extern void ALPlayerVel(ALenum param, ALfloat v1);
 extern void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3);
@@ -323,7 +324,7 @@ if (gl.keyhits[32]) {
             b->pos[1] = (*g).ship.pos[1];
             b->pos[2] = (*g).ship.pos[2];
 #ifdef USE_OPENAL_SOUND
-	    pewPew();
+	    weapon1();
 #endif
 	    b->vel = (*g).ship.vel + 25;
             //convert ship angle to radians
