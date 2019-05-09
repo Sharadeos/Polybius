@@ -148,7 +148,7 @@ public:
 class Ship: public Base {
 public:
 	int number;
-	bool invert;
+	bool lockedOn;
 	int weaponType;
 
 	Ship(int x, int y, int z);
@@ -235,7 +235,7 @@ public:
 	bool show_credits;
 	float mtext;
 
-  float difficulty;
+  	float difficulty;
 	int level;
 
 
