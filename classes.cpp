@@ -124,11 +124,10 @@ void Base::drawBase(Game * g, Global gl) {
     yScale = 1.0;
     yScale = yScale - tempValue;
   }
-  float distanceScale;
-  if (polar[0])
-     distanceScale = 12/polar[0];
-  else
-     distanceScale = 12;
+
+
+  float distanceScale = 12/polar[0];
+
 
 
   float Yellow[3] = {1,1,0};
@@ -163,7 +162,7 @@ void Base::drawBase(Game * g, Global gl) {
 }
 void Base::drawBullet(Game * g, Global gl) {
 
-	if (type == 1) {
+	if (type != 3) {
    		float e[3];
  	   	e[0] = 0;
  	   	e[1] = polar[1];
@@ -191,14 +190,19 @@ void Base::drawBullet(Game * g, Global gl) {
 
  	   	x = ((high - e[1])/120)*gl.xres;
  	   	y = ((s[1] + 45 - e[2])/90)*gl.yres;
-		float distanceScale;
-		if(polar[0])
-   	           distanceScale = 48/polar[0];
-		else
-		   distanceScale = 48;
-   	 	//glColor3fv(color);
-   	 	//float Green[3] = {0,1,0};
- 	   	glColor3fv(color);
+
+   	 	float distanceScale = 48/polar[0];
+ 	   	if (type == 1) { 
+			color[0] = 0;
+			color[1] = 1;
+			color[2] = 0;
+		}
+		if (type == 2) {
+			color[0] = 1;
+			color[1] = 0;
+			color[2] = 0;
+		}
+		glColor3fv(color);
  	   	glPushMatrix();
  	   	glBegin(GL_POLYGON);
 
@@ -239,12 +243,8 @@ void Base::drawBullet(Game * g, Global gl) {
  	   	x = ((high - e[1])/120)*gl.xres;
  	   	y = ((s[1] + 45 - e[2])/90)*gl.yres;
 
-   	 	float distanceScale 
-		if(polar[0])
-		   distanceScale= 48/polar[0];
-		else
-		   distanceScale=48;
-		//glColor3fv(color);
+   	 	float distanceScale = 48/polar[0];
+   	 	//glColor3fv(color);
    	 	//float Green[3] = {0,1,0};
 
 		float capsule[3] = {0,1,0};
@@ -335,6 +335,7 @@ void Enemy::targeting(Game * g, Global gl) {
            b->color[1] = 1.0f;
            b->color[2] = 0.0f;
            b->enemyBullet = true;
+		   b->type = 2;
            (*g).nbullets++;
        }
 
@@ -400,7 +401,8 @@ Ship::Ship(int x, int y, int z) {
 
   color[0] = color[1] = color[2] = 1.0;
   color[3] = .1;
-  invert = false;
+  lockedOn = false;
+ 
 
   color[0] = color[1] = color[2] = 1.0;
   maxHealth = maxShield = maxBoost = 100;
@@ -419,7 +421,9 @@ Object::Object(int x, int y, int z) {
   pos[0] = x;
   pos[1] = y;
   pos[2] = z;
-} 
+}
+
+
 
 Bullet::Bullet()
 {
@@ -458,5 +462,4 @@ Game::Game(int xWindowSize, int yWindowSize, const Ship& ship, const Object& obj
 
 
   clock_gettime(CLOCK_REALTIME, &difficultyTimer);
-
 }
