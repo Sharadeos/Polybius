@@ -116,6 +116,10 @@ switch((*g).level)
 			    if ((*g).ship.currentShield > 15) {
 				(*g).ship.currentShield -= 15;
 			    }
+					else {
+						float temp = (*g).ship.currentShield - 15;
+						(*g).ship.currentHealth -= temp;
+					}
 					//time to delete the bullet.
 				memcpy(&(*g).earr[i], &(*g).earr[(*g).nenemies-1], sizeof(Enemy));
 				(*g).nenemies--;
@@ -154,6 +158,9 @@ switch((*g).level)
 
 					memcpy(&(*g).barr[j], &(*g).barr[(*g).nbullets-1], sizeof(Bullet));
 					(*g).ship.currentShield--;
+					if(	(*g).ship.currentShield <= 0) {
+								(*g).ship.currentHealth--;
+					}
 						//clock_gettime(CLOCK_REALTIME, &shield);
 							clock_gettime(CLOCK_REALTIME, &(*g).ship.shieldTimer);
 
