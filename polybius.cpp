@@ -41,6 +41,7 @@ void ALExplodeUpdate(ALenum param, float x, float y/*, ALfloat *z*/);
 void playTitleMusic();
 void pauseTitleMusic();
 void playMusic();
+void onMenuButton();
 void weapon1();
 void weapon2();
 unsigned char *buildAlphaData(Image *img);
@@ -684,8 +685,6 @@ int check_keys(XEvent *e)
 	if (e->type == KeyPress) {
 		//std::cout << "press" << std::endl;
 		gl.keyhits[key%KEYS] = 1;
-		if (key == XK_Escape)
-			return 1;
 	}
 	return 0;
 }
@@ -708,6 +707,7 @@ void physics()
 void render()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
+	(*g).object.drawBase(g, gl);
 	joeyStars(g, gl);
 	switch ((*g).gameState) {
 			case GameState::GS_Menu:
@@ -731,6 +731,11 @@ void render()
 				break;
 			case GameState::GS_Play:
 			//	(*g).object.drawBase(g, gl);
+				if(((*g).playmusic == true) && (*g).playmusic2 == false) {
+					playMusic();
+					(*g).playmusic2 = true;
+					pauseTitleMusic();
+				}
 				for (int i=0; i < (*g).nbullets; i++) {
 					//Bullet *b = &(*g).barr[i];
 					(*g).barr[i].drawBullet(g, gl);
@@ -755,12 +760,4 @@ void render()
 				exit(EXIT_SUCCESS);
 				break;
 		}
-		/*if((*g).show_credits) {
-	        // function calls for everyone with parameters
-			mainMenuTitle(.5*gl.xres, .8*gl.yres, gl.titleTexture);
-			mainMenuPlay(.5*gl.xres, .6*gl.yres, gl.playTexture);
-			mainMenuControls(.5*gl.xres, .5*gl.yres, gl.controlsTexture);
-			mainMenuCredits(.5*gl.xres, .4*gl.yres, gl.creditsTexture);
-			mainMenuExit(.5*gl.xres, .3*gl.yres, gl.exitTexture);
-		}*/
 }

@@ -153,6 +153,7 @@ void stateKeys(Game *g, Global gl) {
 	if (gl.keyhits[93]) {
 		if ((*g).menuitem == 0) {
 			(*g).gameState = GameState::GS_Play;
+			(*g).playmusic = true;
 		}
 		if ((*g).menuitem == 1) {
 			(*g).gameState = GameState::GS_Controls;
@@ -328,7 +329,7 @@ void playExplosion() {
 	alSourcePlay(audiothing.alSource[5]);
 }
 void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3) {
-	alSource3f(audiothing.alSource[2], param, v1, v2, v3);
+	alSource3f(audiothing.alSource[9], param, v1, v2, v3);
 }
 /*bool checkActivity(int &init, int &num, bool &flag) {
     if(init != num) {

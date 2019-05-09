@@ -237,7 +237,8 @@ public:
 	float stars[32000][3];
 	float debris[500][3];
 	GameState gameState;
-	int menuarr[4];
+	bool playmusic;
+	bool playmusic2;
 	int menuitem;
         int playw;
         int controlsw;

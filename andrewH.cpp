@@ -57,6 +57,7 @@ extern void setActionFlag();
 extern void checkAction(timespec *t);
 extern void weapon1();
 extern void weapon2();
+extern void missile();
 extern void ALPlayerUpdate(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3);
 extern void ALPlayerVel(ALenum param, ALfloat v1);
 extern void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3);
@@ -263,7 +264,10 @@ void joeyPhysics(Game *g, Global gl)
                     xo = 8*cos(a1)*sin(a3);
                     yo = 8*sin(a1)*sin(a3);
                     //shoot a bullet...
-                    Bullet *b = &(*g).barr[(*g).nbullets];
+#ifdef USE_OPENAL_SOUND
+		    weapon2();
+#endif
+		    Bullet *b = &(*g).barr[(*g).nbullets];
                     timeCopy(&b->time, &bt);
                     b->pos[0] = (*g).ship.pos[0] + xo;
                     b->pos[1] = (*g).ship.pos[1] + yo;
@@ -306,7 +310,10 @@ void joeyPhysics(Game *g, Global gl)
                     //shoot a bullet...
                     Bullet *b = &(*g).barr[(*g).nbullets];
                     timeCopy(&b->time, &bt);
-                    b->pos[0] = (*g).ship.pos[0];
+#ifdef USE_OPENAL_SOUND
+		    missile();
+#endif
+		    b->pos[0] = (*g).ship.pos[0];
                     b->pos[1] = (*g).ship.pos[1];
                     b->pos[2] = (*g).ship.pos[2];
 
@@ -376,8 +383,8 @@ void joeyRender(Game *g, Global gl)
     //stars
     float cx = gl.xres/2;
     float cy = gl.yres/2;
-    float stars[4] = {1,1,1,1};
-
+//    float stars[4] = {1,1,1,1};
+/*
     glPushMatrix();
     glBegin(GL_POINTS);
     for (int i = 0; i < (*g).num_stars; i++) {
@@ -394,7 +401,7 @@ void joeyRender(Game *g, Global gl)
         if (x <= 0)
             x += 360.0f;
         x = (x/120)*gl.xres;
-        y = (*g).stars[i][1]+y;
+ //       y = (*g).stars[i][1]+y;
         if (y >= 180.0f)
             y -= 180.0f;
         if (y <= 0)
@@ -404,7 +411,7 @@ void joeyRender(Game *g, Global gl)
     }
     glEnd();
     glPopMatrix();
-
+*/
     // setup variables for cockpit
     float rad[4];           // radius
     rad[0] = gl.yres*.1;   // inner oct

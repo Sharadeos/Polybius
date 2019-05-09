@@ -511,7 +511,9 @@ Bullet::Bullet()
 Game::Game(int xWindowSize, int yWindowSize, const Ship& ship, const Object& object) : ship(ship), object(object)
 {
 	gameState = GameState::GS_Menu;
- 	menuitem = 0;
+ 	playmusic = false;
+	playmusic2 = false;
+	menuitem = 0;
   playw=0;
   controlsw=0;
   creditsw=0;
