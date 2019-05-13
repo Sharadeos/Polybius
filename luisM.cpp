@@ -26,10 +26,10 @@ void creditsLuis(int x, int y, GLuint luisTexture)
 	glColor3ub(255,255,255);
 	glBindTexture(GL_TEXTURE_2D, luisTexture);
 	glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 0.0f); glVertex2f(-wid,  wid);
-		glTexCoord2f(1.0f, 0.0f); glVertex2f( wid,  wid);
-		glTexCoord2f(1.0f, 1.0f); glVertex2f( wid, -wid);
-		glTexCoord2f(0.0f, 1.0f); glVertex2f(-wid, -wid);
+	glTexCoord2f(0.0f, 0.0f); glVertex2f(-wid,  wid);
+	glTexCoord2f(1.0f, 0.0f); glVertex2f( wid,  wid);
+	glTexCoord2f(1.0f, 1.0f); glVertex2f( wid, -wid);
+	glTexCoord2f(0.0f, 1.0f); glVertex2f(-wid, -wid);
 	glEnd();
 	glPopMatrix();
 }
@@ -38,32 +38,34 @@ bool collisionDetection(Base object1, Base object2)
 {
 	// we are using multiplications because it's faster than calling Math.pow
 	float distance = sqrt((object1.pos[0] - object2.pos[0]) *
-												(object1.pos[0] - object2.pos[0]) +
+			(object1.pos[0] - object2.pos[0]) +
                         (object1.pos[1] - object2.pos[1]) *
-												(object1.pos[1] - object2.pos[1]) +
+			(object1.pos[1] - object2.pos[1]) +
                         (object1.pos[2] - object2.pos[2]) *
-												(object1.pos[2] - object2.pos[2]));
-  return distance  < (object1.radius/10 + object2.radius/10);
+			(object1.pos[2] - object2.pos[2]));
+	return distance  < (object1.radius/10 + object2.radius/10);
 }
 
 bool collisionDetectionShip(Base object1, Base object2)
 {
-  // we are using multiplications because it's faster than calling Math.pow
-  float distance = sqrt((object1.pos[0] - object2.pos[0]) *
-												(object1.pos[0] - object2.pos[0]) +
+	// we are using multiplications because it's faster than calling Math.pow
+	float distance = sqrt((object1.pos[0] - object2.pos[0]) *
+			(object1.pos[0] - object2.pos[0]) +
                         (object1.pos[1] - object2.pos[1]) *
-												(object1.pos[1] - object2.pos[1]) +
+			(object1.pos[1] - object2.pos[1]) +
                        	(object1.pos[2] - object2.pos[2]) *
-												(object1.pos[2] - object2.pos[2]));
-  return distance  < (object1.radius/25 + object2.radius/25);
+			(object1.pos[2] - object2.pos[2]));
+	return distance  < (object1.radius/25 + object2.radius/25);
 }
 
-int even_random_number() {
-    return 2 * ( rand() % 5 + 1 );
+int even_random_number() 
+{
+	return 2 * ( rand() % 5 + 1 );
 }
 // 3, 5, 7
-int odd_random_number() {
-    return (1 + even_random_number()) % 8;
+int odd_random_number() 
+{
+	return (1 + even_random_number()) % 8;
 }
 
 
@@ -81,8 +83,7 @@ void difficultyScaling(Game *g, Global gl)
 	}
 
 //difficulty handler
-	switch((*g).level)
-	{
+	switch((*g).level) {
 		// level 1
 		case 1:
 		struct timespec dt;
@@ -96,9 +97,6 @@ void difficultyScaling(Game *g, Global gl)
 				location[1] = rand() % 500 - 250;
 				location[2] = rand() % 500 - 250;
 				spawnEnemy(g, location, false, rand() % 3);
-				#ifdef USE_OPENAL_SOUND
-					//playEngine();
-				#endif
 				clock_gettime(CLOCK_REALTIME, &(*g).difficultyTimer);
 				}
 			}
@@ -113,7 +111,7 @@ void difficultyScaling(Game *g, Global gl)
 			if (collisionDetectionShip(*e, (*g).ship)) {
 				if ((*g).ship.currentShield > 15) {
 					(*g).ship.currentShield -= 15;
-			    }
+				}
 				else {
 					float temp = (*g).ship.currentShield - 15;
 					(*g).ship.currentHealth -= temp;
@@ -137,20 +135,17 @@ void difficultyScaling(Game *g, Global gl)
 						(*g).nenemies--;
 					 	score(g,i);
 						continue;
-						#ifdef USE_OPENAL_SOUND
-							//pauseEngine();
-						#endif
 					}
 				}
 				//bullet hitting player ship
 				if (collisionDetection(*b, (*g).ship) && b->enemyBullet == true) {
 					memcpy(&(*g).barr[j], &(*g).barr[(*g).nbullets-1], sizeof(Bullet));
 					(*g).ship.currentShield--;
-					if(	(*g).ship.currentShield <= 0) {
-								(*g).ship.currentHealth--;
+					if((*g).ship.currentShield <= 0) {
+						(*g).ship.currentHealth--;
 					}
-						//clock_gettime(CLOCK_REALTIME, &shield);
-							clock_gettime(CLOCK_REALTIME, &(*g).ship.shieldTimer);
+					//clock_gettime(CLOCK_REALTIME, &shield);
+					clock_gettime(CLOCK_REALTIME, &(*g).ship.shieldTimer);
 				}
 
 			}
@@ -162,7 +157,6 @@ void difficultyScaling(Game *g, Global gl)
 				a_xy *= PI/180;
 				a_z = e->angle[1];
 				a_z *= PI/180;
-
 				e->pos[0] += e->vel*cos(a_xy)*sin(a_z);
 				e->pos[1] += e->vel*sin(a_xy)*sin(a_z);
 				e->pos[2] += e->vel*cos(a_z);
@@ -174,15 +168,14 @@ void difficultyScaling(Game *g, Global gl)
 				a_xy *= PI/180;
 				a_z = e->angle[1];
 				a_z *= PI/180;
-
 				e->pos[0] += e->vel*cos(a_xy)*sin(a_z);
 				e->pos[1] += e->vel*sin(a_xy)*sin(a_z);
 				e->pos[2] += e->vel*cos(a_z);
 				e->updatePolar((*g).ship.pos);
 			}
 		#ifdef USE_OPENAL_SOUND
-				//playEngine();
-				//alShipLocation(AL_POSITION, e->pos[0], e->pos[1], e->pos[2]);
+			//playEngine();
+			//alShipLocation(AL_POSITION, e->pos[0], e->pos[1], e->pos[2]);
 		#endif
 	}
 
@@ -193,11 +186,11 @@ void difficultyScaling(Game *g, Global gl)
 	// r key thrust
 	if (gl.keyhits[14]) {
 		clock_gettime(CLOCK_REALTIME, &(*g).ship.thrustTimer);
-		if(	(*g).ship.boost > 0.0) {
+		if((*g).ship.boost > 0.0) {
 			(*g).ship.boost -= 0.2;
 			(*g).ship.vel = MAX_THRUST*2;
 		}
-		if( (*g).ship.boost <= 0) {
+		if((*g).ship.boost <= 0) {
 			(*g).ship.boost = 0;
 			if ((*g).ship.vel > MAX_THRUST) {
 				(*g).ship.vel = MAX_THRUST;
@@ -210,16 +203,16 @@ void difficultyScaling(Game *g, Global gl)
 		}
 	}
 	// resets the thrust
-	if (thrustCounter > 5.0 && 	(*g).ship.boost <= 100.0) {
+	if (thrustCounter > 5.0 && (*g).ship.boost <= 100.0) {
 		(*g).ship.boost += 0.5;
 	}
 	// b key
 	if (gl.keyhits[98]) {
-					Vec location;
-					location[0] = rand() % 500 - 250;
-					location[1] = rand() % 500 - 250;
-					location[2] = rand() % 500 - 250;
-					spawnEnemy(g, location, 0, rand() % 3);
+		Vec location;
+		location[0] = rand() % 500 - 250;
+		location[1] = rand() % 500 - 250;
+		location[2] = rand() % 500 - 250;
+		spawnEnemy(g, location, 0, rand() % 3);
 	}
 // f key squadron test
 	if (gl.keyhits[2]) {
@@ -283,10 +276,8 @@ void luisRender(Game *g, Global gl)
 	ggprint8b(&r, 16, 0x00ffff00, "ship velocity = %.1f",(*g).ship.vel);
 	ggprint8b(&r, 16, 0x00ffff00, "level= %.1i",(*g).level);
 	ggprint8b(&r, 16, 0x00ffff00, "difficulty= %.1f",(*g).difficulty);
-
 	ggprint8b(&r, 16, 0x00ffff00, "boost= %.1f",(*g).ship.boost);
 	ggprint8b(&r, 16, 0x00ffff00, "mouse =  %d",gl.mousecode);
-
 	ggprint8b(&r, 16, 0x00ffff00, "object xy angle= %.1f",(*g).object.angle[0]);
 	ggprint8b(&r, 16, 0x00ffff00, "object z angle= %.1f",(*g).object.angle[1]);
 	ggprint8b(&r, 16, 0x00ffff00, "ship thrust = %.1f",(*g).ship.boost);
@@ -297,83 +288,76 @@ extern void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3);
 
 Enemy spawnEnemy(Game *g, Vec pos, int squadNumber, int enemyType)
 {
-  Enemy *e = &(*g).earr[(*g).nenemies];
-
-	if(e->enemyType == 0) {
-	  e->pos[0] = (*g).ship.pos[0] + pos[0];
-	  e->pos[1] = (*g).ship.pos[1] + pos[1];
-	  e->pos[2] = (*g).ship.pos[2] + pos[2];
-	  e->vel = 0;
+	Enemy *e = &(*g).earr[(*g).nenemies];
+	if (e->enemyType == 0) {
+		e->pos[0] = (*g).ship.pos[0] + pos[0];
+		e->pos[1] = (*g).ship.pos[1] + pos[1];
+		e->pos[2] = (*g).ship.pos[2] + pos[2];
+		e->vel = 0;
 		e->currentHealth = 3;
 		e->enemyType = enemyType;
 		e->squadNumber = squadNumber;
 		#ifdef USE_OPENAL_SOUND
 			alShipLocation(AL_POSITION, e->pos[0], e->pos[1], e->pos[2]);
 		#endif
-	  //convert ship angle to radians
-	  e->angle[0] = (*g).ship.angle[0];
-	  e->angle[1] = (*g).ship.angle[1];
+		//convert ship angle to radians
+		e->angle[0] = (*g).ship.angle[0];
+		e->angle[1] = (*g).ship.angle[1];
 
 		e->bulletAngle[0] = e->angle[0];
 		e->bulletAngle[1] = e->angle[1];
-
-	  e->color[0] = 0.0f;
-	  e->color[1] = 1.0f;
-	  e->color[2] = 0.0f;
+		e->color[0] = 0.0f;
+		e->color[1] = 1.0f;
+		e->color[2] = 0.0f;
 	}
-	if(e->enemyType == 1) {
-	  e->pos[0] = (*g).ship.pos[0] + pos[0];
-	  e->pos[1] = (*g).ship.pos[1] + pos[1];
-	  e->pos[2] = (*g).ship.pos[2] + pos[2];
-	  e->vel = 0;
+	if (e->enemyType == 1) {
+		e->pos[0] = (*g).ship.pos[0] + pos[0];
+		e->pos[1] = (*g).ship.pos[1] + pos[1];
+		e->pos[2] = (*g).ship.pos[2] + pos[2];
+		e->vel = 0;
 		e->currentHealth = 10;
 		e->enemyType = enemyType;
 		e->squadNumber = squadNumber;
 		#ifdef USE_OPENAL_SOUND
 			alShipLocation(AL_POSITION, e->pos[0], e->pos[1], e->pos[2]);
 		#endif
-	  //convert ship angle to radians
-	  e->angle[0] = (*g).ship.angle[0];
-	  e->angle[1] = (*g).ship.angle[1];
-
+		//convert ship angle to radians
+		e->angle[0] = (*g).ship.angle[0];
+		e->angle[1] = (*g).ship.angle[1];
 		e->bulletAngle[0] = e->angle[0];
 		e->bulletAngle[1] = e->angle[1];
-
-	  e->color[0] = 0.0f;
-	  e->color[1] = 1.0f;
-	  e->color[2] = 0.0f;
-	}
-	if(e->enemyType == 2) {
-	  e->pos[0] = (*g).ship.pos[0] + pos[0];
-	  e->pos[1] = (*g).ship.pos[1] + pos[1];
-	  e->pos[2] = (*g).ship.pos[2] + pos[2];
-	  e->vel = 0;
+		e->color[0] = 0.0f;
+		e->color[1] = 1.0f;
+		e->color[2] = 0.0f;
+		}
+	if (e->enemyType == 2) {
+		e->pos[0] = (*g).ship.pos[0] + pos[0];
+		e->pos[1] = (*g).ship.pos[1] + pos[1];
+		e->pos[2] = (*g).ship.pos[2] + pos[2];
+		e->vel = 0;
 		e->currentHealth = 5;
 		e->enemyType = enemyType;
 		e->squadNumber = squadNumber;
 		#ifdef USE_OPENAL_SOUND
 			alShipLocation(AL_POSITION, e->pos[0], e->pos[1], e->pos[2]);
 		#endif
-	  //convert ship angle to radians
-	  e->angle[0] = (*g).ship.angle[0];
-	  e->angle[1] = (*g).ship.angle[1];
-
+		//convert ship angle to radians
+		e->angle[0] = (*g).ship.angle[0];
+		e->angle[1] = (*g).ship.angle[1];
 		e->bulletAngle[0] = e->angle[0];
 		e->bulletAngle[1] = e->angle[1];
-
-	  e->color[0] = 0.0f;
-	  e->color[1] = 1.0f;
-	  e->color[2] = 0.0f;
+		e->color[0] = 0.0f;
+		e->color[1] = 1.0f;
+		e->color[2] = 0.0f;
 	}
-  (*g).nenemies++;
+	(*g).nenemies++;
 	return *e;
 }
 
 //object test function
 void enemyTargeting(Game *g) {
-
 	for (int i =0; i < (*g).nenemies; i++) {
 		Enemy *e= &(*g).earr[i];
 		e->targeting(g);
-		}
+	}
 }
