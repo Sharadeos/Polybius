@@ -29,29 +29,30 @@ void showChrisRamirez(int x, int y, GLuint textid)
 //Enables .png transparency
 unsigned char *buildAlphaData(Image *img)
 {
-    //add 4th component to RGB stream...
-    int i;
-    int a,b,c;
-    unsigned char *newdata, *ptr;
-    unsigned char *data = (unsigned char *)img->data;
-    newdata = (unsigned char *)malloc(img->width * img->height * 4);
-    ptr = newdata;
-    for (i=0; i<img->width * img->height * 3; i+=3) {
-        a = *(data+0);
-        b = *(data+1);
-        c = *(data+2);
-        *(ptr+0) = a;
-        *(ptr+1) = b;
-        *(ptr+2) = c;
-        *(ptr+3) = (a|b|c);
-        ptr += 4;
-        data += 3;
-    }
-    return newdata;
+	//add 4th component to RGB stream...
+	int i;
+	int a,b,c;
+	unsigned char *newdata, *ptr;
+	unsigned char *data = (unsigned char *)img->data;
+	newdata = (unsigned char *)malloc(img->width * img->height * 4);
+	ptr = newdata;
+	for (i=0; i<img->width * img->height * 3; i+=3) {
+		a = *(data+0);
+		b = *(data+1);
+		c = *(data+2);
+		*(ptr+0) = a;
+		*(ptr+1) = b;
+		*(ptr+2) = c;
+		*(ptr+3) = (a|b|c);
+		ptr += 4;
+		data += 3;
+	}
+	return newdata;
 }
 
 //Menu Textures
-void mainMenuTitle(int x, int y, GLuint textid) {
+void mainMenuTitle(int x, int y, GLuint textid) 
+{
 	static int wid = 120;
 	glPushMatrix();
 	glTranslatef(x-360, y, 0);
@@ -61,78 +62,83 @@ void mainMenuTitle(int x, int y, GLuint textid) {
 	glBegin(GL_QUADS);
 		//UPLeft, DOWNL, DRight, UR | (x, y)ish
 		glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid); //x = wid-480?
-                glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
-                glTexCoord2f(1.0f, 0.0f); glVertex2i( wid+720, wid);
-                glTexCoord2f(1.0f, 1.0f); glVertex2i( wid+720,-wid);
+				glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+				glTexCoord2f(1.0f, 0.0f); glVertex2i( wid+720, wid);
+				glTexCoord2f(1.0f, 1.0f); glVertex2i( wid+720,-wid);
 	glEnd();
 	glPopMatrix();
 }
-void mainMenuPlay(int x, int y, GLuint textid) {
-        static int wid = 40;
-        glPushMatrix();
-        glTranslatef(x-120, y, 0);
-        glBindTexture(GL_TEXTURE_2D, textid);
-        glEnable(GL_ALPHA_TEST);
-        glColor3ub(255, 255, 255);
-        glBegin(GL_QUADS);
-                //UPLeft, DOWNL, DRight, UR | (x, y)ish
-                glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid); //x = wid-480?
-                glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
-                glTexCoord2f(1.0f, 0.0f); glVertex2i( wid+240, wid);
-                glTexCoord2f(1.0f, 1.0f); glVertex2i( wid+240,-wid);
-        glEnd();
-        glPopMatrix();
+void mainMenuPlay(int x, int y, GLuint textid) 
+{
+		static int wid = 40;
+		glPushMatrix();
+		glTranslatef(x-120, y, 0);
+		glBindTexture(GL_TEXTURE_2D, textid);
+		glEnable(GL_ALPHA_TEST);
+		glColor3ub(255, 255, 255);
+		glBegin(GL_QUADS);
+				//UPLeft, DOWNL, DRight, UR | (x, y)ish
+				glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid); //x = wid-480?
+				glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+				glTexCoord2f(1.0f, 0.0f); glVertex2i( wid+240, wid);
+				glTexCoord2f(1.0f, 1.0f); glVertex2i( wid+240,-wid);
+		glEnd();
+		glPopMatrix();
 }
-void mainMenuControls(int x, int y, GLuint textid) {
-        static int wid = 40;
-        glPushMatrix();
-        glTranslatef(x-240, y, 0);
-        glBindTexture(GL_TEXTURE_2D, textid);
-        glEnable(GL_ALPHA_TEST);
-        glColor3ub(255, 255, 255);
-        glBegin(GL_QUADS);
-                //UPLeft, DOWNL, DRight, UR | (x, y)ish
-                glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid); //x = wid-480?
-                glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
-                glTexCoord2f(1.0f, 0.0f); glVertex2i( wid+480, wid);
-                glTexCoord2f(1.0f, 1.0f); glVertex2i( wid+480,-wid);
-        glEnd();
-        glPopMatrix();
+void mainMenuControls(int x, int y, GLuint textid) 
+{
+		static int wid = 40;
+		glPushMatrix();
+		glTranslatef(x-240, y, 0);
+		glBindTexture(GL_TEXTURE_2D, textid);
+		glEnable(GL_ALPHA_TEST);
+		glColor3ub(255, 255, 255);
+		glBegin(GL_QUADS);
+				//UPLeft, DOWNL, DRight, UR | (x, y)ish
+				glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid); //x = wid-480?
+				glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+				glTexCoord2f(1.0f, 0.0f); glVertex2i( wid+480, wid);
+				glTexCoord2f(1.0f, 1.0f); glVertex2i( wid+480,-wid);
+		glEnd();
+		glPopMatrix();
 }
-void mainMenuCredits(int x, int y, GLuint textid) {
-        static int wid = 40;
-        glPushMatrix();
-        glTranslatef(x-180, y, 0);
-        glBindTexture(GL_TEXTURE_2D, textid);
-        glEnable(GL_ALPHA_TEST);
-        glColor3ub(255, 255, 255);
-        glBegin(GL_QUADS);
-                //UPLeft, DOWNL, DRight, UR | (x, y)ish
-                glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid); //x = wid-480?
-                glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
-                glTexCoord2f(1.0f, 0.0f); glVertex2i( wid+360, wid);
-                glTexCoord2f(1.0f, 1.0f); glVertex2i( wid+360,-wid);
-        glEnd();
-        glPopMatrix();
+void mainMenuCredits(int x, int y, GLuint textid) 
+{
+		static int wid = 40;
+		glPushMatrix();
+		glTranslatef(x-180, y, 0);
+		glBindTexture(GL_TEXTURE_2D, textid);
+		glEnable(GL_ALPHA_TEST);
+		glColor3ub(255, 255, 255);
+		glBegin(GL_QUADS);
+				//UPLeft, DOWNL, DRight, UR | (x, y)ish
+				glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid); //x = wid-480?
+				glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+				glTexCoord2f(1.0f, 0.0f); glVertex2i( wid+360, wid);
+				glTexCoord2f(1.0f, 1.0f); glVertex2i( wid+360,-wid);
+		glEnd();
+		glPopMatrix();
 }
-void mainMenuExit(int x, int y, GLuint textid) {
-        static int wid = 40;
-        glPushMatrix();
-        glTranslatef(x-120, y, 0);
-        glBindTexture(GL_TEXTURE_2D, textid);
-        glEnable(GL_ALPHA_TEST);
-        glColor3ub(255, 255, 255);
-        glBegin(GL_QUADS);
-                //UPLeft, DOWNL, DRight, UR | (x, y)ish
-                glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
-                glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
-                glTexCoord2f(1.0f, 0.0f); glVertex2i( wid+240, wid);
-                glTexCoord2f(1.0f, 1.0f); glVertex2i( wid+240,-wid);
-        glEnd();
-        glPopMatrix();
+void mainMenuExit(int x, int y, GLuint textid) 
+{
+		static int wid = 40;
+		glPushMatrix();
+		glTranslatef(x-120, y, 0);
+		glBindTexture(GL_TEXTURE_2D, textid);
+		glEnable(GL_ALPHA_TEST);
+		glColor3ub(255, 255, 255);
+		glBegin(GL_QUADS);
+				//UPLeft, DOWNL, DRight, UR | (x, y)ish
+				glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
+				glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+				glTexCoord2f(1.0f, 0.0f); glVertex2i( wid+240, wid);
+				glTexCoord2f(1.0f, 1.0f); glVertex2i( wid+240,-wid);
+		glEnd();
+		glPopMatrix();
 }
 void onMenuButton();
-void stateKeys(Game *g, Global gl) {
+void stateKeys(Game *g, Global gl) 
+{
 	//Up
 	if (gl.keyhits[62]) {
 		if ((*g).menuitem > 0) {
@@ -171,7 +177,8 @@ void stateKeys(Game *g, Global gl) {
 		(*g).menuitem = 0;
 	}
 }
-void checkMenuItem(Game *g) {
+void checkMenuItem(Game *g) 
+{
 	if ((*g).menuitem == 0) {
 		(*g).playw = 1;
 		(*g).controlsw = 0;
@@ -286,64 +293,69 @@ public:
 	}
 } audiothing;
 #endif
-void weapon1() {
-    float output = rand() % 12 + 4;//min + (rand() % static_cast<float>(max - min + 1));
-    alSourcei(audiothing.alSource[0], AL_PITCH, output);
-    alSourcePlay(audiothing.alSource[0]);
+void weapon1() 
+{
+	float output = rand() % 12 + 4;//min + (rand() % static_cast<float>(max - min + 1));
+	alSourcei(audiothing.alSource[0], AL_PITCH, output);
+	alSourcePlay(audiothing.alSource[0]);
 }
-void weapon2() {
+void weapon2() 
+{
 		alSourcePlay(audiothing.alSource[1]);
 }
-void onHit() {
+void onHit() 
+{
 		float output = rand() % 11 + 4;
 		alSourcei(audiothing.alSource[2], AL_PITCH, output);
 		alSourcePlay(audiothing.alSource[2]);
 }
-void onDeath() {
+void onDeath() 
+{
 		alSourcePlay(audiothing.alSource[3]);
 }
-void missile() {
+void missile() 
+{
 		alSourcePlay(audiothing.alSource[4]);
 }
-void onMenuButton() {
+void onMenuButton() 
+{
 		alSourcePlay(audiothing.alSource[6]);
 }
-void playTitleMusic() {
+void playTitleMusic() 
+{
 		alSourcePlay(audiothing.alSource[12]);
 		alSourcei(audiothing.alSource[12], AL_SOURCE_RELATIVE, AL_TRUE);
 }
-void pauseTitleMusic() {
+void pauseTitleMusic() 
+{
 	alSourcePause(audiothing.alSource[12]);
 	alSourceRewind(audiothing.alSource[12]);
 }
-void playMusic() {
+void playMusic() 
+{
 	alSourcePlay(audiothing.alSource[11]);
 	alSourcei(audiothing.alSource[11], AL_SOURCE_RELATIVE, AL_TRUE);
 	alSourcePlay(audiothing.alSource[10]);
 	alSourcei(audiothing.alSource[10], AL_SOURCE_RELATIVE, AL_TRUE);
 	alSourcef(audiothing.alSource[10], AL_GAIN, 0.0f);
 }
-void playExplosion() {
+void playExplosion() 
+{
 	alSourcei(audiothing.alSource[5], AL_SOURCE_RELATIVE, AL_FALSE);
 	alSource3f(audiothing.alSource[5], AL_DIRECTION, 0.0f, 0.0f, 0.0f);
 	alSourcePlay(audiothing.alSource[5]);
 }
-void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3) {
+void alShipLocation(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3) 
+{
 	alSource3f(audiothing.alSource[9], param, v1, v2, v3);
 }
-/*bool checkActivity(int &init, int &num, bool &flag) {
-    if(init != num) {
-        flag = true;
-        (*g).initialNumAsteroids = (*g).nasteroids;
-    }
-    if(
-}*/
 
 float tincrement = 0.01;
 bool actionFlag = false, actionFlag2 = false;
 double tdif = 0.0;
 struct timespec at;
-bool setActionFlag() {
+bool setActionFlag() 
+{
 	actionFlag2 = true;
 	if(actionFlag == false) {
 		actionFlag = true;
@@ -353,7 +365,8 @@ bool setActionFlag() {
 	clock_gettime(CLOCK_REALTIME, &at);
 	return 0;
 }
-void checkAction(struct timespec *t) {
+void checkAction(struct timespec *t) 
+{
 	if(actionFlag == true) {
 		tdif = timeDiff(&at, t);
 		if(tdif <= 3.0) {
@@ -366,7 +379,7 @@ void checkAction(struct timespec *t) {
 		}
 	}
 	if((actionFlag == false) && (actionFlag2 == true)) {
-	    	tdif = timeDiff(&at, t);
+			tdif = timeDiff(&at, t);
 		if(tdif <= 3.0) {
 			tincrement -= 0.01;
 			alSourcef(audiothing.alSource[10], AL_GAIN, tincrement);
@@ -374,22 +387,22 @@ void checkAction(struct timespec *t) {
 		}
 	}
 }
-//void ALExplodeUpdate(ALenum param, float x, float y //ALfloat *z//) {
-//	alSource3f(audiothing.alSource[1], param, x, y, -2.0);
-//EX: ALPlayerUpdate(AL_VELOCITY,
-void ALPlayerUpdate(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3) {
+void ALPlayerUpdate(ALenum param, ALfloat v1, ALfloat v2, ALfloat v3) 
+{
 	alListener3f(param, v1, v2, v3);
 }
-void ALPlayerVel(ALenum param, ALfloat v1) {
-    alListeneri(param, v1);
+void ALPlayerVel(ALenum param, ALfloat v1) 
+{
+	alListeneri(param, v1);
 }
 void orientationVec(ALfloat v1, ALfloat v2, ALfloat v3, ALfloat v4, ALfloat v5,
-	ALfloat v6) {
-    audiothing.vec[0] = v1;
-    audiothing.vec[1] = v2;
-    audiothing.vec[2] = v3;
-    audiothing.vec[3] = v4; //0.0f;
-    audiothing.vec[4] = v5; //1.0f;
-    audiothing.vec[5] = v6; //0.0f;
-    alListenerfv(AL_ORIENTATION, audiothing.vec);
+	ALfloat v6) 
+{
+	audiothing.vec[0] = v1;
+	audiothing.vec[1] = v2;
+	audiothing.vec[2] = v3;
+	audiothing.vec[3] = v4; //0.0f;
+	audiothing.vec[4] = v5; //1.0f;
+	audiothing.vec[5] = v6; //0.0f;
+	alListenerfv(AL_ORIENTATION, audiothing.vec);
 }
