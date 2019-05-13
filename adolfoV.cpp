@@ -147,9 +147,9 @@ void DrawCircle(float cx, float cy, float r, int num_segments, float xViewScale,
 void DrawCarrier(float cx, float cy, float r, float xViewScale, float yViewScale ) {
 	DrawCircle(cx, cy, r, 360, xViewScale, yViewScale);
 	DrawRectangle(cx+(.75*r*xViewScale), cy, r/2, r*7.5/100, xViewScale, yViewScale);
-	DrawRectangle(cx-(.75*r*xViewScale), cy, r/2, r*7.5/100, xViewScale, yViewScale);
-  DrawRectangle(cx+(.90*r*xViewScale), cy+(.10*r*yViewScale), r/4, r*7.5/100, xViewScale, yViewScale);
-  DrawRectangle(cx-(.90*r*xViewScale), cy+(.10*r*yViewScale), r/4, r*7.5/100, xViewScale, yViewScale);
+    DrawRectangle(cx-(.75*r*xViewScale), cy, r/2, r*7.5/100, xViewScale, yViewScale);
+    DrawRectangle(cx+(.90*r*xViewScale), cy+(.10*r*yViewScale), r/4, r*7.5/100, xViewScale, yViewScale);
+    DrawRectangle(cx-(.90*r*xViewScale), cy+(.10*r*yViewScale), r/4, r*7.5/100, xViewScale, yViewScale);
 }
 
 void DrawEnemy(Game *g, Global gl) {
@@ -227,13 +227,11 @@ void DrawEnemy(Game *g, Global gl) {
     }
 
     if(e->enemyType == 2) {
-
       drawDestroyer(x, y, e->radius*2, xViewScale, yViewScale);
     }
 
     
     Rect r;
-    //
     r.bot = y + 10;
     r.left = x;
     r.center = 0;
