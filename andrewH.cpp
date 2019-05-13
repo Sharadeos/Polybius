@@ -1,9 +1,7 @@
-//
 //program: andrewH.cpp
 //author: Andrew (Joey) Hubbard
 //Last Modified: 5-7-2019
 //
-//#include <GL/glx.h>
 #include "classes.h"
 static float spin = 20;
 void andrewH(int x, int y, GLuint textid, float move)
@@ -65,21 +63,22 @@ extern void orientationVec(ALfloat v1, ALfloat v2, ALfloat v3, ALfloat v4,
 #endif
 void joeyPhysics(Game *g, Global gl)
 {
+    //update ship position
     float a_xy, a_z;
     a_xy = (*g).ship.angle[0];
-    a_xy *= PI/180;
     a_z = (*g).ship.angle[1];
+    a_xy *= PI/180;
     a_z *= PI/180;
     (*g).ship.pos[0] += .04*(*g).ship.vel*cos(a_xy)*sin(a_z);
     (*g).ship.pos[1] += .04*(*g).ship.vel*sin(a_xy)*sin(a_z);
     (*g).ship.pos[2] += .04*(*g).ship.vel*cos(a_z);
+
+    //update audio 
     alShipLocation(AL_POSITION, (*g).object.pos[0], (*g).object.pos[1],
             (*g).object.pos[2]);
     (*g).object.updatePolar((*g).ship.pos);
-    #ifdef USE_OPENAL_SOUND
+#ifdef USE_OPENAL_SOUND
     checkAction(&timeCurrent);
-    /*alShipLocation(AL_POSITION, (*g).earr->pos[0], (*g).earr->pos[1],
-      (*g).earr->pos[2]);*/
     ALPlayerUpdate(AL_POSITION, (*g).object.pos[0], (*g).ship.pos[1],
             (*g).ship.pos[2]);
     ALPlayerVel(AL_VELOCITY, (*g).ship.vel);
@@ -95,7 +94,8 @@ void joeyPhysics(Game *g, Global gl)
     abc[4] = cos(v_xy)*sin(v_z);
     abc[5] = cos(v_z);
     orientationVec(abc[0], abc[1], abc[2], abc[3], abc[4], abc[5]);
-    #endif
+#endif
+
     //Update bullet positions
     struct timespec bt;
     clock_gettime(CLOCK_REALTIME, &bt);
@@ -186,20 +186,21 @@ void joeyPhysics(Game *g, Global gl)
             (*g).ship.angle[1] = 180.0f;
         }
     }
-    
-	// a
+
+    // a
     if (gl.keyhits[97]) {
         (*g).ship.angle[0] += TURN;
         if ((*g).ship.angle[0] >= 360.0f)
             (*g).ship.angle[0] -= 360.0f;
     }
-    
-	// d
+
+    // d
     if (gl.keyhits[0]) {
         (*g).ship.angle[0] -= TURN;
         if ((*g).ship.angle[0] < 0.0f)
             (*g).ship.angle[0] += 360.0f;
     }
+
     // spacebar
     if (gl.keyhits[32]) {
         if ((*g).ship.weaponType == 1) {
@@ -216,15 +217,15 @@ void joeyPhysics(Game *g, Global gl)
                     b->pos[0] = (*g).ship.pos[0];
                     b->pos[1] = (*g).ship.pos[1];
                     b->pos[2] = (*g).ship.pos[2];
-					#ifdef USE_OPENAL_SOUND
+#ifdef USE_OPENAL_SOUND
                     weapon1();
-					#endif
+#endif
                     b->vel = (*g).ship.vel + 25;
                     b->angle[0] = (*g).ship.angle[0];
                     b->angle[1] = (*g).ship.angle[1];
                     b->type = 1;
                     b->radius = 15;
-					b->enemyBullet = false;
+                    b->enemyBullet = false;
                     (*g).nbullets++;
                 }
             }
@@ -248,10 +249,10 @@ void joeyPhysics(Game *g, Global gl)
                     xo = 8*cos(a1)*sin(a3);
                     yo = 8*sin(a1)*sin(a3);
                     //shoot a bullet...
-					#ifdef USE_OPENAL_SOUND
-				    weapon2();
-					#endif
-				    Bullet *b = &(*g).barr[(*g).nbullets];
+#ifdef USE_OPENAL_SOUND
+                    weapon2();
+#endif
+                    Bullet *b = &(*g).barr[(*g).nbullets];
                     timeCopy(&b->time, &bt);
                     b->pos[0] = (*g).ship.pos[0] + xo;
                     b->pos[1] = (*g).ship.pos[1] + yo;
@@ -261,7 +262,7 @@ void joeyPhysics(Game *g, Global gl)
                     b->angle[1] = (*g).ship.angle[1];
                     b->type = 1;
                     b->radius = 15;
-					b->enemyBullet = false;
+                    b->enemyBullet = false;
                     (*g).nbullets++;
                     //shoot a bullet...
                     xo = 8*cos(a2)*sin(a3);
@@ -276,7 +277,7 @@ void joeyPhysics(Game *g, Global gl)
                     c->angle[1] = (*g).ship.angle[1];
                     c->type = 1;
                     c->radius = 15;
-					c->enemyBullet = false;
+                    c->enemyBullet = false;
                     (*g).nbullets++;
                 }
             }
@@ -292,10 +293,10 @@ void joeyPhysics(Game *g, Global gl)
                     //shoot a bullet...
                     Bullet *b = &(*g).barr[(*g).nbullets];
                     timeCopy(&b->time, &bt);
-					#ifdef USE_OPENAL_SOUND
-		    		missile();
-					#endif
-		    		b->pos[0] = (*g).ship.pos[0];
+#ifdef USE_OPENAL_SOUND
+                    missile();
+#endif
+                    b->pos[0] = (*g).ship.pos[0];
                     b->pos[1] = (*g).ship.pos[1];
                     b->pos[2] = (*g).ship.pos[2];
 
@@ -304,7 +305,7 @@ void joeyPhysics(Game *g, Global gl)
                     b->angle[1] = (*g).ship.angle[1];
                     b->type = 3;
                     b->radius = 15;
-					b->enemyBullet = false;
+                    b->enemyBullet = false;
                     (*g).nbullets++;
                 }
             }
@@ -345,7 +346,6 @@ void joeyStars(Game *g, Global gl)
 
 void joeyRender(Game *g, Global gl)
 {
-    //stars
     float cx = gl.xres/2;
     float cy = gl.yres/2;
     // setup variables for cockpit
@@ -483,6 +483,7 @@ void joeyRender(Game *g, Global gl)
         v8_2[i][0] = cx + rad[3]*cos(theta);
         v8_2[i][1] = cy + rad[3]*sin(theta);
     }
+    
     //top
     float HUD[3];
     HUD[0] = .6;
@@ -559,8 +560,7 @@ void joeyRender(Game *g, Global gl)
         glPopMatrix();
     }
 
-    // red triangle detector
-
+    // red triangle indicator
     float Red[4] = {1,0,0,1};
     float angle = atan2((*g).object.projection[1]-cy,(*g).object.projection[0]-cx);
     float tri[3][2];
@@ -780,6 +780,7 @@ void joeyRender(Game *g, Global gl)
             glPopMatrix();
         }
     }
+   
     //shield
     float lt_edge = cx*.99;
     float rt_edge = cx*.94;
@@ -798,14 +799,14 @@ void joeyRender(Game *g, Global gl)
         glColor4fv(shield);
         glPushMatrix();
         glBegin(GL_POLYGON);
-        glVertex2f( cx + rt_edge * cos(bAngle - i * sz) 		,
-                100 + rt_edge * sin(bAngle - i * sz)       	);
-        glVertex2f( cx + rt_edge * cos(bAngle - (i + 1) * sz)  	,
-                100 + rt_edge * sin(bAngle - (i + 1) * sz) 	);
-        glVertex2f( cx + lt_edge * cos(bAngle - (i + 1) * sz)  	,
-                100 + lt_edge * sin(bAngle - (i + 1) * sz)	);
-        glVertex2f( cx + lt_edge * cos(bAngle - i * sz) 	 	,
-                100 + lt_edge * sin(bAngle - i * sz)		);
+        glVertex2f( cx + rt_edge * cos(bAngle - i * sz)         ,
+                100 + rt_edge * sin(bAngle - i * sz)        );
+        glVertex2f( cx + rt_edge * cos(bAngle - (i + 1) * sz)   ,
+                100 + rt_edge * sin(bAngle - (i + 1) * sz)  );
+        glVertex2f( cx + lt_edge * cos(bAngle - (i + 1) * sz)   ,
+                100 + lt_edge * sin(bAngle - (i + 1) * sz)  );
+        glVertex2f( cx + lt_edge * cos(bAngle - i * sz)         ,
+                100 + lt_edge * sin(bAngle - i * sz)        );
 
         rt_edge += 1;
         bAngle -= .01;
@@ -816,6 +817,7 @@ void joeyRender(Game *g, Global gl)
         }
         bar += 10;
     }
+
     //health
     lt_edge = cx*.94;
     rt_edge = cx*.99;
@@ -834,14 +836,14 @@ void joeyRender(Game *g, Global gl)
         glColor4fv(health);
         glPushMatrix();
         glBegin(GL_POLYGON);
-        glVertex2f( cx + rt_edge * cos(bAngle + i * sz) 		,
-                100 + rt_edge*sin(bAngle + i*sz)			);
-        glVertex2f( cx + rt_edge * cos(bAngle + (i + 1) * sz) 	,
-                100 + rt_edge * sin(bAngle + (i + 1) * sz)	);
+        glVertex2f( cx + rt_edge * cos(bAngle + i * sz)         ,
+                100 + rt_edge*sin(bAngle + i*sz)            );
+        glVertex2f( cx + rt_edge * cos(bAngle + (i + 1) * sz)   ,
+                100 + rt_edge * sin(bAngle + (i + 1) * sz)  );
         glVertex2f( cx + lt_edge * cos(bAngle + (i + 1) * sz) ,
-                100 + lt_edge * sin(bAngle + ( i + 1) * sz)	);
-        glVertex2f( cx + lt_edge * cos(bAngle + i * sz) 		,
-                100 + lt_edge * sin(bAngle + i * sz)		);
+                100 + lt_edge * sin(bAngle + ( i + 1) * sz) );
+        glVertex2f( cx + lt_edge * cos(bAngle + i * sz)         ,
+                100 + lt_edge * sin(bAngle + i * sz)        );
 
         lt_edge += 1;
         bAngle +=.01;
