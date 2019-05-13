@@ -219,6 +219,8 @@ void destroyerPF(Game *g, Global gl, int e)
     //initial movement type and velocity
     (*g).earr[e].type = 1;
     (*g).earr[e].vel = .2;
+    
+    //calculate angles	
     float a_xy, a_z;
     a_xy = (*g).earr[e].angle[0];
     a_xy *= PI/180;
@@ -227,7 +229,8 @@ void destroyerPF(Game *g, Global gl, int e)
     (*g).earr[e].pos[0] += (*g).earr[e].vel*cos(a_xy)*sin(a_z);
     (*g).earr[e].pos[1] += (*g).earr[e].vel*sin(a_xy)*sin(a_z);
     (*g).earr[e].pos[2] += (*g).earr[e].vel*cos(a_z);
-            
+    
+    //check to see if out of range
     if ((*g).earr[e].polar[0] > RANGE-200) {
        if ((*g).earr[e].polar[1] < 180)
            (*g).earr[e].angle[0] = (*g).earr[e].polar[1] + 180;
@@ -238,14 +241,16 @@ void destroyerPF(Game *g, Global gl, int e)
        (*g).earr[e].type = 2;
     return;
     }
- 	
+   
+    //keep xy angle within 360 and z angle within 180
     float xy =(*g).earr[e].polar[1]+180;
     if (xy > 360)
         xy -= 360;
     float z = (*g).earr[e].polar[2]+90;
     if (z > 180)
         z -= 180;
-
+    
+    //initial movement
     if ((*g).earr[e].type == 1) {
       if ((*g).earr[e].angle[0] < xy-1) {
           (*g).earr[e].angle[0] += .2;
@@ -260,7 +265,8 @@ void destroyerPF(Game *g, Global gl, int e)
           (*g).earr[e].angle[1] -= .1;
     return;
     }
-
+ 
+    //lockon movement
     if ((*g).earr[e].type == 2) {	    	    
       if ((*g).earr[e].angle[0] < (*g).ship.angle[0])
 	  (*g).earr[e].angle[0] += .2;
@@ -277,13 +283,13 @@ void destroyerPF(Game *g, Global gl, int e)
     return;	    
     }
 	
-       
+    //evasion movement
     if ((*g).earr[e].projection[0] < gl.xres && (*g).earr[e].projection[0] > 0 &&
         (*g).earr[e].projection[1] < gl.yres && (*g).earr[e].projection[1] > 0 && (*g).earr[e].type != 2) {
 	    (*g).earr[e].type = 3;
 	    (*g).earr[e].angle[0] += rand()%181 - 90;
     }
-	
+    	
     if ((*g).earr[e].type == 3) {
        if ((*g).earr[e].angle[0] < xy-1) {
            (*g).earr[e].angle[0] += (((rand()%4001)+1000)*.0001);
@@ -293,7 +299,7 @@ void destroyerPF(Game *g, Global gl, int e)
        (*g).earr[e].type = 4;
     return;
     }
-	
+    //back to normal movement
     if ((*g).earr[e].type == 4) {
        if ((*g).earr[e].polar[0] == 500)
 	   (*g).earr[e].type = 1;
@@ -302,6 +308,9 @@ void destroyerPF(Game *g, Global gl, int e)
 }
 void pathFindingTest2(Game *g,Global gl)
 {
+    //tests every element of the enemy array
+    //for which pathfinding type to use
+    //0 = fighter, 1 = carrier, 2 = destroyer
     for (int i = 0; i < (*g).nenemies; i++) {
 	if ((*g).earr[i].enemyType == 0) {
 	    fighterPF(g,gl,i);
@@ -317,6 +326,8 @@ void pathFindingTest2(Game *g,Global gl)
 }
 void score(Game *g,int i)
 {
+    //increments score based on enemy destroyed
+    //100 for fighter, 500 for destroyer, 1000 for carrier
     if ((*g).earr[i].enemyType == 0) 
 	(*g).score += 100;
     if ((*g).earr[i].enemyType == 1)
@@ -326,6 +337,7 @@ void score(Game *g,int i)
 }
 void scoreBoard(Game *g, Global gl)
 {
+    //displays player score at top of ship interface
     Rect r;
     r.bot = gl.yres-100;
     r.left = (gl.xres/2)-34;
